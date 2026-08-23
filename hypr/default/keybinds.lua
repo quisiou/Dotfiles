@@ -16,7 +16,7 @@ hl.bind(Config.mainMod .. " + E", hl.dsp.exec_cmd(Config.fileManager))
 hl.bind(Config.mainMod .. " + X", hl.dsp.window.close())
 hl.bind(Config.mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(Config.mainMod .. " + P", hl.dsp.window.pseudo())
-hl.bind(Config.mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
+hl.bind(Config.mainMod .. " + Y", hl.dsp.layout("togglesplit"))    -- dwindle only
 hl.bind(Config.mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(Config.mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(Config.mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
@@ -106,7 +106,7 @@ hl.bind(
     hl.dsp.exec_cmd("qs -c shell ipc call toggleSystemMenu handle")
 )
 hl.bind(
-    Config.mainMod .. " + Tab",
+    "ALT + TAB",
     hl.dsp.exec_cmd("qs -c shell ipc call toggleTrayMenu handle")
 )
 hl.bind(
@@ -116,8 +116,4 @@ hl.bind(
 hl.bind(
     Config.mainMod .. " + Escape",
     hl.dsp.exec_cmd("qs -c shell ipc call controlMenu toggleSessionMenu")
-)
-hl.bind(
-    Config.mainMod .. " + L",
-    hl.dsp.exec_cmd("qs -c shell ipc call controlMenu lockSession")
 )
