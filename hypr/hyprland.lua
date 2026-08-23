@@ -15,7 +15,7 @@ require("default.variables")
 require("user.variables")
 
 
------- LOAD DEFAULT CONF")IGURATION -----------------------
+------ LOAD DEFAULT CONFIGURATION -----------------------
 require("default.monitors")
 require("default.look_and_feel")
 require("default.input")
