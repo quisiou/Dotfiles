@@ -3,10 +3,11 @@
 
 
 flag_force=false
+flag_no_configlink=false
 while getopts "fn" opt; do
     case "$opt" in
         f) flag_force=true ;;
-        n) ;;
+        n) flag_no_configlink=true ;;
         *) echo "Usage: $0 [-f]"; exit 1 ;;
     esac
 done
@@ -37,22 +38,26 @@ EOF
     echo "    created   $USER_DIR/$1"
 }
 
-echo "Creating symlink in $CONFIG_DIR..."
-
-symlink_src="${ROOT_DIR%/}"
-symlink_dst="$CONFIG_DIR/$(basename "$symlink_src")"
-
-if [ "$flag_force" = true ]; then
-    rm -f "$symlink_dst"
-fi
-
-if [ -L "$symlink_dst" ]; then
-    echo "    skipped    $symlink_dst: file already exists (symlink)"
-elif [ -e "$symlink_dst" ]; then
-    echo "    skipped    $symlink_dst: file already exists (not symlink)"
+if [ "$flag_no_configlink" = true ]; then
+    echo "Skipping symlink in $CONFIG_DIR (-n set)..."
 else
-    ln -s "$symlink_src" "$symlink_dst"
-    echo "    linked     $symlink_src -> $symlink_dst"
+    echo "Creating symlink in $CONFIG_DIR..."
+
+    symlink_src="${ROOT_DIR%/}"
+    symlink_dst="$CONFIG_DIR/$(basename "$symlink_src")"
+
+    if [ "$flag_force" = true ]; then
+        rm -f "$symlink_dst"
+    fi
+
+    if [ -L "$symlink_dst" ]; then
+        echo "    skipped    $symlink_dst: file already exists (symlink)"
+    elif [ -e "$symlink_dst" ]; then
+        echo "    skipped    $symlink_dst: file already exists (not symlink)"
+    else
+        ln -s "$symlink_src" "$symlink_dst"
+        echo "    linked     $symlink_src -> $symlink_dst"
+    fi
 fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
