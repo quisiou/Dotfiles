@@ -3,4 +3,7 @@
 
 others
 user
-.vscode
+
+.*
+!.gitignore
+!**/gitignore
