@@ -35,7 +35,7 @@ Item {
     readonly property real radius: square ? 0 : cornerRadius
 
     // Clamp so radii can never exceed half the box, and top+bottom can't exceed full height
-    readonly property real _br: square ? 0 : Math.min(cornerRadius, width / 2, height)
+    readonly property real _br: square ? 0 : Math.min(cornerRadius, width / 2, 3 * height / 5)
     readonly property real _tr: square ? 0 : Math.min(cornerRadius, width / 2, Math.max(height - _br, 0))
 
     property bool _morphing: false
