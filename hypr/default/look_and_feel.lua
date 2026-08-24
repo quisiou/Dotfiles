@@ -23,25 +23,11 @@ hl.config({
     general = {
         gaps_in  = 5,
         gaps_out = 10,
-
-        border_size = 2,
-
-        col = {
-            active_border   = {
-                colors = {
-                    theme.colors.FG_DARK,
-                    theme.colors.FG_DARK
-                },
-                angle = 45
-            },
-            inactive_border = theme.colors.TERMINAL_BLACK,
-        },
+        border_size = 0,
 
         -- Set to true to enable resizing windows by clicking and dragging on borders and gaps
         resize_on_border = false,
-
         allow_tearing = false,
-
         layout = "dwindle",
     },
 
@@ -55,17 +41,23 @@ hl.config({
 
         shadow = {
             enabled      = true,
-            range        = 4,
+            range        = 6,
             render_power = 3,
-            color        = 0xee1a1a1a,  -- SHADOW
+            color        = tonumber("aa" .. (theme.colors.BG_FOCUSED):sub(2), 16),
         },
 
         blur = {
-            enabled   = true,
-            size      = 8,
-            passes    = 3,
-            new_optimizations = true,
-            vibrancy = 0.1696
+            enabled            = true,
+            size               = 8,
+            passes             = 3,
+            new_optimizations  = true,
+            xray               = false, -- true = blur only wallpaper; false = blur whatever's behind
+            vibrancy           = 0.2,
+            vibrancy_darkness  = 0.5,
+            contrast           = 1.0,
+            brightness         = 0.9,
+            noise              = 0.02,
+            special            = false,
         },
     },
 
