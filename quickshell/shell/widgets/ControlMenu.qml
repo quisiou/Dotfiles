@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.UPower 
+import Quickshell.Services.Polkit
 import QtQuick
 import ElysianShell.Services
 import ElysianShell.Themes
@@ -26,6 +27,7 @@ PanelWindow {
     WlrLayershell.keyboardFocus: root.pillWidget === "launcher"
         || root.pillWidget === "session"
         || root.pillWidget === "lock"
+        || root.pillWidget === "auth"
             ? WlrKeyboardFocus.Exclusive
             : WlrKeyboardFocus.None
     WlrLayershell.namespace: "top-bar"
@@ -158,10 +160,22 @@ PanelWindow {
         cornerRadius: panwin.topbarHeight / 2
 
         // ── Public API ────────────────────────────────────────────────────────────
-        function toggleLauncher(): void { pillWidget = pillWidget === "launcher" ? "default" : "launcher" }
-        function toggleSessionMenu(): void { pillWidget = pillWidget === "session" ? "default" : "session" }
-        function lockSession(): void { pillWidget = "lock" }
-        function reset(): void { pillWidget = "default" }
+        function toggleLauncher(): void {
+            if (pillWidget === "auth") return
+            pillWidget = pillWidget === "launcher" ? "default" : "launcher"
+        }
+        function toggleSessionMenu(): void {
+            if (pillWidget === "auth") return
+            pillWidget = pillWidget === "session" ? "default" : "session"
+        }
+        function lockSession(): void {
+            if (pillWidget === "auth") return
+            pillWidget = "lock"
+        }
+        function reset(): void {
+            if (pillWidget === "auth") return
+            pillWidget = "default"
+        }
 
         BluetoothMode  { id: bluetoothMode }
         WallpaperMode  { id: wallpaperMode }
@@ -190,7 +204,7 @@ PanelWindow {
             target: VolumeService
 
             function onOsdRequested() {
-                if (root.pillWidget === "launcher" || root.pillWidget === "lock") return
+                if (root.pillWidget === "launcher" || root.pillWidget === "lock" || root.pillWidget === "auth") return
 
                 root.pillWidget = "volume"
                 if (pillHoverHandler.hovered) volumeOsdTimer.stop()
@@ -202,7 +216,7 @@ PanelWindow {
             target: BrightnessService
 
             function onBrightnessChanged() {
-                if (root.pillWidget === "launcher" || root.pillWidget === "lock") return
+                if (root.pillWidget === "launcher" || root.pillWidget === "lock" || root.pillWidget === "auth") return
 
                 root.pillWidget = "brightness"
                 if (pillHoverHandler.hovered) brightnessOsdTimer.stop()
@@ -214,12 +228,17 @@ PanelWindow {
             target: WorkspaceService
 
             function onSwitched() {
-                if (root.pillWidget === "launcher" || root.pillWidget === "lock") return
+                if (root.pillWidget === "launcher" || root.pillWidget === "lock" || root.pillWidget === "auth") return
 
                 root.pillWidget = "workspace"
                 if (pillHoverHandler.hovered) workspaceTimer.stop()
                 else workspaceTimer.restart()
             }
+        }
+
+        PolkitAgent {
+            id: polkitAgent
+            onIsActiveChanged: if (isActive && root.pillWidget !== "lock") root.pillWidget = "auth"
         }
 
         // ── Possible Menus ────────────────────────────────────────────────────────
@@ -531,6 +550,200 @@ PanelWindow {
             }
         }
         Component {
+            id: authComponent
+            Item {
+                id: authItem
+                property real padding: 20
+
+                implicitWidth: 450
+                implicitHeight: authColumn.implicitHeight + padding * 2
+
+                Keys.onEscapePressed: authItem.cancel()
+                Component.onCompleted: Qt.callLater(passwordInput.forceActiveFocus)
+
+                function cancel() {
+                    if (polkitAgent.flow) polkitAgent.flow.cancelAuthenticationRequest()
+                    root.pillWidget = "default"
+                }
+
+                function submit() {
+                    if (polkitAgent.flow && passwordInput.text.length > 0) {
+                        polkitAgent.flow.submit(passwordInput.text)
+                        passwordInput.text = ""
+                    }
+                }
+
+                Connections {
+                    target: polkitAgent.flow
+                    function onFailedChanged() {
+                        if (polkitAgent.flow.failed) {
+                            passwordInput.text = ""
+                            errorText.visible = true
+                            Qt.callLater(passwordInput.forceActiveFocus)
+                        }
+                    }
+                    function onIsCompletedChanged() {
+                        if (polkitAgent.flow.isCompleted) root.pillWidget = "default"
+                    }
+                }
+
+                Column {
+                    id: authColumn
+                    anchors {
+                        left: parent.left;
+                        top: parent.top
+                        margins: authItem.padding
+                    }
+                    width: authItem.implicitWidth - authItem.padding * 2
+                    spacing: 12
+
+                    Row {
+                        spacing: 8
+                        Text {
+                            text: "\uf023"
+                            color: ActiveTheme.colors["ACCENT_LOW"]
+                            font.pixelSize: 14
+                        }
+                        Text {
+                            text: "Authentication Required"
+                            color: ActiveTheme.colors["FG"]
+                            font {
+                                pixelSize: 16
+                                bold: true
+                            }
+                        }
+                    }
+
+                    // Message
+                    Text {
+                        width: parent.width
+                        text: polkitAgent.flow ? polkitAgent.flow.message : ""
+                        color: ActiveTheme.colors["FG_DARK"]
+                        font.pixelSize: 13
+                        wrapMode: Text.WordWrap
+                    }
+
+                    // Action id, muted small text
+                    Text {
+                        width: parent.width
+                        text: polkitAgent.flow ? polkitAgent.flow.actionId : ""
+                        color: ActiveTheme.colors["FG_MUTED"]
+                        font.pixelSize: 11
+                        elide: Text.ElideRight
+                    }
+
+                    // Password field with inline placeholder
+                    Rectangle {
+                        width: parent.width
+                        height: 36
+                        radius: 8
+                        color: ActiveTheme.colors["BG_STRIPE"]
+                        border {
+                            width: passwordInput.activeFocus ? 1 : 0
+                            color: ActiveTheme.colors["ACCENT_LOW"]
+                        }
+
+                        Text {
+                            anchors { left: parent.left; leftMargin: 10; verticalCenter: parent.verticalCenter }
+                            text: "Password:"
+                            color: ActiveTheme.colors["DARK3"]
+                            font.pixelSize: 13
+                            visible: passwordInput.text.length === 0
+                        }
+
+                        TextInput {
+                            id: passwordInput
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            verticalAlignment: TextInput.AlignVCenter
+                            color: ActiveTheme.colors["FG"]
+                            enabled: polkitAgent.flow ? polkitAgent.flow.isResponseRequired : false
+                            echoMode: (polkitAgent.flow && polkitAgent.flow.responseVisible)
+                                ? TextInput.Normal : TextInput.Password
+                            onAccepted: authItem.submit()
+                        }
+                    }
+
+                    // Buttons, right-aligned: bare-text Cancel + pill Authenticate
+                    Item {
+                        width: parent.width
+                        height: buttonsRow.implicitHeight
+
+                        Text {
+                            id: errorText
+                            visible: false
+                            text: "Authentication failed, try again"
+                            color: "#e06c75"
+                            font.pixelSize: 11
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        Row {
+                            id: buttonsRow
+                            spacing: 10
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            Rectangle {
+                                id: cancelLabel
+                                width: cancelText.implicitWidth + 28
+                                height: 30
+                                radius: 8
+                                color: ActiveTheme.colors["BG_FOCUSED"]
+                                Text {
+                                    id: cancelText
+                                    anchors.centerIn: parent
+                                    text: "Cancel"
+                                    color: ActiveTheme.colors["FG"]
+                                    font {
+                                        pixelSize: 13
+                                        bold: true
+                                    }
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
+
+                                    onEntered:  cancelLabel.color = ActiveTheme.colors["BG_SELECTED"]
+                                    onExited:   cancelLabel.color = ActiveTheme.colors["BG_FOCUSED"]
+                                    onClicked:  authItem.cancel()
+                                }
+                            }
+
+                            Rectangle {
+                                id: authenticateLabel
+                                width: authenticateText.implicitWidth + 28
+                                height: 30
+                                radius: 8
+                                color: ActiveTheme.colors["ACCENT_LOW"]
+                                Text {
+                                    id: authenticateText
+                                    anchors.centerIn: parent
+                                    text: "Authenticate"
+                                    color: ActiveTheme.colors["BG"]
+                                    font {
+                                        pixelSize: 13
+                                        bold: true
+                                    }
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
+
+                                    onEntered:  authenticateLabel.color = ActiveTheme.colors["ACCENT_HIGH"]
+                                    onExited:   authenticateLabel.color = ActiveTheme.colors["ACCENT_LOW"]
+                                    onClicked:  authItem.submit()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Component {
             id: lockComponent
             LockVisual {
                 implicitWidth:  panwin.screen ? panwin.screen.width  : 0
@@ -552,6 +765,7 @@ PanelWindow {
                     case "workspace":   root.content = workspaceOsdComponent;   break
                     case "lock":        root.content = lockComponent;           break
                     case "session":     root.content = sessionMenuComponent;    break
+                    case "auth":        root.content = authComponent;           break
                 }
             }
         }
@@ -559,7 +773,7 @@ PanelWindow {
 
         HoverHandler {
             id: pillHoverHandler
-            cursorShape: Qt.PointingHandCursor
+            cursorShape: root.pillWidget === "default" ? Qt.PointingHandCursor : Qt.ArrowCursor
 
             onHoveredChanged: {
                 switch (root.pillWidget) {

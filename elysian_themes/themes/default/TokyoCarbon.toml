@@ -61,6 +61,7 @@ ACCENT_SUBTLE           = "#506fca"     # mid accent — between ACCENT and ANSI
 ACCENT_MUTED            = "#6183bb"     # muted accent — links, subtle highlights
 ACCENT_DIM              = "#668ac4"     # dim accent — mid-tone highlighted foreground
 ACCENT_LOW              = "#9abdf5"     # light accent — structural punctuation, soft highlights
+ACCENT_HIGH             = "#b8d1f8"     # even light accent
 
 # --- Secondary Brand / Accent ---
 SECONDARY               = "#7dcfff"     # bright cyan — keywords, prominent tokens
