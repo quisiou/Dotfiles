@@ -32,8 +32,8 @@ hl.config({
     },
 
     decoration = {
-        rounding       = 10,
-        rounding_power = 2,
+        rounding       = 18,
+        rounding_power = 3,
 
         -- Change transparency of focused and unfocused windows
         active_opacity   = 1.0,
@@ -41,7 +41,7 @@ hl.config({
 
         shadow = {
             enabled      = true,
-            range        = 6,
+            range        = 5,
             render_power = 3,
             color        = tonumber("aa" .. (theme.colors.BG_FOCUSED):sub(2), 16),
         },
