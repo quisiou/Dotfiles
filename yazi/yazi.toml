@@ -3,13 +3,13 @@
 
 [opener]
 vscodium = [
-    { run = 'codium "$@"', desc = "VSCodium", block = false }
+    { run = 'codium %s', desc = "VSCodium", block = false }
 ]
 nvim = [
-    { run = 'nvim "$@"', block = true }
+    { run = 'nvim %s', block = true }
 ]
 default = [
-    { run = 'xdg-open "$@"', block = false }
+    { run = 'xdg-open %s', block = false }
 ]
 
 
