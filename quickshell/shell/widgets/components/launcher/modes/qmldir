@@ -1,4 +1,4 @@
-# quickshell/shell/widgets/base/launcher/modes/qmldir
+# quickshell/shell/widgets/components/launcher/modes/qmldir
 
 
 BluetoothMode 1.0 BluetoothMode.qml

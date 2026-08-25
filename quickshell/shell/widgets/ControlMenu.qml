@@ -10,9 +10,12 @@ import QtQuick
 import ElysianShell.Services
 import ElysianShell.Themes
 import "base"
-import "base/lock"
-import "base/launcher"
-import "base/launcher/modes"
+import "components/auth"
+import "components/lock"
+import "components/launcher"
+import "components/launcher/modes"
+import "components/session"
+import "components/workspace"
 
 PanelWindow {
     id: panwin
@@ -126,6 +129,7 @@ PanelWindow {
                 }
             }
         }
+        LockScreen { id: lockScreen }
 
         defaultItem: defaultMenu
 
@@ -242,7 +246,7 @@ PanelWindow {
         }
 
         // ── Possible Menus ────────────────────────────────────────────────────────
-        Component {
+        Component {     // Volume OSD
             id: volumeOsdComponent
             Item {
                 id: volumeOsd
@@ -265,8 +269,10 @@ PanelWindow {
                         source: VolumeService.muted
                                     ? Quickshell.shellDir + "/assets/icons/audio-volume-muted.svg"
                                     : Quickshell.shellDir + "/assets/icons/audio-volume-high.svg"
-                        sourceSize.width:  volumeOsd.iconSize
-                        sourceSize.height: volumeOsd.iconSize
+                        sourceSize {
+                            width:  volumeOsd.iconSize
+                            height: volumeOsd.iconSize
+                        }
                         width:  volumeOsd.iconSize
                         height: volumeOsd.iconSize
                         fillMode: Image.PreserveAspectFit
@@ -274,7 +280,6 @@ PanelWindow {
                     }
 
                     SlideBar {
-                        id: slideBar
                         anchors.verticalCenter: parent.verticalCenter
                         value: VolumeService.volume
                         minValue: 0
@@ -284,7 +289,7 @@ PanelWindow {
                 }
             }
         }
-        Component {
+        Component {     // Brightness OSD
             id: brightnessOsdComponent
             Item {
                 id: brightnessOsd
@@ -305,8 +310,10 @@ PanelWindow {
                         id: brightnessIcon
                         anchors.verticalCenter: parent.verticalCenter
                         source: Quickshell.shellDir + "/assets/icons/brightness.svg"
-                        sourceSize.width:  brightnessOsd.iconSize
-                        sourceSize.height: brightnessOsd.iconSize
+                        sourceSize {
+                            width:  brightnessOsd.iconSize
+                            height: brightnessOsd.iconSize
+                        }
                         width:  brightnessOsd.iconSize
                         height: brightnessOsd.iconSize
                         fillMode: Image.PreserveAspectFit
@@ -314,7 +321,6 @@ PanelWindow {
                     }
 
                     SlideBar {
-                        id: slideBar
                         anchors.verticalCenter: parent.verticalCenter
                         value: BrightnessService.value
                         minValue: 0.02  // This matches window manager's keybind min limit
@@ -324,20 +330,17 @@ PanelWindow {
                 }
             }
         }
-        Component {
-            id: controlCenter
-            Rectangle {
-                id: controlRect
+        Component {     // Launcher
+            id: launcherComponent
+            Launcher {
+                id: launcher
 
-                readonly property int padding: 20
-                implicitWidth:  launcher.implicitWidth  + padding * 2
-                implicitHeight: launcher.implicitHeight + padding * 2
-
-                color: "transparent"
+                entries:      root._entries
+                launchModes:  root._launchModes
 
                 Connections {
                     target: DesktopEntries
-                    function onApplicationsChanged() { controlRect.rebuildEntries() }
+                    function onApplicationsChanged() { launcher.rebuildEntries() }
                 }
 
                 // ── App entries ───────────────────────────────────────────────────────────
@@ -355,6 +358,7 @@ PanelWindow {
                 }
 
                 // ── Hooks ─────────────────────────────────────────────────────────────────
+                onCloseRequested: root.pillWidget = "default"
                 Component.onCompleted: {
                     rebuildEntries()
                     Qt.callLater(launcher.forceInputFocus)
@@ -362,397 +366,52 @@ PanelWindow {
                     wallpaperMode.rescan()
                     colorThemeMode.rescan()
                 }
-
-                // ── Content ───────────────────────────────────────────────────────────────
-                Rectangle {
-                    anchors.fill: parent
-                    color: ActiveTheme.colors["BG"]
-                    radius: root.radius
-                    clip: true
-
-                    Launcher {
-                        id: launcher
-                        anchors.centerIn: parent
-                        entries:      root._entries
-                        launchModes:  root._launchModes
-                        onActivated:      (entry) => entry.action()
-                        onCloseRequested: root.pillWidget = "default"
-                    }
-                }
             }
         }
-        Component {
+        Component {     // Workspace OSD
             id: workspaceOsdComponent
-            Item {
-                id: workspaceOsd
-                property real horizontalPadding: 20
-                property real verticalPadding: 7
-
-                readonly property int _radius: 15
-                readonly property int _animDuration: 100
-
-                implicitWidth: row.implicitWidth + horizontalPadding * 2
-                implicitHeight: row.implicitHeight + verticalPadding * 2
-
-                Row {
-                    id: row
-                    anchors.centerIn: parent
-                    spacing: 10
-
-                    Repeater {
-                        model: WorkspaceService.states
-
-                        Rectangle {
-                            id: wsIndicator
-
-                            required property var modelData
-
-                            readonly property bool active:  modelData.active
-                            readonly property bool exists:  modelData.exists
-
-                            visible: modelData.visible
-
-                            width: active ? workspaceOsd._radius * 3 : workspaceOsd._radius
-                            height: workspaceOsd._radius
-                            radius: height / 2
-                            color: WorkspaceService.colorFor(active, exists)
-
-                            border {
-                                width: 0
-                                color: ActiveTheme.colors["FG"]
-                            }
-
-                            Behavior on color { ColorAnimation { duration: workspaceOsd._animDuration } }
-
-                            Behavior on width { NumberAnimation {
-                                duration: workspaceOsd._animDuration
-                                easing.type: Easing.InOutCubic
-                            }}
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                hoverEnabled: true
-
-                                onEntered: wsIndicator.border.width = 2
-                                onExited: wsIndicator.border.width = 0
-                                onClicked: WorkspaceService.activate(modelData.id)
-                            }
-                        }
-                    }
-                }
-            }
+            WorkspaceOSD {}
         }
-        Component {
-            id: sessionMenuComponent;
-            Item {
+        Component {     // Session menu
+            id: sessionComponent;
+            SessionMenu {
                 id: sessionMenu
-                property real padding: 10
-                property int currentIndex: 0
+                cornerRadius: root.cornerRadius
 
-                readonly property int _radius: 15
-                readonly property int _animDuration: 100
-
-                implicitWidth: sessionRow.implicitWidth + padding * 2
-                implicitHeight: sessionRow.implicitHeight + padding * 2
-
-                Component.onCompleted: {
-                    sessionMenu.currentIndex = 0
-                    Qt.callLater(sessionMenu.forceActiveFocus)
-                }
-
-                Keys.onLeftPressed:  sessionMenu.currentIndex = Math.max(sessionMenu.currentIndex - 1, 0)
-                Keys.onRightPressed: sessionMenu.currentIndex = Math.min(sessionMenu.currentIndex + 1, sessionRow.sessionActions.length - 1)
-                Keys.onReturnPressed: sessionRow.sessionActions[sessionMenu.currentIndex].action()
-                Keys.onEscapePressed: root.reset()
-
-                Row {
-                    id: sessionRow
-                    anchors.centerIn: parent
-                    spacing: 10
-
-                    property var sessionActions: [
-                        {
-                            title: "Lock",
-                            icon: "object-locked.svg",
-                            action: () => root.lockSession()
-                        },
-                        {
-                            title: "Logout",
-                            icon: "system-log-out.svg",
-                            action: () => Quickshell.execDetached([
-                                "bash", "-c",
-                                "loginctl terminate-session \"${XDG_SESSION_ID:-$(loginctl session-status | head -1 | awk '{print $1}')}\""
-                            ])
-                        },
-                        {
-                            title: "Reboot",
-                            icon: "system-reboot.svg",
-                            action: () => Quickshell.execDetached(["systemctl", "reboot"])
-                        },
-                        {
-                            title: "Shutdown",
-                            icon: "system-shutdown.svg",
-                            action: () => Quickshell.execDetached(["systemctl", "poweroff"])
-                        }
-                    ]
-
-                    Repeater {
-                        model: sessionRow.sessionActions
-
-                        delegate: Rectangle {
-                            id: btn
-                            required property var modelData
-                            required property int index
-
-                            readonly property bool isCurrent: index === sessionMenu.currentIndex
-
-                            width: 64
-                            height: 64
-                            radius: root.cornerRadius - sessionMenu.padding
-                            color: isCurrent ? ActiveTheme.colors["BG_STRIPE"]
-                                : mouseArea.containsMouse ? "#3a3a3a" : "#2a2a2a"
-                            border.width: isCurrent ? 2 : 0
-                            border.color: ActiveTheme.colors["ACCENT_DIM"]
-
-                            Behavior on color { ColorAnimation { duration: sessionMenu._animDuration } }
-                            Behavior on border.width { NumberAnimation { duration: sessionMenu._animDuration } }
-
-                            Column {
-                                anchors.centerIn: parent
-                                spacing: 4
-
-                                Image {
-                                    source: Quickshell.shellDir + "/assets/icons/" + btn.modelData.icon
-                                    width: 36
-                                    height: 36
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                }
-
-                                // Text {
-                                //     text: btn.modelData.title
-                                //     color: "white"
-                                //     font.pixelSize: 15
-                                //     anchors.horizontalCenter: parent.horizontalCenter
-                                // }
-                            }
-
-                            MouseArea {
-                                id: mouseArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered: sessionMenu.currentIndex = btn.index
-                                onClicked: btn.modelData.action()
-                            }
-                        }
-                    }
-                }
+                onResetRequested: root.reset()
+                onLockRequested: root.lockSession()
             }
         }
-        Component {
+        Component {     // Authentication
             id: authComponent
-            Item {
+            Authenticator {
                 id: authItem
-                property real padding: 20
+                flow: polkitAgent.flow
+                
+                Connections {
+                    target: authItem.flow
+                    function onIsCompletedChanged() { if (authItem.flow.isCompleted) root.pillWidget = "default" }
+                    function onIsResponseRequiredChanged() {
+                        if (authItem.flow.isResponseRequired && authItem.flow.failed) authItem.authFailed()
+                    }
+                }
 
-                implicitWidth: 450
-                implicitHeight: authColumn.implicitHeight + padding * 2
-
-                Keys.onEscapePressed: authItem.cancel()
-                Component.onCompleted: Qt.callLater(passwordInput.forceActiveFocus)
-
-                function cancel() {
-                    if (polkitAgent.flow) polkitAgent.flow.cancelAuthenticationRequest()
+                onAuthSubmitRequested: (passwd) => { if (authItem.flow) authItem.flow.submit(passwd) }
+                onAuthCancelRequested: {
+                    if (authItem.flow) authItem.flow.cancelAuthenticationRequest()
                     root.pillWidget = "default"
                 }
-
-                function submit() {
-                    if (polkitAgent.flow && passwordInput.text.length > 0) {
-                        polkitAgent.flow.submit(passwordInput.text)
-                        passwordInput.text = ""
-                    }
-                }
-
-                Connections {
-                    target: polkitAgent.flow
-                    function onFailedChanged() {
-                        if (polkitAgent.flow.failed) {
-                            passwordInput.text = ""
-                            errorText.visible = true
-                            Qt.callLater(passwordInput.forceActiveFocus)
-                        }
-                    }
-                    function onIsCompletedChanged() {
-                        if (polkitAgent.flow.isCompleted) root.pillWidget = "default"
-                    }
-                }
-
-                Column {
-                    id: authColumn
-                    anchors {
-                        left: parent.left;
-                        top: parent.top
-                        margins: authItem.padding
-                    }
-                    width: authItem.implicitWidth - authItem.padding * 2
-                    spacing: 12
-
-                    Row {
-                        spacing: 8
-                        Text {
-                            text: "\uf023"
-                            color: ActiveTheme.colors["ACCENT_LOW"]
-                            font.pixelSize: 14
-                        }
-                        Text {
-                            text: "Authentication Required"
-                            color: ActiveTheme.colors["FG"]
-                            font {
-                                pixelSize: 16
-                                bold: true
-                            }
-                        }
-                    }
-
-                    // Message
-                    Text {
-                        width: parent.width
-                        text: polkitAgent.flow ? polkitAgent.flow.message : ""
-                        color: ActiveTheme.colors["FG_DARK"]
-                        font.pixelSize: 13
-                        wrapMode: Text.WordWrap
-                    }
-
-                    // Action id, muted small text
-                    Text {
-                        width: parent.width
-                        text: polkitAgent.flow ? polkitAgent.flow.actionId : ""
-                        color: ActiveTheme.colors["FG_MUTED"]
-                        font.pixelSize: 11
-                        elide: Text.ElideRight
-                    }
-
-                    // Password field with inline placeholder
-                    Rectangle {
-                        width: parent.width
-                        height: 36
-                        radius: 8
-                        color: ActiveTheme.colors["BG_STRIPE"]
-                        border {
-                            width: passwordInput.activeFocus ? 1 : 0
-                            color: ActiveTheme.colors["ACCENT_LOW"]
-                        }
-
-                        Text {
-                            anchors { left: parent.left; leftMargin: 10; verticalCenter: parent.verticalCenter }
-                            text: "Password:"
-                            color: ActiveTheme.colors["DARK3"]
-                            font.pixelSize: 13
-                            visible: passwordInput.text.length === 0
-                        }
-
-                        TextInput {
-                            id: passwordInput
-                            anchors.fill: parent
-                            anchors.margins: 10
-                            verticalAlignment: TextInput.AlignVCenter
-                            color: ActiveTheme.colors["FG"]
-                            enabled: polkitAgent.flow ? polkitAgent.flow.isResponseRequired : false
-                            echoMode: (polkitAgent.flow && polkitAgent.flow.responseVisible)
-                                ? TextInput.Normal : TextInput.Password
-                            onAccepted: authItem.submit()
-                        }
-                    }
-
-                    // Buttons, right-aligned: bare-text Cancel + pill Authenticate
-                    Item {
-                        width: parent.width
-                        height: buttonsRow.implicitHeight
-
-                        Text {
-                            id: errorText
-                            visible: false
-                            text: "Authentication failed, try again"
-                            color: "#e06c75"
-                            font.pixelSize: 11
-                            anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-
-                        Row {
-                            id: buttonsRow
-                            spacing: 10
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            Rectangle {
-                                id: cancelLabel
-                                width: cancelText.implicitWidth + 28
-                                height: 30
-                                radius: 8
-                                color: ActiveTheme.colors["BG_FOCUSED"]
-                                Text {
-                                    id: cancelText
-                                    anchors.centerIn: parent
-                                    text: "Cancel"
-                                    color: ActiveTheme.colors["FG"]
-                                    font {
-                                        pixelSize: 13
-                                        bold: true
-                                    }
-                                }
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    hoverEnabled: true
-
-                                    onEntered:  cancelLabel.color = ActiveTheme.colors["BG_SELECTED"]
-                                    onExited:   cancelLabel.color = ActiveTheme.colors["BG_FOCUSED"]
-                                    onClicked:  authItem.cancel()
-                                }
-                            }
-
-                            Rectangle {
-                                id: authenticateLabel
-                                width: authenticateText.implicitWidth + 28
-                                height: 30
-                                radius: 8
-                                color: ActiveTheme.colors["ACCENT_LOW"]
-                                Text {
-                                    id: authenticateText
-                                    anchors.centerIn: parent
-                                    text: "Authenticate"
-                                    color: ActiveTheme.colors["BG"]
-                                    font {
-                                        pixelSize: 13
-                                        bold: true
-                                    }
-                                }
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    hoverEnabled: true
-
-                                    onEntered:  authenticateLabel.color = ActiveTheme.colors["ACCENT_HIGH"]
-                                    onExited:   authenticateLabel.color = ActiveTheme.colors["ACCENT_LOW"]
-                                    onClicked:  authItem.submit()
-                                }
-                            }
-                        }
-                    }
-                }
             }
         }
-        Component {
+        Component {     // Lock visual
             id: lockComponent
             LockVisual {
                 implicitWidth:  panwin.screen ? panwin.screen.width  : 0
                 implicitHeight: panwin.screen ? panwin.screen.height : 0
                 wallpaper: LockService.currentWallpaper
-                clockPixelSize: root._defaultClockPixelSize + _lockProgress * (64 - 16)
+                clockPixelSize: root._defaultClockPixelSize + root._lockProgress * (64 - 16)
             }
         }
-        LockScreen { id: lockScreen }
 
         onPillWidgetChanged: {
             if (pillWidget === "default") root.content = null
@@ -761,10 +420,10 @@ PanelWindow {
                 switch (pillWidget) {
                     case "volume":      root.content = volumeOsdComponent;      break
                     case "brightness":  root.content = brightnessOsdComponent;  break
-                    case "launcher":    root.content = controlCenter;           break
+                    case "launcher":    root.content = launcherComponent;       break
                     case "workspace":   root.content = workspaceOsdComponent;   break
                     case "lock":        root.content = lockComponent;           break
-                    case "session":     root.content = sessionMenuComponent;    break
+                    case "session":     root.content = sessionComponent;        break
                     case "auth":        root.content = authComponent;           break
                 }
             }

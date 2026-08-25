@@ -1,0 +1,5 @@
+# quickshell/shell/widgets/components/launcher/qmldir
+
+
+EntryView   1.0 EntryView.qml
+Launcher    1.0 Launcher.qml

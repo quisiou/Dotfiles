@@ -1,0 +1,4 @@
+# quickshell/shell/widgets/components/workspace/qmldir
+
+
+WorkspaceOSD 1.0 WorkspaceOSD.qml

@@ -1,0 +1,4 @@
+# quickshell/shell/widgets/components/session/qmldir
+
+
+SessionMenu 1.0 SessionMenu.qml

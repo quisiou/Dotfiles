@@ -1,9 +1,9 @@
-/* quickshell/shell/widgets/base/LockVisual.qml */
+/* quickshell/shell/widgets/components/lock/LockVisual.qml */
 
 
 import QtQuick
 import QtQuick.Effects
-import ".."     // For Clock widget
+import "../../base"     // For Clock widget
 
 Item {
     id: root

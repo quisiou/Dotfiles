@@ -1,4 +1,4 @@
-/* quickshell/shell/widgets/base/launcher/modes/WallpaperMode.qml */
+/* quickshell/shell/widgets/components/launcher/modes/WallpaperMode.qml */
 
 
 import QtQuick

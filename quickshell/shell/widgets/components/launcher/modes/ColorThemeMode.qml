@@ -1,4 +1,4 @@
-/* quickshell/shell/widgets/base/launcher/modes/ColorThemeMode.qml */
+/* quickshell/shell/widgets/components/launcher/modes/ColorThemeMode.qml */
 
 
 import QtQuick

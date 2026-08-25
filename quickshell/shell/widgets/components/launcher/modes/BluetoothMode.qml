@@ -1,4 +1,4 @@
-/* quickshell/shell/widgets/base/launcher/modes/BluetoothMode.qml */
+/* quickshell/shell/widgets/components/launcher/modes/BluetoothMode.qml */
 
 
 import QtQuick

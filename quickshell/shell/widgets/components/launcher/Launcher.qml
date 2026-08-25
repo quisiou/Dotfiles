@@ -1,13 +1,12 @@
-/* quickshell/shell/widgets/base/launcher/Launcher.qml */
+/* quickshell/shell/widgets/components/launcher/Launcher.qml */
 
 
 import QtQml
 import QtQuick
 import QtQuick.Layouts
 import ElysianShell.Themes
-import ".."     // Needed to use EntryView, which is one level above
 
-Item {
+Rectangle {
     id: root
 
     // ── Public API — inputs ──────────────────────────────────────────
@@ -36,8 +35,12 @@ Item {
     property var _filteredEntries: []
     property int _currentIndex:    0
 
-    implicitWidth:  contentColumn.implicitWidth
-    implicitHeight: contentColumn.implicitHeight
+    property int padding: 20
+
+    implicitWidth:  launcher.implicitWidth  + padding * 2
+    implicitHeight: launcher.implicitHeight + padding * 2
+
+    color: "transparent"
 
     // ── Public functions ───────────────────────────────────────────────
     function forceInputFocus() {
@@ -142,6 +145,7 @@ Item {
     }
 
     onEntriesChanged: refresh()
+    onActivated:      (entry) => entry.action()
     Component.onCompleted: _filteredEntries = _computeFilteredEntries()
 
     // Shared key handling — both inputs forward here so Return/Up/Down/Escape
@@ -156,145 +160,157 @@ Item {
         Keys.onRightPressed:  root._navigateNext()
     }
 
-    // ── Layout ────────────────────────────────────────────────────────
-    ColumnLayout {
-        id: contentColumn
-        spacing: 20
+    Rectangle {
+        id: launcher
 
-        // ── Search input row ─────────────────────────────────────────
-        Rectangle {
-            id: searchBarRect
-            Layout.fillWidth: true
-            Layout.preferredHeight: 50
-            color: ActiveTheme.colors["BG_STRIPE"]
-            radius: 12
+        implicitWidth:  contentColumn.implicitWidth
+        implicitHeight: contentColumn.implicitHeight
 
-            Row {
-                anchors.fill: parent
-                anchors.margins: 10
-                spacing: 6
-                visible: root.activeMode !== null
+        color: "transparent"
+        clip: true
 
-                Rectangle {
+        anchors.centerIn: parent
+
+        // ── Layout ────────────────────────────────────────────────────────
+        ColumnLayout {
+            id: contentColumn
+            spacing: 20
+
+            // ── Search input row ─────────────────────────────────────────
+            Rectangle {
+                id: searchBarRect
+                Layout.fillWidth: true
+                Layout.preferredHeight: 50
+                color: ActiveTheme.colors["BG_STRIPE"]
+                radius: 12
+
+                Row {
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    spacing: 6
                     visible: root.activeMode !== null
-                    height: 26
-                    width: chipLabel.implicitWidth + 16
-                    radius: 6
-                    color: ActiveTheme.colors["ACCENT_DIM"]
-                    anchors.verticalCenter: parent.verticalCenter
 
-                    Text {
-                        id: chipLabel
-                        anchors.centerIn: parent
-                        text: root.activeMode?.label ?? ""
+                    Rectangle {
+                        visible: root.activeMode !== null
+                        height: 26
+                        width: chipLabel.implicitWidth + 16
+                        radius: 6
+                        color: ActiveTheme.colors["ACCENT_DIM"]
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Text {
+                            id: chipLabel
+                            anchors.centerIn: parent
+                            text: root.activeMode?.label ?? ""
+                            color: ActiveTheme.colors["FG"]
+                            font.pixelSize: 12
+                            font.weight: Font.Medium
+                        }
+                    }
+
+                    TextInput {
+                        id: modeInput
+                        width: parent.width - chipLabel.implicitWidth - 32
+                        anchors.verticalCenter: parent.verticalCenter
                         color: ActiveTheme.colors["FG"]
-                        font.pixelSize: 12
-                        font.weight: Font.Medium
+                        font.pixelSize: 16
+                        focus: root.activeMode !== null
+
+                        property string modePrefixText: root.activeMode
+                            ? (root.actionPrefix + root.activeMode.prefix + " ")
+                            : ""
+
+                        onModePrefixTextChanged: {
+                            if (root.activeMode !== null) {
+                                const full = searchInput.text
+                                text = full.startsWith(modePrefixText) ? full.slice(modePrefixText.length) : ""
+                                forceActiveFocus()
+                            }
+                        }
+                        onTextChanged: {
+                            if (root.activeMode !== null)
+                                searchInput.text = modePrefixText + text
+                        }
+
+                        Keys.priority: Keys.BeforeItem
+                        Keys.forwardTo: [keyHandler]
+                        Keys.onPressed: function(event) {
+                            if (event.key === Qt.Key_Backspace && text === "") {
+                                searchInput.text = root.actionPrefix
+                                event.accepted = true
+                            }
+                        }
+
+                        Text {
+                            visible: modeInput.text === ""
+                            text: root.activeMode?.placeholder
+                                ?? ("Search " + (root.activeMode?.label ?? "") + "...")
+                            color: ActiveTheme.colors["DARK3"]
+                            font.pixelSize: 16
+                            font.italic: true
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
                     }
                 }
 
                 TextInput {
-                    id: modeInput
-                    width: parent.width - chipLabel.implicitWidth - 32
+                    id: searchInput
+                    anchors.left: parent.left
+                    anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    color: ActiveTheme.colors["FG"]
+                    anchors.margins: 16
+                    visible: root.activeMode === null
+                    focus:   root.activeMode === null
+                    color: searchInput.text.startsWith(root.actionPrefix)
+                            ? ActiveTheme.colors["ACCENT_DIM"] : ActiveTheme.colors["FG"]
                     font.pixelSize: 16
-                    focus: root.activeMode !== null
 
-                    property string modePrefixText: root.activeMode
-                        ? (root.actionPrefix + root.activeMode.prefix + " ")
-                        : ""
-
-                    onModePrefixTextChanged: {
-                        if (root.activeMode !== null) {
-                            const full = searchInput.text
-                            text = full.startsWith(modePrefixText) ? full.slice(modePrefixText.length) : ""
-                            forceActiveFocus()
-                        }
-                    }
                     onTextChanged: {
+                        root._currentIndex = 0
+                        filterDebounce.restart()
                         if (root.activeMode !== null)
-                            searchInput.text = modePrefixText + text
+                            modeInput.forceActiveFocus()
                     }
 
                     Keys.priority: Keys.BeforeItem
                     Keys.forwardTo: [keyHandler]
+                    Keys.onTabPressed: {
+                        if (root._filteredEntries.length > 0) {
+                            const entry = root._filteredEntries[root._currentIndex]
+                            if (entry.isModeEntry) searchInput.text = entry.modePrefix
+                        }
+                    }
                     Keys.onPressed: function(event) {
-                        if (event.key === Qt.Key_Backspace && text === "") {
-                            searchInput.text = root.actionPrefix
+                        if (event.key === Qt.Key_Backspace && text === root.actionPrefix) {
+                            searchInput.text = ""
                             event.accepted = true
                         }
                     }
+                }
 
-                    Text {
-                        visible: modeInput.text === ""
-                        text: root.activeMode?.placeholder
-                            ?? ("Search " + (root.activeMode?.label ?? "") + "...")
-                        color: ActiveTheme.colors["DARK3"]
-                        font.pixelSize: 16
-                        font.italic: true
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
+                Text {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.margins: 16
+                    visible: searchInput.text === "" && root.activeMode === null
+                    text: "Search apps  ·  type " + root.actionPrefix + " for commands"
+                    color: ActiveTheme.colors["DARK3"]
+                    font.pixelSize: 15
+                    font.italic: true
                 }
             }
 
-            TextInput {
-                id: searchInput
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.margins: 16
-                visible: root.activeMode === null
-                focus:   root.activeMode === null
-                color: searchInput.text.startsWith(root.actionPrefix)
-                        ? ActiveTheme.colors["ACCENT_DIM"] : ActiveTheme.colors["FG"]
-                font.pixelSize: 16
-
-                onTextChanged: {
-                    root._currentIndex = 0
-                    filterDebounce.restart()
-                    if (root.activeMode !== null)
-                        modeInput.forceActiveFocus()
-                }
-
-                Keys.priority: Keys.BeforeItem
-                Keys.forwardTo: [keyHandler]
-                Keys.onTabPressed: {
-                    if (root._filteredEntries.length > 0) {
-                        const entry = root._filteredEntries[root._currentIndex]
-                        if (entry.isModeEntry) searchInput.text = entry.modePrefix
-                    }
-                }
-                Keys.onPressed: function(event) {
-                    if (event.key === Qt.Key_Backspace && text === root.actionPrefix) {
-                        searchInput.text = ""
-                        event.accepted = true
-                    }
-                }
+            // ── Results ──────────────────────────────────────────────────
+            EntryView {
+                id: entryView
+                Layout.alignment: Qt.AlignHCenter
+                model:        root._filteredEntries
+                currentIndex: root._currentIndex
+                displayMode:  root.activeMode?.displayMode ?? "items"
+                onActivated:      (entry) => root.activated(entry)
+                onCloseRequested: root.closeRequested()
             }
-
-            Text {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.margins: 16
-                visible: searchInput.text === "" && root.activeMode === null
-                text: "Search apps  ·  type " + root.actionPrefix + " for commands"
-                color: ActiveTheme.colors["DARK3"]
-                font.pixelSize: 15
-                font.italic: true
-            }
-        }
-
-        // ── Results ──────────────────────────────────────────────────
-        EntryView {
-            id: entryView
-            Layout.alignment: Qt.AlignHCenter
-            model:        root._filteredEntries
-            currentIndex: root._currentIndex
-            displayMode:  root.activeMode?.displayMode ?? "items"
-            onActivated:      (entry) => root.activated(entry)
-            onCloseRequested: root.closeRequested()
         }
     }
 }

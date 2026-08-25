@@ -1,4 +1,4 @@
-/* quickshell/shell/widgets/base/LockScreen.qml */
+/* quickshell/shell/widgets/components/lock/LockScreen.qml */
 
 
 import QtQuick
