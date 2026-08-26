@@ -135,7 +135,11 @@ Item {
     Column {
         id: clockColumn
         anchors.centerIn: parent
-        spacing: 2
+        spacing: root.expanded ? 2 : 0
+
+        Behavior on spacing {
+            NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+        }
 
         Clock {
             id: clock
@@ -147,16 +151,28 @@ Item {
             }
         }
 
-        Text {
-            opacity: root.expanded ? 1 : 0
-            visible: opacity > 0
+        Item {
+            id: dateWrapper
             anchors.horizontalCenter: parent.horizontalCenter
-            text: Qt.formatDate(new Date(), "ddd, MMM d")
-            color: ActiveTheme.colors["FG_MUTED"]
-            font.pixelSize: 11
+            width: dateText.implicitWidth
+            height: root.expanded ? dateMetrics.height : 0
+            clip: true
 
-            Behavior on opacity {
+            Behavior on height {
                 NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+            }
+
+            Text {
+                id: dateText
+                anchors.top: parent.top   // pin to top of wrapper so clipping trims cleanly as height shrinks
+                opacity: root.expanded ? 1 : 0
+                text: Qt.formatDate(new Date(), "ddd, MMM d")
+                color: ActiveTheme.colors["FG_MUTED"]
+                font.pixelSize: 11
+
+                Behavior on opacity {
+                    NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+                }
             }
         }
     }
