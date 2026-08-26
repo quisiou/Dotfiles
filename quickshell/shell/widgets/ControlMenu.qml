@@ -340,8 +340,6 @@ PanelWindow {
 
         HoverHandler {
             id: pillHoverHandler
-            cursorShape: root.pillWidget === "default" ? Qt.PointingHandCursor : Qt.ArrowCursor
-
             onHoveredChanged: {
                 defaultMenu.expanded = hovered
                 switch (root.pillWidget) {

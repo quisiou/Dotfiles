@@ -11,7 +11,7 @@ import "../../base"     // For ClockText widget
 Item {
     id: root
 
-    property real horizontalPadding: 20
+    property real horizontalPadding: 10
     property real verticalPadding: 8
     property bool expanded: false
     property int clockPixelSize: 16
@@ -47,209 +47,303 @@ Item {
         font.pixelSize: 11
     }
 
-    readonly property real _clockColumnTargetHeight:
+    readonly property real _clockWrapperTargetHeight:
         _clockTargetHeight + (root.expanded ? (2 + _dateHeight) : 0)   // 2 = Column spacing
 
     implicitWidth: root.expanded
-        ? mediaInfo.implicitWidth + _clockTargetWidth + batteryIcon.implicitWidth + root.horizontalPadding * 9
-        : _clockTargetWidth + root.horizontalPadding * 2
+        ? mediaRect.implicitWidth + _clockTargetWidth + systemRect.implicitWidth + root.horizontalPadding * 18
+        : _clockTargetWidth + root.horizontalPadding * 4
 
     implicitHeight: root.expanded
-        ? _clockColumnTargetHeight + root.verticalPadding * 4
+        ? _clockWrapperTargetHeight + root.verticalPadding * 4
         : _clockTargetHeight + root.verticalPadding * 1.5
 
     readonly property real basePillHeight: _clockTargetHeight + verticalPadding * 2
 
     // ---------------- LEFT: media info ----------------
-    Row {
-        id: mediaInfo
+    Rectangle {
+        id: mediaRect
+        color: ActiveTheme.colors["ACCENT"].replace("#", "#20")
+        radius: 12
         opacity: root._hasMedia ? 1 : 0
         visible: opacity > 0
-        spacing: 8
-        clip: true   // guards against a stray 3rd wrapped line pushing past bounds
         anchors {
             left: parent.left
             leftMargin: root.horizontalPadding
             verticalCenter: parent.verticalCenter
         }
+        border {
+            width: 1
+            color: ActiveTheme.colors["BG_HIGHLIGHT"]
+        }
+        implicitWidth: mediaInfo.implicitWidth + 16
+        implicitHeight: mediaInfo.implicitHeight + 12
 
         Behavior on opacity {
             NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
         }
 
-        property real textMaxWidth: 90   // tune to taste — this is what caps mediaInfo's footprint
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            hoverEnabled: true
 
-        ClippingRectangle {
-            id: albumArtMask
-            width: 32
-            height: 32
-            radius: 8
-            color: "transparent"
-            anchors.verticalCenter: parent.verticalCenter
-
-            Image {
-                anchors.fill: parent
-                source: root._activePlayer && root._activePlayer.trackArtUrl
-                        ? root._activePlayer.trackArtUrl : ""
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-            }
+            onEntered:  mediaRect.color = ActiveTheme.colors["ACCENT_LOW"].replace("#", "#20")
+            onExited:   mediaRect.color = ActiveTheme.colors["ACCENT"].replace("#", "#20")
+            onClicked:  console.log("Going to media player menu...")
         }
 
-        Column {
-            width: mediaInfo.textMaxWidth
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 1
+        Row {
+            id: mediaInfo
+            spacing: 8
+            clip: true
+            anchors.centerIn: parent
 
-            Row {
-                width: parent.width
-                spacing: 4
-                Text {
-                    text: "♫"
-                    color: ActiveTheme.colors["ACCENT_LOW"]
-                    font.pixelSize: 11
-                }
-                Text {
-                    width: parent.width - 15   // leaves room for the note glyph + spacing
-                    text: root._activePlayer ? root._activePlayer.trackTitle : ""
-                    color: ActiveTheme.colors["FG"]
-                    font.bold: true
-                    font.pixelSize: 11
-                    maximumLineCount: 2
-                    elide: Text.ElideRight
+            property real textMaxWidth: 90
+
+            ClippingRectangle {
+                id: albumArtMask
+                width: 32
+                height: 32
+                radius: 8
+                color: "transparent"
+                anchors.verticalCenter: parent.verticalCenter
+
+                Image {
+                    anchors.fill: parent
+                    source: root._activePlayer && root._activePlayer.trackArtUrl
+                            ? root._activePlayer.trackArtUrl : ""
+                    fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
                 }
             }
 
-            Text {
-                width: parent.width
-                text: root._activePlayer ? root._activePlayer.trackArtist : ""
-                color: ActiveTheme.colors["FG_MUTED"]
-                font.pixelSize: 10
-                maximumLineCount: 1
-                elide: Text.ElideRight
+            Column {
+                width: mediaInfo.textMaxWidth
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 1
+
+                Item {
+                    id: titleClip
+                    width: parent.width - 10
+                    height: titleText.implicitHeight
+                    clip: true
+
+                    property bool shouldMarquee: titleText.implicitWidth > titleClip.width
+
+                    Text {
+                        id: titleText
+                        text: root._activePlayer ? root._activePlayer.trackTitle : ""
+                        color: ActiveTheme.colors["FG"]
+                        font.bold: true
+                        font.pixelSize: 11
+                    }
+
+                    SequentialAnimation {
+                        id: marqueeAnim
+                        loops: Animation.Infinite
+
+                        PauseAnimation { duration: 2000 }
+
+                        NumberAnimation {
+                            target: titleText
+                            property: "x"
+                            to: titleClip.width - titleText.implicitWidth - 6
+                            duration: Math.max(1200, (titleText.implicitWidth - titleClip.width) * 40)
+                            easing.type: Easing.Linear
+                        }
+
+                        PauseAnimation { duration: 1200 }
+
+                        NumberAnimation {
+                            target: titleText
+                            property: "x"
+                            to: 0
+                            duration: Math.max(1200, (titleText.implicitWidth - titleClip.width) * 40)
+                            easing.type: Easing.Linear
+                        }
+
+                        PauseAnimation { duration: 500 }
+                    }
+
+                    onShouldMarqueeChanged: restartMarquee()
+                    Component.onCompleted: restartMarquee()
+
+                    function restartMarquee() {
+                        marqueeAnim.stop()
+                        titleText.x = 0
+                        if (shouldMarquee) marqueeAnim.start()
+                    }
+                }
+
+                Text {
+                    width: parent.width
+                    text: root._activePlayer ? root._activePlayer.trackArtist : ""
+                    color: ActiveTheme.colors["FG_MUTED"]
+                    font.pixelSize: 10
+                    maximumLineCount: 1
+                    elide: Text.ElideRight
+                }
             }
         }
     }
 
     // ---------------- CENTER: clock + date ----------------
-    Column {
-        id: clockColumn
+    Item {
+        id: clockWrapper
         anchors.centerIn: parent
-        spacing: root.expanded ? 2 : 0
+        implicitWidth: clockColumn.implicitWidth
+        implicitHeight: clockColumn.implicitHeight
 
-        Behavior on spacing {
-            NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            hoverEnabled: true
+            onClicked:  console.log("Going to media control center...")
         }
 
-        Clock {
-            id: clock
-            anchors.horizontalCenter: parent.horizontalCenter
-            pixelSize: root._targetClockPixelSize
+        Column {
+            id: clockColumn
+            anchors.centerIn: parent
+            spacing: root.expanded ? 2 : 0
 
-            Behavior on pixelSize {
-                NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
-            }
-        }
-
-        Item {
-            id: dateWrapper
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: dateText.implicitWidth
-            height: root.expanded ? dateMetrics.height : 0
-            clip: true
-
-            Behavior on height {
+            Behavior on spacing {
                 NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
             }
 
-            Text {
-                id: dateText
-                anchors.top: parent.top   // pin to top of wrapper so clipping trims cleanly as height shrinks
-                opacity: root.expanded ? 1 : 0
-                text: Qt.formatDate(new Date(), "ddd, MMM d")
-                color: ActiveTheme.colors["FG_MUTED"]
-                font.pixelSize: 11
+            Clock {
+                id: clock
+                anchors.horizontalCenter: parent.horizontalCenter
+                pixelSize: root._targetClockPixelSize
 
-                Behavior on opacity {
+                Behavior on pixelSize {
                     NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+                }
+            }
+
+            Item {
+                id: dateWrapper
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: dateText.implicitWidth
+                height: root.expanded ? dateMetrics.height : 0
+                clip: true
+
+                Behavior on height {
+                    NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+                }
+
+                Text {
+                    id: dateText
+                    anchors.top: parent.top   // pin to top of wrapper so clipping trims cleanly as height shrinks
+                    opacity: root.expanded ? 1 : 0
+                    text: Qt.formatDate(new Date(), "ddd, MMM d")
+                    color: ActiveTheme.colors["FG_MUTED"]
+                    font.pixelSize: 11
+
+                    Behavior on opacity {
+                        NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+                    }
                 }
             }
         }
     }
 
     // ---------------- RIGHT: wifi + battery ----------------
-    Row {
-        id: batteryIcon
+    Rectangle {
+        id: systemRect
+        color: ActiveTheme.colors["ACCENT"].replace("#", "#20")
+        radius: 12
         opacity: root.expanded ? 1 : 0
         visible: opacity > 0
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
-            rightMargin: root.horizontalPadding
+            rightMargin: root.horizontalPadding * 3
         }
-        spacing: 6
-
-        Behavior on opacity {
-            NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+        border {
+            width: 1
+            color: ActiveTheme.colors["BG_HIGHLIGHT"]
         }
+        implicitWidth: systemRow.implicitWidth + 16
+        implicitHeight: systemRow.implicitHeight + 12
 
-        Text {
-            text: "📶"
-            color: ActiveTheme.colors["FG"]
-            font.pixelSize: 12
-            anchors.verticalCenter: parent.verticalCenter
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            hoverEnabled: true
+
+            onEntered:  systemRect.color = ActiveTheme.colors["ACCENT_LOW"].replace("#", "#20")
+            onExited:   systemRect.color = ActiveTheme.colors["ACCENT"].replace("#", "#20")
+            onClicked:  console.log("Going to system menu...")
         }
 
         Row {
-            spacing: 1
-            anchors.verticalCenter: parent.verticalCenter
+            id: systemRow
+            spacing: 6
+            anchors.centerIn: parent
 
-            Rectangle {
-                id: batteryBody
-                implicitWidth: 25
-                implicitHeight: 15
-                anchors.verticalCenter: parent.verticalCenter
-                radius: 5
-                color: "transparent"
-                border {
-                    width: 1.5
-                    color: ActiveTheme.colors["FG"]
-                }
-                clip: true
-
-                Rectangle {
-                    id: batteryFill
-                    anchors {
-                        left: parent.left
-                        top: parent.top
-                        bottom: parent.bottom
-                        margins: 2.5
-                    }
-                    width: (parent.width - anchors.margins * 2) * root._batteryPercentage
-                    radius: 3
-                    color: ActiveTheme.colors["ACCENT_LOW"]
-
-                    Behavior on width {
-                        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-                    }
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    z: 1
-                    text: Math.round(root._batteryPercentage * 100)
-                    font.pixelSize: 8
-                    font.bold: true
-                    color: ActiveTheme.colors["BG"]
-                }
+            Behavior on opacity {
+                NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
             }
 
-            Rectangle {
-                implicitWidth: 1.5
-                implicitHeight: 6
-                anchors.verticalCenter: parent.verticalCenter
-                radius: height / 2
+            Text {
+                text: "📶"
                 color: ActiveTheme.colors["FG"]
+                font.pixelSize: 12
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Row {
+                spacing: 1
+                anchors.verticalCenter: parent.verticalCenter
+
+                Rectangle {
+                    id: batteryBody
+                    implicitWidth: 25
+                    implicitHeight: 15
+                    anchors.verticalCenter: parent.verticalCenter
+                    radius: 5
+                    color: "transparent"
+                    border {
+                        width: 1.5
+                        color: ActiveTheme.colors["FG"]
+                    }
+                    clip: true
+
+                    Rectangle {
+                        id: batteryFill
+                        anchors {
+                            left: parent.left
+                            top: parent.top
+                            bottom: parent.bottom
+                            margins: 2.5
+                        }
+                        width: (parent.width - anchors.margins * 2) * root._batteryPercentage
+                        radius: 3
+                        color: ActiveTheme.colors["ACCENT_LOW"]
+
+                        Behavior on width {
+                            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                        }
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        z: 1
+                        text: Math.round(root._batteryPercentage * 100)
+                        font.pixelSize: 8
+                        font.bold: true
+                        color: ActiveTheme.colors["BG"]
+                    }
+                }
+
+                Rectangle {
+                    implicitWidth: 1.5
+                    implicitHeight: 6
+                    anchors.verticalCenter: parent.verticalCenter
+                    radius: height / 2
+                    color: ActiveTheme.colors["FG"]
+                }
             }
         }
     }
