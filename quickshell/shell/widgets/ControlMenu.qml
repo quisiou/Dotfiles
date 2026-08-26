@@ -325,7 +325,6 @@ PanelWindow {
         onPillWidgetChanged: {
             if (pillWidget === "default") root.content = null
             else {
-                defaultMenu.expanded = false
                 switch (pillWidget) {
                     case "volume":      root.content = volumeOsdComponent;      break
                     case "brightness":  root.content = brightnessOsdComponent;  break
@@ -344,6 +343,7 @@ PanelWindow {
             cursorShape: root.pillWidget === "default" ? Qt.PointingHandCursor : Qt.ArrowCursor
 
             onHoveredChanged: {
+                defaultMenu.expanded = hovered
                 switch (root.pillWidget) {
                     case "volume":
                         if (hovered) volumeOsdTimer.stop()
@@ -356,9 +356,6 @@ PanelWindow {
                     case "workspace":
                         if (hovered) workspaceTimer.stop()
                         else workspaceTimer.restart()
-                        break
-                    case "default":
-                        defaultMenu.expanded = hovered
                         break
                     default:
                         break
