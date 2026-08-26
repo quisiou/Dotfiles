@@ -8,7 +8,6 @@ Text {
 
     property string timeFormat: "hh:mm"
     property real pixelSize: 16
-    property int animDuration: 200
 
     color: "white"
     font.bold: true

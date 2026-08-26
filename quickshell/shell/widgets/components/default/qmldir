@@ -1,0 +1,4 @@
+# quickshell/shell/widgets/components/default/qmldir
+
+
+DefaultMenu 1.0 DefaultMenu.qml

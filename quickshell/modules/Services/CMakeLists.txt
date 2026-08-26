@@ -8,6 +8,7 @@ qt_add_qml_module(elysianshell-services
     VERSION 1.0
 )
 
+add_subdirectory(Battery)
 add_subdirectory(Bluetooth)
 add_subdirectory(Brightness)
 add_subdirectory(Lock)

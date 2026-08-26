@@ -4,13 +4,13 @@
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import Quickshell.Services.UPower 
 import Quickshell.Services.Polkit
 import QtQuick
 import ElysianShell.Services
 import ElysianShell.Themes
 import "base"
 import "components/auth"
+import "components/default"
 import "components/lock"
 import "components/launcher"
 import "components/launcher/modes"
@@ -48,86 +48,10 @@ PanelWindow {
 
         readonly property int _defaultClockPixelSize: 16
 
-        Item {
+        DefaultMenu {
             id: defaultMenu
             anchors.fill: parent
-
-            property real horizontalPadding: 20
-            property real verticalPadding: 4
-            
-            implicitWidth:  (clock.implicitWidth  + horizontalPadding * 2) * (root.defaultExpanded ? 2 : 1)
-            implicitHeight: (clock.implicitHeight + verticalPadding   * 2) * (root.defaultExpanded ? 2 : 1)
-
-            readonly property real basePillHeight: clock.implicitHeight + verticalPadding * 2
-
-            Clock {
-                id: clock
-                anchors {
-                    top: parent.top
-                    topMargin: 3
-                    horizontalCenter: parent.horizontalCenter
-                }
-                pixelSize: root._defaultClockPixelSize
-            }
-
-            Row {
-                id: batteryIcon
-                visible: root.defaultExpanded
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    right: parent.right
-                    rightMargin: 5
-                }
-                spacing: 1
-
-                Rectangle {
-                    id: batteryBody
-                    implicitWidth: 25
-                    implicitHeight: 15
-                    anchors.verticalCenter: parent.verticalCenter
-                    radius: 5
-                    color: "transparent"
-                    border {
-                        width: 1.5
-                        color: ActiveTheme.colors["FG"]
-                    }
-                    clip: true
-
-                    Rectangle {
-                        id: batteryFill
-                        anchors {
-                            left: parent.left
-                            top: parent.top
-                            bottom: parent.bottom
-                            margins: 2.5
-                        }
-                        width: (parent.width - anchors.margins * 2) * root._batteryPercentage
-                        radius: 3
-                        color: ActiveTheme.colors["ACCENT_LOW"]
-
-                        Behavior on width {
-                            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-                        }
-                    }
-
-                    Text {
-                        anchors.centerIn: parent
-                        z: 1
-                        text: Math.round(root._batteryPercentage * 100)
-                        font.pixelSize: 8
-                        font.bold: true
-                        color: ActiveTheme.colors["BG"]
-                    }
-                }
-
-                Rectangle {
-                    implicitWidth: 1.5
-                    implicitHeight: 6
-                    anchors.verticalCenter: parent.verticalCenter
-                    radius: height / 2
-                    color: ActiveTheme.colors["FG"]
-                }
-            }
+            clockPixelSize: root._defaultClockPixelSize
         }
         LockScreen { id: lockScreen }
 
@@ -139,22 +63,7 @@ PanelWindow {
             (root.height - defaultMenu.basePillHeight) / (_fullHeight - defaultMenu.basePillHeight), 0), 1)
 
         property string pillWidget: "default"
-        property bool defaultExpanded: false
         property var _entries: []
-
-        property var _batteryDevice: UPower.displayDevice
-        property real _batteryPercentage: _batteryDevice.percentage
-        property string _batteryStatusText: {
-            switch (_batteryDevice.state) {
-                case UPowerDeviceState.Charging:            return "Charging"
-                case UPowerDeviceState.Discharging:         return "Discharging"
-                case UPowerDeviceState.Empty:               return "Empty"
-                case UPowerDeviceState.FullyCharged:        return "Fully charged"
-                case UPowerDeviceState.PendingCharge:       return "Not drawing power"
-                case UPowerDeviceState.PendingDischarge:    return "Pending discharge"
-                default:                                    return "Unknown"
-            }
-        }
         
         anchors {
             top: parent.top
@@ -416,7 +325,7 @@ PanelWindow {
         onPillWidgetChanged: {
             if (pillWidget === "default") root.content = null
             else {
-                root.defaultExpanded = false
+                defaultMenu.expanded = false
                 switch (pillWidget) {
                     case "volume":      root.content = volumeOsdComponent;      break
                     case "brightness":  root.content = brightnessOsdComponent;  break
@@ -449,7 +358,7 @@ PanelWindow {
                         else workspaceTimer.restart()
                         break
                     case "default":
-                        root.defaultExpanded = hovered
+                        defaultMenu.expanded = hovered
                         break
                     default:
                         break
