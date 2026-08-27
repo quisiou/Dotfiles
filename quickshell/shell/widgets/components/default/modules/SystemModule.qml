@@ -14,11 +14,43 @@ Row {
     property real _batteryPercentage: BatteryService.percentage
     property string _batteryStatus: BatteryService.statusText
 
-    Text {
-        text: "📶"
-        color: ActiveTheme.colors["FG"]
-        font.pixelSize: 12
+    Image {
+        id: volumeIcon
         anchors.verticalCenter: parent.verticalCenter
+        source: VolumeService.muted
+                    ? Quickshell.shellDir + "/assets/icons/audio-volume-muted.svg"
+                    : Quickshell.shellDir + "/assets/icons/audio-volume-high.svg"
+        sourceSize {
+            width:  48
+            height: 48
+        }
+        width:  24
+        height: 24
+        fillMode: Image.PreserveAspectFit
+        smooth: true
+        asynchronous: true
+    }
+
+    Image {
+        id: networkIcon
+        anchors.verticalCenter: parent.verticalCenter
+        source: NetworkService.connectionType === "ethernet"
+            ?                                   Quickshell.shellDir + "/assets/icons/network-wired.svg"
+            : !NetworkService.enabled       ?   Quickshell.shellDir + "/assets/icons/network-wireless-offline.svg"
+            : NetworkService.strength === 0 ?   Quickshell.shellDir + "/assets/icons/network-wireless-acquiring.svg"
+            : NetworkService.strength >= 80 ?   Quickshell.shellDir + "/assets/icons/network-wireless-80.svg"
+            : NetworkService.strength >= 60 ?   Quickshell.shellDir + "/assets/icons/network-wireless-60.svg"
+            : NetworkService.strength >= 40 ?   Quickshell.shellDir + "/assets/icons/network-wireless-40.svg"
+            :                                   Quickshell.shellDir + "/assets/icons/network-wireless-20.svg"
+        sourceSize {
+            width:  48
+            height: 48
+        }
+        width:  24
+        height: 24
+        fillMode: Image.PreserveAspectFit
+        smooth: true
+        asynchronous: true
     }
 
     Row {

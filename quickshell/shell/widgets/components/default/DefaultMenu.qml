@@ -36,8 +36,8 @@ Item {
         _targetClockHeight + (root.expanded ? (2 + _dateHeight) : 0)   // 2 = Column spacing
 
     implicitWidth: root.expanded
-        ? mediaRect.implicitWidth + _targetClockWidth + systemRect.implicitWidth + root.horizontalPadding * 18
-        : _targetClockWidth + root.horizontalPadding * 4
+        ? mediaRect.implicitWidth + _targetClockWidth + systemRect.implicitWidth + root.horizontalPadding * 16
+        : _targetClockWidth + root.horizontalPadding * 3
 
     implicitHeight: root.expanded
         ? _clockWrapperTargetHeight + root.verticalPadding * 4
@@ -117,7 +117,7 @@ Item {
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
-            rightMargin: root.horizontalPadding * 3
+            rightMargin: root.horizontalPadding * 4
         }
         implicitWidth: systemModule.implicitWidth + 12
         implicitHeight: systemModule.implicitHeight + 12
