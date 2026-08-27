@@ -117,3 +117,7 @@ hl.bind(
     Config.mainMod .. " + Escape",
     hl.dsp.exec_cmd("qs -c shell ipc call controlMenu toggleSessionMenu")
 )
+hl.bind(
+    Config.mainMod .. " + L",
+    hl.dsp.exec_cmd("qs -c shell ipc call controlMenu lockSession")
+)
