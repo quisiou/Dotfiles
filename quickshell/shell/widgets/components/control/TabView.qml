@@ -3,98 +3,143 @@
 
 import QtQuick
 import QtQuick.Layouts
+import ElysianShell.Themes
 
 Item {
     id: root
 
-    property var tabs: ["Dashboard", "Media"]
+    property var tabs: []   // [{ name: "Dashboard", item: <Item> }, ...]
     property int currentIndex: 0
 
-    implicitWidth: 600
-    implicitHeight: 300
-    width: root.implicitWidth
-    height: root.implicitHeight
+    readonly property int _animDuration: 200
+    property bool _pagesReady: false
 
-    signal closeRequested()
+    signal tabRequested(int newIndex)
 
-    Keys.onEscapePressed: root.closeRequested()
+    Component.onCompleted: Qt.callLater(() => root._pagesReady = true)
 
     ColumnLayout {
         anchors{
             fill: parent
             topMargin: 20
         }
-        spacing: 8
+        spacing: 0
 
         Item {
             id: tabBarContainer
             Layout.fillWidth: true
             Layout.preferredHeight: 36
 
-            RowLayout {
-                id: tabRow
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    top: parent.top
-                    topMargin: 8
-                }
-                spacing: 32
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: 6
 
-                Repeater {
-                    id: tabRepeater
-                    model: root.tabs
+                RowLayout {
+                    id: tabRow
+                    Layout.fillWidth: true
+                    Layout.topMargin: 8
+                    spacing: 32
 
-                    delegate: Item {
-                        id: tabDelegate
-                        Layout.fillWidth: true          // divides space evenly between tabs
-                        Layout.preferredHeight: label.implicitHeight
-                        readonly property alias labelWidth: label.implicitWidth
+                    Repeater {
+                        id: tabRepeater
+                        model: root.tabs
 
-                        property bool selected: root.currentIndex === index
+                        delegate: Item {
+                            id: tabDelegate
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: label.implicitHeight
+                            
+                            readonly property alias labelWidth: label.implicitWidth
+                            property bool selected: root.currentIndex === index
 
-                        Text {
-                            id: label
-                            anchors.centerIn: parent
-                            text: modelData
-                            font.pixelSize: 15
-                            color: tabDelegate.selected ? "#8b3a3a" : "#9a8b86"
+                            Text {
+                                id: label
+                                anchors.centerIn: parent
+                                text: modelData.name
+                                font.pixelSize: 15
+                                color: ActiveTheme.colors[tabDelegate.selected ? "ACCENT_LOW" : "FG"]
+                                
+                                Behavior on color {
+                                    ColorAnimation { duration: root._animDuration; easing.type: Easing.InOutCubic }
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.tabRequested(index)
+                            }
                         }
+                    }
+                }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.currentIndex = index
+                Item {
+                    id: indicatorTrack
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 3
+
+                    Rectangle {
+                        id: indicator
+                        height: 3
+                        radius: 1.5
+                        color: ActiveTheme.colors["ACCENT_LOW"]
+
+                        property var currentTab: tabRepeater.count > 0 ? tabRepeater.itemAt(root.currentIndex) : null
+
+                        x: currentTab ? tabRow.x + currentTab.x + (currentTab.width - currentTab.labelWidth * 5/4) / 2 : 0
+                        width: currentTab ? currentTab.labelWidth * 5/4 : 0
+
+                        Behavior on x {
+                            NumberAnimation { duration: root._animDuration; easing.type: Easing.InOutCubic }
+                        }
+                        Behavior on width {
+                            NumberAnimation { duration: root._animDuration; easing.type: Easing.InOutCubic }
                         }
                     }
                 }
             }
+        }
 
-            Rectangle {
-                id: indicator
-                height: 3
-                radius: 1.5
-                color: '#1859ca'  // placeholder, you'll wire this up
-                y: tabRow.y + tabRow.height - height
-
-                property var currentTab: tabRepeater.count > 0 ? tabRepeater.itemAt(root.currentIndex) : null
-
-                x: currentTab ? tabRow.x + currentTab.x + (currentTab.width - currentTab.labelWidth * 3/2) / 2 : 0
-                width: currentTab ? currentTab.labelWidth * 3/2 : 0
-
-                Behavior on x {
-                    NumberAnimation { duration: 250; easing.type: Easing.InOutCubic }
-                }
-                Behavior on width {
-                    NumberAnimation { duration: 250; easing.type: Easing.InOutCubic }
-                }
-            }
+        Rectangle {
+            color: ActiveTheme.colors["BG_ACTIVE"]
+            implicitWidth: 300
+            implicitHeight: 1
+            Layout.fillWidth: true
         }
 
         Item {
+            id: pageContainer
             Layout.fillWidth: true
             Layout.fillHeight: true
-            // paged content goes here
+            Layout.topMargin: 8
+            clip: true
+
+            Repeater {
+                id: pageRepeater
+                model: root.tabs
+
+                delegate: Item {
+                    id: pageSlot
+                    visible: Math.abs(index - root.currentIndex) <= 1
+                    width: pageContainer.width
+                    height: pageContainer.height
+                    y: 0
+                    x: (index - root.currentIndex) * pageContainer.width
+
+                    Behavior on x {
+                        enabled: root._pagesReady
+                        NumberAnimation { duration: root._animDuration; easing.type: Easing.InOutCubic }
+                    }
+
+                    Component.onCompleted: {
+                        const page = modelData.item
+                        if (page) {
+                            page.parent = pageSlot
+                            page.anchors.fill = pageSlot
+                        }
+                    }
+                }
+            }
         }
     }
 }

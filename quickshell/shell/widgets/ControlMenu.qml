@@ -11,6 +11,7 @@ import ElysianShell.Themes
 import "base"
 import "components/auth"
 import "components/control"
+import "components/control/pages"
 import "components/default"
 import "components/lock"
 import "components/launcher"
@@ -48,12 +49,6 @@ PanelWindow {
         id: root
 
         readonly property int _defaultClockPixelSize: 16
-        readonly property var _controlMenuTabs: [
-            "Media",
-            "Dashboard",
-            "System"
-        ]
-        property int _currentControlMenuTab: 0
 
         DefaultMenu {
             id: defaultMenu
@@ -62,15 +57,18 @@ PanelWindow {
             mouseEnabled: root.pillWidget === "default"
 
             onDashboardTabRequested: {
-                root._currentControlMenuTab = root._controlMenuTabs.indexOf("Dashboard")
+                const idx = root._controlCenterTabs.findIndex(t => t.name === "Dashboard")
+                root._controlCenterCurrentIndex = idx >= 0 ? idx : 0
                 root.pillWidget = "control"
             }
             onSystemTabRequested: {
-                root._currentControlMenuTab = root._controlMenuTabs.indexOf("System")
+                const idx = root._controlCenterTabs.findIndex(t => t.name === "System")
+                root._controlCenterCurrentIndex = idx >= 0 ? idx : 0
                 root.pillWidget = "control"
             }
             onMediaTabRequested: {
-                root._currentControlMenuTab = root._controlMenuTabs.indexOf("Media")
+                const idx = root._controlCenterTabs.findIndex(t => t.name === "Media")
+                root._controlCenterCurrentIndex = idx >= 0 ? idx : 0
                 root.pillWidget = "control"
             }
         }
@@ -129,6 +127,17 @@ PanelWindow {
                 .sort((a, b) => a.name.localeCompare(b.name))
         }
 
+        DashboardPage   { id: dashboardPage }
+        MediaPage       { id: mediaPage }
+        SystemPage      { id: systemPage }
+        PerformancePage { id: performancePage }
+        property int _controlCenterCurrentIndex: 0
+        readonly property var _controlCenterTabs: [
+            { name: "Dashboard",    item: dashboardPage},
+            { name: "Media",        item: mediaPage},
+            { name: "Performance",  item: performancePage},
+            { name: "System",       item: systemPage}
+        ]
 
         Timer {
             id: volumeOsdTimer
@@ -335,12 +344,11 @@ PanelWindow {
         }
         Component {     // Control center
             id: controlComponent
-            TabView {
-                id: tabViewMenu
-                tabs: root._controlMenuTabs
-                currentIndex: root._currentControlMenuTab
-                
-                Component.onCompleted: Qt.callLater(tabViewMenu.forceActiveFocus)
+            ControlCenter {
+                tabs: root._controlCenterTabs
+                currentIndex: root._controlCenterCurrentIndex
+
+                onTabChanged: (newIndex) => { root._controlCenterCurrentIndex = newIndex }
                 onCloseRequested: root.pillWidget = "default"
             }
         }

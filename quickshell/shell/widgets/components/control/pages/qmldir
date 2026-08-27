@@ -1,0 +1,7 @@
+# quickshell/shell/widgets/components/control/pages/qmldir
+
+
+DashboardPage 1.0 DashboardPage.qml
+MediaPage 1.0 MediaPage.qml
+PerformancePage 1.0 PerformancePage.qml
+SystemPage 1.0 SystemPage.qml
