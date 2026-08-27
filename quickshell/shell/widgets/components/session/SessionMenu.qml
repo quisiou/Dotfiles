@@ -80,6 +80,7 @@ Item {
                 border.color: ActiveTheme.colors["ACCENT_DIM"]
 
                 Behavior on color { ColorAnimation { duration: root._animDuration } }
+                Behavior on border.color { ColorAnimation { duration: root._animDuration } }
                 Behavior on border.width { NumberAnimation { duration: root._animDuration } }
 
                 Column {
@@ -92,13 +93,6 @@ Item {
                         height: 36
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
-
-                    // Text {
-                    //     text: btn.modelData.title
-                    //     color: "white"
-                    //     font.pixelSize: 15
-                    //     anchors.horizontalCenter: parent.horizontalCenter
-                    // }
                 }
 
                 MouseArea {

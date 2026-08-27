@@ -1,0 +1,6 @@
+# quickshell/shell/widgets/components/default/modules/qmldir
+
+
+ClockModule 1.0 ClockModule.qml
+MediaModule 1.0 MediaModule.qml
+SystemModule 1.0 SystemModule.qml

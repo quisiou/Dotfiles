@@ -1,7 +1,7 @@
 # quickshell/shell/widgets/base/qmldir
 
 
-Clock 1.0 Clock.qml
+ClockText 1.0 ClockText.qml
 EntryView 1.0 EntryView.qml
 MorphingContainer 1.0 MorphingContainer.qml
 NotificationCard 1.0 NotificationCard.qml

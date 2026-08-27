@@ -1,4 +1,4 @@
-// quickshell/shell/widgets/base/Clock.qml
+// quickshell/shell/widgets/base/ClockText.qml
 
 
 import QtQuick

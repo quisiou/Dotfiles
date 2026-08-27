@@ -18,6 +18,9 @@ Item {
 
     Component.onCompleted: Qt.callLater(() => root._pagesReady = true)
 
+    Keys.onRightPressed:    root.tabRequested(Math.min(root.currentIndex + 1, root.tabs.length - 1))
+    Keys.onLeftPressed:     root.tabRequested(Math.max(root.currentIndex - 1, 0))
+
     ColumnLayout {
         anchors{
             fill: parent

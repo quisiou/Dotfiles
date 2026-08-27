@@ -3,7 +3,7 @@
 
 import QtQuick
 import QtQuick.Effects
-import "../../base"     // For Clock widget
+import "../../base"     // For ClockText widget
 
 Item {
     id: root
@@ -29,7 +29,7 @@ Item {
         brightness: -0.15
     }
 
-    Clock {
+    ClockText {
         anchors.centerIn: parent
         pixelSize: root.clockPixelSize
     }

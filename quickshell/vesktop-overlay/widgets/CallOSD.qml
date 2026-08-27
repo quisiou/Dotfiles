@@ -50,7 +50,7 @@ PanelWindow {
         // Where tiles get parented once created — swap Column for whatever layout you want later
         Column {
             id: userContainer
-            spacing: 2
+            spacing: 15
         }
 
         Component {
