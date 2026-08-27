@@ -1,0 +1,5 @@
+# quickshell/shell/widgets/components/control/qmldir
+
+
+ControlCenter 1.0 ControlCenter.qml
+TabView 1.0 TabView.qml

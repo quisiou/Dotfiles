@@ -15,6 +15,7 @@ Item {
     property real verticalPadding: 8
     property bool expanded: false
     property int clockPixelSize: 16
+    property bool mouseEnabled: false
 
     property real _batteryPercentage: BatteryService.percentage
     property string _batteryStatus:   BatteryService.statusText
@@ -60,6 +61,10 @@ Item {
 
     readonly property real basePillHeight: _clockTargetHeight + verticalPadding * 2
 
+    signal dashboardTabRequested()
+    signal mediaTabRequested()
+    signal systemTabRequested()
+
     // ---------------- LEFT: media info ----------------
     Rectangle {
         id: mediaRect
@@ -84,13 +89,14 @@ Item {
         }
 
         MouseArea {
+            enabled: root.mouseEnabled
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
 
             onEntered:  mediaRect.color = ActiveTheme.colors["ACCENT_LOW"].replace("#", "#20")
             onExited:   mediaRect.color = ActiveTheme.colors["ACCENT"].replace("#", "#20")
-            onClicked:  console.log("Going to media player menu...")
+            onClicked:  root.mediaTabRequested()
         }
 
         Row {
@@ -196,10 +202,11 @@ Item {
         implicitHeight: clockColumn.implicitHeight
 
         MouseArea {
+            enabled: root.mouseEnabled
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
-            onClicked:  console.log("Going to media control center...")
+            onClicked:  root.dashboardTabRequested()
         }
 
         Column {
@@ -268,13 +275,14 @@ Item {
         implicitHeight: systemRow.implicitHeight + 12
 
         MouseArea {
+            enabled: root.mouseEnabled
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
 
             onEntered:  systemRect.color = ActiveTheme.colors["ACCENT_LOW"].replace("#", "#20")
             onExited:   systemRect.color = ActiveTheme.colors["ACCENT"].replace("#", "#20")
-            onClicked:  console.log("Going to system menu...")
+            onClicked:  root.systemTabRequested()
         }
 
         Row {

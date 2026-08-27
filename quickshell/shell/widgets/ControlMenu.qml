@@ -10,6 +10,7 @@ import ElysianShell.Services
 import ElysianShell.Themes
 import "base"
 import "components/auth"
+import "components/control"
 import "components/default"
 import "components/lock"
 import "components/launcher"
@@ -27,12 +28,12 @@ PanelWindow {
     exclusiveZone: topbarHeight - 15
 
     WlrLayershell.layer: root.pillWidget !== "default" ? WlrLayer.Overlay : WlrLayer.Top
-    WlrLayershell.keyboardFocus: root.pillWidget === "launcher"
-        || root.pillWidget === "session"
-        || root.pillWidget === "lock"
-        || root.pillWidget === "auth"
-            ? WlrKeyboardFocus.Exclusive
-            : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: root.pillWidget === "default"
+        || root.pillWidget === "volume"
+        || root.pillWidget === "brightness"
+        || root.pillWidget === "workspace"
+            ? WlrKeyboardFocus.None
+            : WlrKeyboardFocus.Exclusive
     WlrLayershell.namespace: "top-bar"
 
     mask: Region { item: root }
@@ -47,11 +48,31 @@ PanelWindow {
         id: root
 
         readonly property int _defaultClockPixelSize: 16
+        readonly property var _controlMenuTabs: [
+            "Media",
+            "Dashboard",
+            "System"
+        ]
+        property int _currentControlMenuTab: 0
 
         DefaultMenu {
             id: defaultMenu
             anchors.fill: parent
             clockPixelSize: root._defaultClockPixelSize
+            mouseEnabled: root.pillWidget === "default"
+
+            onDashboardTabRequested: {
+                root._currentControlMenuTab = root._controlMenuTabs.indexOf("Dashboard")
+                root.pillWidget = "control"
+            }
+            onSystemTabRequested: {
+                root._currentControlMenuTab = root._controlMenuTabs.indexOf("System")
+                root.pillWidget = "control"
+            }
+            onMediaTabRequested: {
+                root._currentControlMenuTab = root._controlMenuTabs.indexOf("Media")
+                root.pillWidget = "control"
+            }
         }
         LockScreen { id: lockScreen }
 
@@ -94,6 +115,20 @@ PanelWindow {
         WallpaperMode  { id: wallpaperMode }
         ColorThemeMode { id: colorThemeMode }
         readonly property var _launchModes: [bluetoothMode, wallpaperMode, colorThemeMode]
+
+        function _rebuildEntries() {     // App entries
+            root._entries = DesktopEntries.applications.values
+                .filter(app => !app.noDisplay)
+                .map(app => ({
+                    id:      app.id ?? app.name,
+                    name:    app.name,
+                    icon:    app.icon ? "image://icon/" + app.icon : "",
+                    comment: app.comment ?? "",
+                    action:  (function(a) { return () => a.execute() })(app)
+                }))
+                .sort((a, b) => a.name.localeCompare(b.name))
+        }
+
 
         Timer {
             id: volumeOsdTimer
@@ -249,27 +284,13 @@ PanelWindow {
 
                 Connections {
                     target: DesktopEntries
-                    function onApplicationsChanged() { launcher.rebuildEntries() }
-                }
-
-                // ── App entries ───────────────────────────────────────────────────────────
-                function rebuildEntries() {
-                    root._entries = DesktopEntries.applications.values
-                        .filter(app => !app.noDisplay)
-                        .map(app => ({
-                            id:      app.id ?? app.name,
-                            name:    app.name,
-                            icon:    app.icon ? "image://icon/" + app.icon : "",
-                            comment: app.comment ?? "",
-                            action:  (function(a) { return () => a.execute() })(app)
-                        }))
-                        .sort((a, b) => a.name.localeCompare(b.name))
+                    function onApplicationsChanged() { root._rebuildEntries() }
                 }
 
                 // ── Hooks ─────────────────────────────────────────────────────────────────
                 onCloseRequested: root.pillWidget = "default"
                 Component.onCompleted: {
-                    rebuildEntries()
+                    root._rebuildEntries()
                     Qt.callLater(launcher.forceInputFocus)
 
                     wallpaperMode.rescan()
@@ -312,6 +333,17 @@ PanelWindow {
                 }
             }
         }
+        Component {     // Control center
+            id: controlComponent
+            TabView {
+                id: tabViewMenu
+                tabs: root._controlMenuTabs
+                currentIndex: root._currentControlMenuTab
+                
+                Component.onCompleted: Qt.callLater(tabViewMenu.forceActiveFocus)
+                onCloseRequested: root.pillWidget = "default"
+            }
+        }
         Component {     // Lock visual
             id: lockComponent
             LockVisual {
@@ -333,6 +365,7 @@ PanelWindow {
                     case "lock":        root.content = lockComponent;           break
                     case "session":     root.content = sessionComponent;        break
                     case "auth":        root.content = authComponent;           break
+                    case "control":     root.content = controlComponent;        break
                 }
             }
         }
