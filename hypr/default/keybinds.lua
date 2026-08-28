@@ -31,7 +31,7 @@ hl.bind(Config.mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
 
 
 -- Workspace navigation and Move window to specific workspace
-for i = 1, 10 do
+for i = 1, 9 do
     local key = i % 10 -- 10 maps to key 0
     hl.bind(Config.mainMod .. " + " .. key,             hl.dsp.focus({ workspace = i}))
     hl.bind(Config.mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
@@ -39,8 +39,8 @@ end
 
 
 -- Special workspace (scratchpad)
-hl.bind(Config.mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
-hl.bind(Config.mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+hl.bind(Config.mainMod .. " + 0",         hl.dsp.workspace.toggle_special("magic"))
+hl.bind(Config.mainMod .. " + SHIFT + 0", hl.dsp.window.move({ workspace = "special:magic" }))
 
 
 -- Multimedia keys for volume and screen brightness (laptop)
