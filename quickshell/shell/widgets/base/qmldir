@@ -8,3 +8,4 @@ NotificationCard 1.0 NotificationCard.qml
 OrbitMenu 1.0 OrbitMenu.qml
 SlideBar 1.0 SlideBar.qml
 TabMenu 1.0 TabMenu.qml
+Tooltip 1.0 Tooltip.qml

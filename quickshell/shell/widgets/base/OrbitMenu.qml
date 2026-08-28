@@ -291,47 +291,19 @@ Item {
             }
 
             // Tooltip
-            Rectangle {
+            Tooltip {
                 readonly property real gap: 10
 
+                title: bubbleItem.entry?.name ?? ""
+                comment: bubbleItem.entry?.comment ?? ""
+                selected: bubbleItem.selected
+
+                x: Math.cos(bubbleItem.targetAngle) * (root.bubbleSize / 2 + width / 2 + gap) + root.bubbleSize / 2 - width / 2
+                y: Math.sin(bubbleItem.targetAngle) * (root.bubbleSize / 2 + height / 2 + gap) + root.bubbleSize / 2 - height / 2
+                z: root.z + 1
                 visible: (root.fixedTooltip || bubbleItem.hovered) &&
                             !expandAnimation.running && !collapseAnimation.running &&
                             ((bubbleItem.entry?.name ?? "") !== "" || (bubbleItem.entry?.comment ?? "") !== "")
-                x: Math.cos(bubbleItem.targetAngle) * (root.bubbleSize / 2 + width / 2 + gap) + root.bubbleSize / 2 - width / 2
-                y: Math.sin(bubbleItem.targetAngle) * (root.bubbleSize / 2 + height / 2 + gap) + root.bubbleSize / 2 - height / 2
-                width:  tooltipCol.implicitWidth + 16
-                height: tooltipCol.implicitHeight + 10
-                color: ActiveTheme.colors["BG_HIGHLIGHT"]
-                border.color: bubbleItem.selected ? ActiveTheme.colors["ANSI_BLUE"] : ActiveTheme.colors["DARK3"]
-                border.width: 1
-                radius: 6
-                z: root.z + 1
-
-                Column {
-                    id: tooltipCol
-                    anchors.centerIn: parent
-                    spacing: 2
-
-                    Text {
-                        text: bubbleItem.entry?.name ?? ""
-                        color: ActiveTheme.colors["FG"]
-                        font.pixelSize: 12
-                        font.weight: Font.Medium
-                        visible: text !== ""
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-
-                    Text {
-                        text: bubbleItem.entry?.comment ?? ""
-                        color: bubbleItem.selected
-                                ? ActiveTheme.colors["ACCENT_LOW"] : ActiveTheme.colors["FG_DISABLED"]
-                        font.pixelSize: 11
-                        visible: text !== ""
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-                }
             }
         }
     }
