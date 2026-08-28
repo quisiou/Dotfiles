@@ -83,6 +83,25 @@ PanelWindow {
 
         property string pillWidget: "default"
         property var _entries: []
+
+        property var authQueue: []
+        readonly property bool authBusy: pillWidget === "auth" || pillWidget === "auth-ssh"
+
+        function requestAuth(entry) {
+            authQueue.push(entry)
+            _processAuthQueue()
+        }
+
+        function _processAuthQueue() {
+            if (authBusy || authQueue.length === 0) return
+            var next = authQueue.shift()
+            if (next.type === "polkit") {
+                pillWidget = "auth"
+            } else if (next.type === "ssh") {
+                sshFlow.start(next.prompt, next.pipe)
+                pillWidget = "auth-ssh"
+            }
+        }
         
         anchors {
             top: parent.top
@@ -107,6 +126,9 @@ PanelWindow {
         function reset(): void {
             if (pillWidget === "auth") return
             pillWidget = "default"
+        }
+        function sshAskPass(prompt: string, pipe: string): void {
+            root.requestAuth({ type: "ssh", prompt: prompt, pipe: pipe })
         }
 
         BluetoothMode  { id: bluetoothMode }
@@ -195,8 +217,22 @@ PanelWindow {
 
         PolkitAgent {
             id: polkitAgent
-            onIsActiveChanged: if (isActive && root.pillWidget !== "lock") root.pillWidget = "auth"
+            onIsActiveChanged: {
+                if (isActive) {
+                    if (root.pillWidget !== "lock") root.requestAuth({ type: "polkit" })
+                } else {
+                    // flow disappeared (cancelled/timed out) — drop it if still queued,
+                    // or clear the screen if it was the one showing
+                    root.authQueue = root.authQueue.filter(e => e.type !== "polkit")
+                    if (root.pillWidget === "auth") {
+                        root.pillWidget = "default"
+                        Qt.callLater(root._processAuthQueue)
+                    }
+                }
+            }
         }
+
+        SshAskpassFlow { id: sshFlow }
 
         // ── Possible Menus ────────────────────────────────────────────────────────
         Component {     // Volume OSD
@@ -321,24 +357,51 @@ PanelWindow {
                 onLockRequested: root.lockSession()
             }
         }
-        Component {     // Authentication
+        Component {
             id: authComponent
             Authenticator {
                 id: authItem
                 flow: polkitAgent.flow
-                
                 Connections {
                     target: authItem.flow
-                    function onIsCompletedChanged() { if (authItem.flow.isCompleted) root.pillWidget = "default" }
+                    function onIsCompletedChanged() {
+                        if (authItem.flow.isCompleted) {
+                            root.pillWidget = "default"
+                            Qt.callLater(root._processAuthQueue)
+                        }
+                    }
                     function onIsResponseRequiredChanged() {
                         if (authItem.flow.isResponseRequired && authItem.flow.failed) authItem.authFailed()
                     }
                 }
-
                 onAuthSubmitRequested: (passwd) => { if (authItem.flow) authItem.flow.submit(passwd) }
                 onAuthCancelRequested: {
                     if (authItem.flow) authItem.flow.cancelAuthenticationRequest()
                     root.pillWidget = "default"
+                    Qt.callLater(root._processAuthQueue)
+                }
+            }
+        }
+
+        Component {
+            id: authSshComponent
+            Authenticator {
+                id: sshAuthItem
+                flow: sshFlow
+                Connections {
+                    target: sshFlow
+                    function onIsCompletedChanged() {
+                        if (sshFlow.isCompleted) {
+                            root.pillWidget = "default"
+                            Qt.callLater(root._processAuthQueue)
+                        }
+                    }
+                }
+                onAuthSubmitRequested: (passwd) => sshFlow.submit(passwd)
+                onAuthCancelRequested: {
+                    sshFlow.cancelAuthenticationRequest()
+                    root.pillWidget = "default"
+                    Qt.callLater(root._processAuthQueue)
                 }
             }
         }
@@ -373,6 +436,7 @@ PanelWindow {
                     case "lock":        root.content = lockComponent;           break
                     case "session":     root.content = sessionComponent;        break
                     case "auth":        root.content = authComponent;           break
+                    case "auth-ssh":    root.content = authSshComponent;        break
                     case "control":     root.content = controlComponent;        break
                 }
             }
@@ -427,4 +491,5 @@ PanelWindow {
     function toggleSessionMenu(): void { root.toggleSessionMenu() }
     function lockSession(): void { root.lockSession() }
     function reset(): void { root.reset() }
+    function sshAskPass(prompt: string, pipe: string): void { root.sshAskPass(prompt, pipe) }
 }

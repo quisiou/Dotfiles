@@ -136,5 +136,9 @@ ShellRoot {
             root.closeOtherMenus(controlMenuLoader)
             controlMenuLoader.item.reset()
         }
+        function sshAskPass(prompt: string, pipe: string): void {
+            root.closeOtherMenus(controlMenuLoader)
+            controlMenuLoader.item.sshAskPass(prompt, pipe)
+        }
     }
 }

@@ -167,7 +167,7 @@ Item {
                     Text {
                         id: authenticateText
                         anchors.centerIn: parent
-                        text: "Authenticate"
+                        text: "Submit"
                         color: ActiveTheme.colors["BG"]
                         font {
                             pixelSize: 13
