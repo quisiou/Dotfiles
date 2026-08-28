@@ -56,19 +56,27 @@ return {
             width = 30,
             mappings = {
                 ["<space>"] = "none",
+                ["ga"] = "git_add_file",
+                ["gA"]  = "git_add_all",
+                ["gu"] = "git_unstage_file",
+                ["gc"] = "git_commit",
+                ["gp"] = "git_push",
                 ["l"] = "open",
                 ["h"] = "close_node",
                 ["<bs>"] = "navigate_up",
                 ["O"] = {
-                    function(state)
-                        local node = state.tree:get_node()
-                        if node.type ~= "directory" then
-                            vim.notify("Not a directory", vim.log.levels.WARN)
-                            return
-                        end
-                        vim.cmd("Open " .. vim.fn.fnameescape(node.path))
-                    end,
-                    desc = "open_as_workspace",
+                function(state)
+                    local node = state.tree:get_node()
+                    if node.type ~= "directory" then
+                    vim.notify("Not a directory", vim.log.levels.WARN)
+                    return
+                    end
+                    -- change the (tab-local) working directory to the selected folder
+                    vim.cmd.tcd(vim.fn.fnameescape(node.path))
+                    -- re-root neo-tree's filesystem source on the new cwd, in the same window
+                    require("neo-tree.sources.filesystem").navigate(state, node.path)
+                end,
+                desc = "open_as_workspace",
                 },
             },
         },

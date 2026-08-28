@@ -37,17 +37,21 @@ map("v",    "<C-.>",        "gc",                   { remap = true, desc = "Togg
 map("i",    "<C-.>",        "<Esc>gccgi",           { remap = true, desc = "Toggle line comment" })
 
 --- Window navigation ---------------------------------------------------------
--- Standard pane navigation (frees up <leader>w for saving)
+-- Standard pane navigation
 map("n",    "<C-h>",        "<C-w>h",               { desc = "Focus left window" })
 map("n",    "<C-j>",        "<C-w>j",               { desc = "Focus bottom window" })
 map("n",    "<C-k>",        "<C-w>k",               { desc = "Focus top window" })
 map("n",    "<C-l>",        "<C-w>l",               { desc = "Focus right window" })
-
-map("n",    "<leader>w",    "<cmd>w<CR>",           { desc = "Save file" })
 map("t",    "<C-h>",        "<C-\\><C-n><C-w>h",    { desc = "Focus left (terminal)" })
 
+-- Saving and exiting
+map({ "i", "n", "v" },  "<C-s>",    "<cmd>w<CR>",   { desc = "Save file" })
+map({ "n", "v" },       "<C-w>",    "<cmd>q<CR>",   { desc = "Quit window" })
+map({ "n", "v" },       "<C-x>",    "<cmd>x<CR>",   { desc = "Save file and quit window" })
+map("t",                "<C-w>",    "<C-\\><C-n><cmd>q<CR>",    { desc = "Close terminal" })
+
 --- Terminal ------------------------------------------------------------------
-map("n",    "<leader>t",    ":term<CR>",            { desc = "Open terminal" })
+map("n",    "<leader>t",    "<cmd>split | resize 10 | term<CR>i",            { desc = "Open terminal" })
 
 --- Search & Grep ------------------------------------------------------------
 -- Clear highlights with Esc
