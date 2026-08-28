@@ -3,6 +3,7 @@
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import ElysianShell.Themes
 
 Item {
@@ -22,18 +23,16 @@ Item {
     Keys.onLeftPressed:     root.tabRequested(Math.max(root.currentIndex - 1, 0))
 
     ColumnLayout {
-        anchors{
-            fill: parent
-            topMargin: 20
-        }
+        anchors.fill: parent
         spacing: 0
 
         Item {
             id: tabBarContainer
             Layout.fillWidth: true
-            Layout.preferredHeight: 36
+            Layout.preferredHeight: tabBarColumn.implicitHeight
 
             ColumnLayout {
+                id: tabBarColumn
                 anchors.fill: parent
                 spacing: 6
 
@@ -50,20 +49,36 @@ Item {
                         delegate: Item {
                             id: tabDelegate
                             Layout.fillWidth: true
-                            Layout.preferredHeight: label.implicitHeight
+                            Layout.preferredHeight: labelCol.implicitHeight
                             
                             readonly property alias labelWidth: label.implicitWidth
                             property bool selected: root.currentIndex === index
 
-                            Text {
-                                id: label
+                            Column {
+                                id: labelCol
                                 anchors.centerIn: parent
-                                text: modelData.name
-                                font.pixelSize: 15
-                                color: ActiveTheme.colors[tabDelegate.selected ? "ACCENT_LOW" : "FG"]
-                                
-                                Behavior on color {
-                                    ColorAnimation { duration: root._animDuration; easing.type: Easing.InOutCubic }
+
+                                Text {
+                                    id: icon
+                                    text: (modelData.icon ?? "") === "" ? "X" : modelData.icon
+                                    font.pixelSize: 24
+                                    color: ActiveTheme.colors[tabDelegate.selected ? "ACCENT_LOW" : "FG"]
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    
+                                    Behavior on color {
+                                        ColorAnimation { duration: root._animDuration; easing.type: Easing.InOutCubic }
+                                    }
+                                }
+
+                                Text {
+                                    id: label
+                                    text: modelData.name
+                                    font.pixelSize: 15
+                                    color: ActiveTheme.colors[tabDelegate.selected ? "ACCENT_LOW" : "FG"]
+                                    
+                                    Behavior on color {
+                                        ColorAnimation { duration: root._animDuration; easing.type: Easing.InOutCubic }
+                                    }
                                 }
                             }
 

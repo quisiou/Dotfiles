@@ -117,7 +117,7 @@ Item {
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
-            rightMargin: root.horizontalPadding * 4
+            rightMargin: root.horizontalPadding * 3
         }
         implicitWidth: systemModule.implicitWidth + 12
         implicitHeight: systemModule.implicitHeight + 12

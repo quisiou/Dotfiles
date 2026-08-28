@@ -133,10 +133,10 @@ PanelWindow {
         PerformancePage { id: performancePage }
         property int _controlCenterCurrentIndex: 0
         readonly property var _controlCenterTabs: [
-            { name: "Dashboard",    item: dashboardPage},
-            { name: "Media",        item: mediaPage},
-            { name: "Performance",  item: performancePage},
-            { name: "System",       item: systemPage}
+            { name: "Dashboard",    item: dashboardPage,    icon: "\udb81\udd6e" },
+            { name: "Media",        item: mediaPage,        icon: "\udb83\udcb8" },
+            { name: "Performance",  item: performancePage,  icon: "\udb81\udcc5" },
+            { name: "System",       item: systemPage,       icon: "\ue690" }
         ]
 
         Timer {

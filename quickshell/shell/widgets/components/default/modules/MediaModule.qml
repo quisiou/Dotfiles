@@ -29,11 +29,17 @@ Row {
         color: "transparent"
         anchors.verticalCenter: parent.verticalCenter
 
+        Text {
+            text: "\udb81\udf5b"
+            font.pixelSize: 32
+            color: ActiveTheme.colors["FG_MUTED"]
+            visible: !(root._activePlayer && root._activePlayer.trackArtUrl)
+            anchors.centerIn: parent
+        }
+
         Image {
             anchors.fill: parent
-            source: root._activePlayer && root._activePlayer.trackArtUrl
-                    ? root._activePlayer.trackArtUrl
-                    : Quickshell.shellDir + "/assets/icons/view-media-lyrics.svg"
+            source: root._activePlayer.trackArtUrl
             sourceSize {
                 width:  48
                 height: 48
@@ -42,6 +48,7 @@ Row {
             height: 48
             fillMode: Image.PreserveAspectFit
             asynchronous: true
+            visible: root._activePlayer && root._activePlayer.trackArtUrl
         }
     }
 
