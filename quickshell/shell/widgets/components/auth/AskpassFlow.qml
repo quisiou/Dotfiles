@@ -1,4 +1,4 @@
-// quickshell/shell/widgets/components/auth/SshAskpassFlow.qml
+// quickshell/shell/widgets/components/auth/AskpassFlow.qml
 import QtQuick
 import Quickshell.Io
 
@@ -6,39 +6,47 @@ QtObject {
     id: root
 
     property string message: ""
-    property string actionId: "ssh-askpass"
+    property string actionId: "askpass"
     property bool isResponseRequired: true
     property bool responseVisible: false
     property bool isCompleted: false
-    property bool failed: false
-
     property string pipePath: ""
+
+    signal submitted()
 
     function start(prompt, pipe) {
         message = prompt
         pipePath = pipe
         isCompleted = false
-        failed = false
     }
 
     function submit(passwd) {
+        writer.wasCancel = false
+        writer.stdinEnabled = true
         writer.passwd = passwd
         writer.running = true
     }
 
     function cancelAuthenticationRequest() {
-        writer.passwd = ""   // unblocks the waiting `cat` in the askpass script with empty output -> ssh treats as failed auth, doesn't hang
+        writer.wasCancel = true
+        writer.stdinEnabled = true
+        writer.passwd = "__ASKPASS_CANCELLED__"
         writer.running = true
     }
 
     property Process writer: Process {
         property string passwd: ""
+        property bool wasCancel: false
         command: ["sh", "-c", "cat > \"$1\"", "_", root.pipePath]
         stdinEnabled: true
         onStarted: {
+            stdinEnabled = true
             write(passwd + "\n")
             stdinEnabled = false
         }
-        onExited: root.isCompleted = true
+        onExited: {
+            root.isCompleted = true
+            if (!wasCancel) root.submitted()
+        }
     }
 }

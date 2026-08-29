@@ -17,3 +17,8 @@ export LESS_TERMCAP_ZN=$'\e[74m'                                # subscript star
 export LESS_TERMCAP_ZV=$'\e[75m'                                # subscript end
 export LESS_TERMCAP_ZO=$'\e[73m'                                # superscript start
 export LESS_TERMCAP_ZW=$'\e[75m'                                # superscript end
+
+# ASKPASS stuff
+export SUDO_ASKPASS="$HOME/.config/quickshell/shell/scripts/askpass.sh"
+export SSH_ASKPASS="$HOME/.config/quickshell/shell/scripts/askpass.sh"
+export SSH_ASKPASS_REQUIRE=force

@@ -85,7 +85,9 @@ PanelWindow {
         property var _entries: []
 
         property var authQueue: []
-        readonly property bool authBusy: pillWidget === "auth" || pillWidget === "auth-ssh"
+        readonly property bool authBusy: pillWidget === "auth" || pillWidget === "auth-askpass"
+        property bool lastAskpassFailed: false
+        property bool _askpassPendingResult: false
 
         function requestAuth(entry) {
             authQueue.push(entry)
@@ -97,9 +99,12 @@ PanelWindow {
             var next = authQueue.shift()
             if (next.type === "polkit") {
                 pillWidget = "auth"
-            } else if (next.type === "ssh") {
-                sshFlow.start(next.prompt, next.pipe)
-                pillWidget = "auth-ssh"
+            } else if (next.type === "askpass") {
+                askpassSettleTimer.stop()
+                root.lastAskpassFailed = root._askpassPendingResult
+                root._askpassPendingResult = false
+                askpassFlow.start(next.prompt, next.pipe)
+                pillWidget = "auth-askpass"
             }
         }
         
@@ -127,8 +132,8 @@ PanelWindow {
             if (pillWidget === "auth") return
             pillWidget = "default"
         }
-        function sshAskPass(prompt: string, pipe: string): void {
-            root.requestAuth({ type: "ssh", prompt: prompt, pipe: pipe })
+        function askPass(prompt: string, pipe: string): void {
+            root.requestAuth({ type: "askpass", prompt: prompt, pipe: pipe })
         }
 
         BluetoothMode  { id: bluetoothMode }
@@ -161,6 +166,25 @@ PanelWindow {
             { name: "System",       item: systemPage,       icon: "\ue690" }
         ]
 
+        PolkitAgent {
+            id: polkitAgent
+            onIsActiveChanged: {
+                if (isActive) {
+                    if (root.pillWidget !== "lock") root.requestAuth({ type: "polkit" })
+                } else {
+                    // flow disappeared (cancelled/timed out) — drop it if still queued,
+                    // or clear the screen if it was the one showing
+                    root.authQueue = root.authQueue.filter(e => e.type !== "polkit")
+                    if (root.pillWidget === "auth") {
+                        root.pillWidget = "default"
+                        Qt.callLater(root._processAuthQueue)
+                    }
+                }
+            }
+        }
+
+        AskpassFlow { id: askpassFlow }
+
         Timer {
             id: volumeOsdTimer
             interval: root._menuHideTimer
@@ -177,6 +201,12 @@ PanelWindow {
             id: workspaceTimer
             interval: root._menuHideTimer
             onTriggered: if (root.pillWidget === "workspace") root.pillWidget = "default"
+        }
+
+        Timer {
+            id: askpassSettleTimer
+            interval: 3000
+            onTriggered: root._askpassPendingResult = false
         }
 
         Connections {
@@ -215,24 +245,13 @@ PanelWindow {
             }
         }
 
-        PolkitAgent {
-            id: polkitAgent
-            onIsActiveChanged: {
-                if (isActive) {
-                    if (root.pillWidget !== "lock") root.requestAuth({ type: "polkit" })
-                } else {
-                    // flow disappeared (cancelled/timed out) — drop it if still queued,
-                    // or clear the screen if it was the one showing
-                    root.authQueue = root.authQueue.filter(e => e.type !== "polkit")
-                    if (root.pillWidget === "auth") {
-                        root.pillWidget = "default"
-                        Qt.callLater(root._processAuthQueue)
-                    }
-                }
+        Connections {
+            target: askpassFlow
+            function onSubmitted() {
+                root._askpassPendingResult = true
+                askpassSettleTimer.restart()
             }
         }
-
-        SshAskpassFlow { id: sshFlow }
 
         // ── Possible Menus ────────────────────────────────────────────────────────
         Component {     // Volume OSD
@@ -357,7 +376,7 @@ PanelWindow {
                 onLockRequested: root.lockSession()
             }
         }
-        Component {
+        Component {     // Authentication (Polkit)
             id: authComponent
             Authenticator {
                 id: authItem
@@ -382,24 +401,24 @@ PanelWindow {
                 }
             }
         }
-
-        Component {
-            id: authSshComponent
+        Component {     // Authentication (ssh / sudo)
+            id: authAskpassComponent
             Authenticator {
-                id: sshAuthItem
-                flow: sshFlow
+                id: authAskpassItem
+                flow: askpassFlow
+                showError: root.lastAskpassFailed
                 Connections {
-                    target: sshFlow
+                    target: askpassFlow
                     function onIsCompletedChanged() {
-                        if (sshFlow.isCompleted) {
+                        if (askpassFlow.isCompleted) {
                             root.pillWidget = "default"
                             Qt.callLater(root._processAuthQueue)
                         }
                     }
                 }
-                onAuthSubmitRequested: (passwd) => sshFlow.submit(passwd)
+                onAuthSubmitRequested: (passwd) => askpassFlow.submit(passwd)
                 onAuthCancelRequested: {
-                    sshFlow.cancelAuthenticationRequest()
+                    askpassFlow.cancelAuthenticationRequest()
                     root.pillWidget = "default"
                     Qt.callLater(root._processAuthQueue)
                 }
@@ -429,15 +448,15 @@ PanelWindow {
             if (pillWidget === "default") root.content = null
             else {
                 switch (pillWidget) {
-                    case "volume":      root.content = volumeOsdComponent;      break
-                    case "brightness":  root.content = brightnessOsdComponent;  break
-                    case "launcher":    root.content = launcherComponent;       break
-                    case "workspace":   root.content = workspaceOsdComponent;   break
-                    case "lock":        root.content = lockComponent;           break
-                    case "session":     root.content = sessionComponent;        break
-                    case "auth":        root.content = authComponent;           break
-                    case "auth-ssh":    root.content = authSshComponent;        break
-                    case "control":     root.content = controlComponent;        break
+                    case "volume":          root.content = volumeOsdComponent;      break
+                    case "brightness":      root.content = brightnessOsdComponent;  break
+                    case "launcher":        root.content = launcherComponent;       break
+                    case "workspace":       root.content = workspaceOsdComponent;   break
+                    case "lock":            root.content = lockComponent;           break
+                    case "session":         root.content = sessionComponent;        break
+                    case "auth":            root.content = authComponent;           break
+                    case "auth-askpass":    root.content = authAskpassComponent;    break
+                    case "control":         root.content = controlComponent;        break
                 }
             }
         }
@@ -491,5 +510,5 @@ PanelWindow {
     function toggleSessionMenu(): void { root.toggleSessionMenu() }
     function lockSession(): void { root.lockSession() }
     function reset(): void { root.reset() }
-    function sshAskPass(prompt: string, pipe: string): void { root.sshAskPass(prompt, pipe) }
+    function askPass(prompt: string, pipe: string): void { root.askPass(prompt, pipe) }
 }

@@ -9,6 +9,7 @@ Item {
 
     property real padding: 20
     property var flow: null
+    property bool showError: false
 
     implicitWidth: 450
     implicitHeight: authColumn.implicitHeight + padding * 2
@@ -117,7 +118,7 @@ Item {
 
             Text {
                 id: errorText
-                visible: false
+                visible: root.showError
                 text: "Authentication failed, try again"
                 color: "#e06c75"
                 font.pixelSize: 11
