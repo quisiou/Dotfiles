@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # quickshell/shell/scripts/askpass.sh
 
+
 set -uo pipefail
 
 PROMPT="${1:-SSH Passphrase}"
-CANCEL_SENTINEL="__ASKPASS_CANCELLED__"
 
 fallback_terminal() {
     if [ -r /dev/tty ] && [ -w /dev/tty ]; then
@@ -16,13 +16,14 @@ fallback_terminal() {
 }
 
 FIFO="$(mktemp -u /tmp/askpass-XXXXXX.fifo)"
+CANCEL_FLAG="$FIFO.cancel"
 mkfifo -m 600 "$FIFO"
-trap 'rm -f "$FIFO"' EXIT
+trap 'rm -f "$FIFO" "$CANCEL_FLAG"' EXIT
 
 if qs -c shell ipc call controlMenu askPass "$PROMPT" "$FIFO" >/dev/null 2>&1; then
-    result="$(timeout 60 cat "$FIFO" || exit 1)"
-    if [ "$result" = "$CANCEL_SENTINEL" ]; then
-        exit 1   # tells sudo the user cancelled — no retry
+    result="$(timeout 60 cat "$FIFO")" || exit 1
+    if [ -e "$CANCEL_FLAG" ]; then
+        exit 1   # explicit cancel (or timeout, if you add the hardening below) — no retry
     fi
     printf '%s\n' "$result"
 else

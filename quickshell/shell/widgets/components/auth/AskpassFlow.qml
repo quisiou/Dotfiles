@@ -30,14 +30,16 @@ QtObject {
     function cancelAuthenticationRequest() {
         writer.wasCancel = true
         writer.stdinEnabled = true
-        writer.passwd = "__ASKPASS_CANCELLED__"
+        writer.passwd = ""
         writer.running = true
     }
 
     property Process writer: Process {
         property string passwd: ""
         property bool wasCancel: false
-        command: ["sh", "-c", "cat > \"$1\"", "_", root.pipePath]
+        command: wasCancel
+            ? ["sh", "-c", "touch \"$1.cancel\"; cat > \"$1\"", "_", root.pipePath]
+            : ["sh", "-c", "cat > \"$1\"", "_", root.pipePath]
         stdinEnabled: true
         onStarted: {
             stdinEnabled = true

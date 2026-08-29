@@ -2,6 +2,7 @@
 # zsh/default/alias.zsh
 
 
+alias sudo='sudo -A'
 alias pubip='curl ipinfo.io/ip && echo'
 alias srcrst='. ~/.zshrc'
 alias suicidate='systemctl poweroff'
