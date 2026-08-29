@@ -9,7 +9,7 @@ PROMPT="${1:-SSH Passphrase}"
 fallback_terminal() {
     if [ -r /dev/tty ] && [ -w /dev/tty ]; then
         local passwd=""
-        IFS= read -r -s -p "$PROMPT: " passwd < /dev/tty > /dev/tty 2>&1 || true
+        IFS= read -r -s -p "$PROMPT" passwd < /dev/tty > /dev/tty 2>&1 || true
         echo > /dev/tty 2>/dev/null || true
         printf '%s\n' "$passwd"
     fi
