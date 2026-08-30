@@ -9,7 +9,7 @@ import ElysianShell.Themes
 
 QtObject {
     property var _file: FileView {
-        path: Quickshell.env("HOME") + "/.config/elysian_themes/active_theme/hypr_quickshell.lua"
+        path: Quickshell.env("HOME") + "/.config/elysian_themes/active_theme/colors.lua"
         watchChanges: true
 
         onFileChanged: reload()

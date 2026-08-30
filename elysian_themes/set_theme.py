@@ -25,12 +25,12 @@ def parse_toml(toml_path: Path) -> dict[str, dict[str, str]]:
     return data
 
 
-def hyprland_quickshell(config_dir: Path, theme: dict[str, dict[str, str]]) -> None:
-    filepath: Path = config_dir / "hypr_quickshell.lua"
+def lua_format(config_dir: Path, theme: dict[str, dict[str, str]]) -> None:
+    filepath: Path = config_dir / "colors.lua"
 
     with open(filepath, "w") as f:
         f.write(f"-- elysian_themes/active_theme/{filepath.name}\n\n\n")
-        f.write("return {\n")
+        f.write("return {")
         for k1, v1 in theme.items():
             if k1 == "meta":
                 continue
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     config_dir.mkdir(exist_ok=True)
 
     # Create the template files for all utilities
-    hyprland_quickshell(config_dir, theme)
+    lua_format(config_dir, theme)
 
     # # For files that are actually templates, use Jinja2
     env = Environment(loader=FileSystemLoader(root_dir / "templates/"))

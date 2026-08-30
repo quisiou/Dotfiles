@@ -39,4 +39,22 @@ fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
+echo "Creating symlink for theme file..."
+
+theme_file_src="$CONFIG_DIR/elysian_themes/active_theme/colors.lua"
+theme_file_dst="$ROOT_DIR/lua/themes/active.lua"
+
+mkdir -p "$(dirname "theme_file_dst")"
+
+if [ -L "$theme_file_dst" ]; then
+    echo "    skipped    $theme_file_dst: file already exists (symlink)"
+elif [ -e "$theme_file_dst" ]; then
+    echo "    skipped    $theme_file_dst: file already exists (not symlink)"
+else
+    ln -s "$theme_file_src" "$theme_file_dst"
+    echo "    linked     $theme_file_src -> $theme_file_dst"
+fi
+
+echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+
 echo "Neovim configured successfully!"

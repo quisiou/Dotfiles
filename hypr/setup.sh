@@ -64,7 +64,7 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 
 echo "Creating symlink for theme file..."
 
-theme_file_src="$CONFIG_DIR/elysian_themes/active_theme/hypr_quickshell.lua"
+theme_file_src="$CONFIG_DIR/elysian_themes/active_theme/colors.lua"
 theme_file_dst="$ROOT_DIR/theme.lua"
 
 if [ -L "$theme_file_dst" ]; then
