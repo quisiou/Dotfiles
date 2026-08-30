@@ -16,6 +16,12 @@ default = [
 [open]
 rules = [
 
+    ###############
+    # DIRECTORIES #
+    ###############
+    { mime = "inode/directory", use = "nvim" },
+    { url = "*/", use = "nvim" },
+
     ######################
     # JSON / IPYNB RULES #
     ######################
