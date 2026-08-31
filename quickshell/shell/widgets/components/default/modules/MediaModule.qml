@@ -19,6 +19,7 @@ Row {
         }
         return players.length > 0 ? players[0] : null
     }
+    property bool _playing: root._activePlayer && root._activePlayer.trackArtUrl
 
     ClippingRectangle {
         id: albumArtMask
@@ -32,13 +33,13 @@ Row {
             text: "\udb81\udf5b"
             font.pixelSize: 32
             color: ActiveTheme.colors["FG_MUTED"]
-            visible: !(root._activePlayer && root._activePlayer.trackArtUrl)
+            visible: !root._playing
             anchors.centerIn: parent
         }
 
         Image {
             anchors.fill: parent
-            source: root._activePlayer.trackArtUrl
+            source: root._playing ? root._activePlayer.trackArtUrl : ""
             sourceSize {
                 width:  48
                 height: 48
@@ -47,7 +48,7 @@ Row {
             height: 48
             fillMode: Image.PreserveAspectFit
             asynchronous: true
-            visible: root._activePlayer && root._activePlayer.trackArtUrl
+            visible: root._playing
         }
     }
 
