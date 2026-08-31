@@ -4,9 +4,16 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "widgets" as Widgets
 
 ShellRoot {
     id: root
+
+    // ── Typed proxies for loaded menu items ─────────────────────────────
+    readonly property Widgets.SystemMenu    systemMenu:     systemMenuLoader.item       as Widgets.SystemMenu
+    readonly property Widgets.TrayMenu      trayMenu:       trayMenuLoader.item         as Widgets.TrayMenu
+    readonly property Widgets.QuickAppsMenu quickAppsMenu:  quickAppsMenuLoader.item    as Widgets.QuickAppsMenu
+    readonly property Widgets.ControlMenu   controlMenu:    controlMenuLoader.item      as Widgets.ControlMenu
 
     Loader {
         source: "widgets/ThemeLoader.qml"
@@ -19,9 +26,10 @@ ShellRoot {
         visible: false
 
         onItemChanged: {
-            if (item) {
-                item.menuClosed.connect(() => systemMenuLoader.active = false)
-                item.lockRequested.connect(() => { controlMenuLoader.item.lockSession() })
+            let menu = item as Widgets.SystemMenu
+            if (menu) {
+                menu.menuClosed.connect(() => systemMenuLoader.active = false)
+                menu.lockRequested.connect(() => root.controlMenu.lockSession())
             }
         }
     }
@@ -32,7 +40,10 @@ ShellRoot {
         source: "widgets/TrayMenu.qml"
         visible: false
 
-        onItemChanged: if (item) item.menuClosed.connect(() => trayMenuLoader.active = false)
+        onItemChanged: {
+            let menu = item as Widgets.TrayMenu
+            if (menu) menu.menuClosed.connect(() => trayMenuLoader.active = false)
+        }
     }
 
     Loader {
@@ -41,7 +52,10 @@ ShellRoot {
         source: "widgets/QuickAppsMenu.qml"
         visible: false
 
-        onItemChanged: if (item) item.menuClosed.connect(() => quickAppsMenuLoader.active = false)
+        onItemChanged: {
+            let menu = item as Widgets.QuickAppsMenu
+            if (menu) menu.menuClosed.connect(() => quickAppsMenuLoader.active = false)
+        }
     }
 
     Loader {
@@ -58,13 +72,13 @@ ShellRoot {
 
     function closeOtherMenus(exceptLoader) {
         if (exceptLoader !== controlMenuLoader)
-            controlMenuLoader.item.reset()
-        if (exceptLoader !== systemMenuLoader && systemMenuLoader.item?.visible)
-            systemMenuLoader.item.closeMenu()
-        if (exceptLoader !== trayMenuLoader && trayMenuLoader.item?.visible)
-            trayMenuLoader.item.closeMenu()
-        if (exceptLoader !== quickAppsMenuLoader && quickAppsMenuLoader.item?.visible)
-            quickAppsMenuLoader.item.closeMenu()
+            root.controlMenu.reset()
+        if (exceptLoader !== systemMenuLoader && root.systemMenu?.visible)
+            root.systemMenu.closeMenu()
+        if (exceptLoader !== trayMenuLoader && root.trayMenu?.visible)
+            root.trayMenu.closeMenu()
+        if (exceptLoader !== quickAppsMenuLoader && root.quickAppsMenu?.visible)
+            root.quickAppsMenu.closeMenu()
     }
 
     IpcHandler {
@@ -72,14 +86,13 @@ ShellRoot {
         function handle(): void {
             if (!systemMenuLoader.active)
                 systemMenuLoader.active = true
-            var orbit = systemMenuLoader.item
-            if (!orbit) return
-            if (!orbit.visible) {
+            if (!root.systemMenu) return
+            if (!root.systemMenu.visible) {
                 root.closeOtherMenus(systemMenuLoader)
-                orbit.openMenu()
+                root.systemMenu.openMenu()
             }
             else {
-                orbit.closeMenu()
+                root.systemMenu.closeMenu()
             }
         }
     }
@@ -89,14 +102,13 @@ ShellRoot {
         function handle(): void {
             if (!trayMenuLoader.active)
                 trayMenuLoader.active = true
-            var orbit = trayMenuLoader.item
-            if (!orbit) return
-            if (!orbit.visible) {
+            if (!root.trayMenu) return
+            if (!root.trayMenu.visible) {
                 root.closeOtherMenus(trayMenuLoader)
-                orbit.openMenu()
+                root.trayMenu.openMenu()
             }
             else {
-                orbit.closeMenu()
+                root.trayMenu.closeMenu()
             }
         }
     }
@@ -106,14 +118,13 @@ ShellRoot {
         function handle(): void {
             if (!quickAppsMenuLoader.active)
                 quickAppsMenuLoader.active = true
-            var orbit = quickAppsMenuLoader.item
-            if (!orbit) return
-            if (!orbit.visible) {
+            if (!root.quickAppsMenu) return
+            if (!root.quickAppsMenu.visible) {
                 root.closeOtherMenus(quickAppsMenuLoader)
-                orbit.openMenu()
+                root.quickAppsMenu.openMenu()
             }
             else {
-                orbit.closeMenu()
+                root.quickAppsMenu.closeMenu()
             }
         }
     }
@@ -122,23 +133,23 @@ ShellRoot {
         target: "controlMenu"
         function toggleLauncher(): void {
             root.closeOtherMenus(controlMenuLoader)
-            controlMenuLoader.item.toggleLauncher()
+            root.controlMenu.toggleLauncher()
         }
         function toggleSessionMenu(): void {
             root.closeOtherMenus(controlMenuLoader)
-            controlMenuLoader.item.toggleSessionMenu()
+            root.controlMenu.toggleSessionMenu()
         }
         function lockSession(): void {
             root.closeOtherMenus(controlMenuLoader)
-            controlMenuLoader.item.lockSession()
+            root.controlMenu.lockSession()
         }
         function reset(): void {
             root.closeOtherMenus(controlMenuLoader)
-            controlMenuLoader.item.reset()
+            root.controlMenu.reset()
         }
         function askPass(prompt: string, pipe: string): void {
             root.closeOtherMenus(controlMenuLoader)
-            controlMenuLoader.item.askPass(prompt, pipe)
+            root.controlMenu.askPass(prompt, pipe)
         }
     }
 }
