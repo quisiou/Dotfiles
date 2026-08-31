@@ -2,6 +2,7 @@
 
 
 pragma Singleton
+pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
@@ -50,6 +51,7 @@ Singleton {
     id: initProc
         command: [Quickshell.shellDir + "/scripts/init_notif_log.sh", root._logPath]
         running: true
+        // qmllint disable signal-handler-parameters
         onExited: function(exitCode) {
             if (exitCode === 0) {
                 logFile.path = root._logPath;
@@ -57,6 +59,7 @@ Singleton {
                 console.warn("NotificationService: failed to initialise log file (exit", exitCode, ")");
             }
         }
+        // qmllint enable signal-handler-parameters
     }
 
     function _appendLog(appName, summary, body) {
@@ -124,7 +127,7 @@ Singleton {
                 body:    notif.body    || "",
                 icon:   root.resolveIcon(notif),
                 urgency: notif.urgency ?? 1,
-                category: notif.category ?? "",
+                category: notif.hints["category"] ?? "",
                 _notif:  notif
             });
 

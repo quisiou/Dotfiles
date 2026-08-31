@@ -15,6 +15,7 @@ Singleton {
     property real value: 0
     property bool _internalWrite: false
     property bool _seen: false
+    property real pendingValue: 0
 
     signal brightnessChanged()
 
@@ -89,11 +90,11 @@ Singleton {
         interval: 40
         onTriggered: {
             root._internalWrite = true
-            setProcess.command = ["brightnessctl", "set", Math.round(pendingValue * 100) + "%"]
+            setProcess.command = ["brightnessctl", "set", Math.round(root.pendingValue * 100) + "%"]
             setProcess.running = true
         }
     }
-    property real pendingValue: 0
+    
 
     Process {
         id: setProcess

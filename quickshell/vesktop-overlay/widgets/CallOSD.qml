@@ -1,6 +1,8 @@
 /* quickshell/shell/widgets/CallOSD.qml */
 
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -340,10 +342,9 @@ PanelWindow {
                     sockWaiter.running = true
                 }
             }
-
-            onError: error => {
-                console.warn("CallOSD: socket error:", error)
-            }
+            // qmllint disable signal-handler-parameters
+            onError: (error) => { console.warn("CallOSD: socket error:", error) }
+            // qmllint enable signal-handler-parameters
         }
 
         Process {
@@ -355,11 +356,12 @@ PanelWindow {
                 "inotifywait -qq -e create,moved_to '" + sock.path.substring(0, sock.path.lastIndexOf('/')) + "'; " +
                 "done"
             ]
-
+            // qmllint disable signal-handler-parameters
             onExited: (exitCode, exitStatus) => {
                 console.log("CallOSD: bridge socket file appeared, connecting")
                 sock.connected = true
             }
+            // qmllint enable signal-handler-parameters
         }
 
         Process {
@@ -368,6 +370,7 @@ PanelWindow {
             property string imgDst: ""
             property var currentJob: null
             command: [ "test", "-f", imgDst ]
+            // qmllint disable signal-handler-parameters
             onExited: (exitCode) => {
                 if (exitCode === 0) {
                     console.log("Profile picture already cached!")
@@ -382,6 +385,7 @@ PanelWindow {
                     imgDownload.running = true
                 }
             }
+            // qmllint enable signal-handler-parameters
         }
 
         Process {
@@ -391,6 +395,7 @@ PanelWindow {
             property string imgDst: ""
             property var currentJob: null
             command: ["curl", "-fsSL", "-o", imgDst, imgSrc]
+            // qmllint disable signal-handler-parameters
             onExited: (exitCode) => {
                 if (exitCode === 0) {
                     root.markAvatarReady(currentJob.userId)
@@ -400,6 +405,7 @@ PanelWindow {
                 root.downloading = false
                 root.processQueue()
             }
+            // qmllint enable signal-handler-parameters
         }
     }
 }
