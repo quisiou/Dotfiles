@@ -155,6 +155,10 @@ PanelWindow {
                             Image {
                                 id: microOffImage
                                 anchors.verticalCenter: parent.verticalCenter
+                                sourceSize {
+                                    width:  48
+                                    height: 48
+                                }
                                 width: 14; height: 14
                                 source: Quickshell.shellDir + "/assets/icons/microphone-sensitivity-muted.svg"
                                 fillMode: Image.PreserveAspectFit
@@ -166,6 +170,10 @@ PanelWindow {
                             Image {
                                 id: audioOffImage
                                 anchors.verticalCenter: parent.verticalCenter
+                                sourceSize {
+                                    width:  48
+                                    height: 48
+                                }
                                 width: 14; height: 14
                                 source: Quickshell.shellDir + "/assets/icons/audio-volume-muted_noalpha.svg"
                                 fillMode: Image.PreserveAspectFit

@@ -281,8 +281,8 @@ PanelWindow {
                                     ? Quickshell.shellDir + "/assets/icons/audio-volume-muted.svg"
                                     : Quickshell.shellDir + "/assets/icons/audio-volume-high.svg"
                         sourceSize {
-                            width:  volumeOsd.iconSize
-                            height: volumeOsd.iconSize
+                            width:  48
+                            height: 48
                         }
                         width:  volumeOsd.iconSize
                         height: volumeOsd.iconSize
@@ -322,8 +322,8 @@ PanelWindow {
                         anchors.verticalCenter: parent.verticalCenter
                         source: Quickshell.shellDir + "/assets/icons/brightness.svg"
                         sourceSize {
-                            width:  brightnessOsd.iconSize
-                            height: brightnessOsd.iconSize
+                            width:  48
+                            height: 48
                         }
                         width:  brightnessOsd.iconSize
                         height: brightnessOsd.iconSize

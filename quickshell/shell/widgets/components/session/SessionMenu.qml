@@ -91,6 +91,10 @@ Item {
 
                     Image {
                         source: Quickshell.shellDir + "/assets/icons/" + btn.modelData.icon
+                        sourceSize {
+                            width:  48
+                            height: 48
+                        }
                         width: 36
                         height: 36
                         anchors.horizontalCenter: parent.horizontalCenter

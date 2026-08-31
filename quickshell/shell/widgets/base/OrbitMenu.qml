@@ -257,7 +257,11 @@ Item {
             Image {
                 id: bubbleIcon
                 anchors.centerIn: parent
-                width: 28; height: 28
+                sourceSize {
+                    width:  48
+                    height: 48
+                }
+                width: 32; height: 32
                 source: bubbleItem.entry?.icon ?? ""
                 fillMode: Image.PreserveAspectFit
                 smooth: true
