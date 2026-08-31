@@ -44,6 +44,7 @@ def build_settings(config_dir: Path):
                     "reportArgumentType": "none"
                 },
                 "qt-qml.qmlls.customExePath": "qmlls",
+                "qt-qml.qmlls.useQmlImportPathEnvVar": True,
                 "workbench.editorAssociations": {
                     "{git,gitlens,copilot,git-graph,git-graph-3}:/**/*.qrc": "default",
                     "*.qrc": "qt-core.qrcEditor",

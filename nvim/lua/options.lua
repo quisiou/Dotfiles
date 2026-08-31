@@ -44,11 +44,6 @@ opt.swapfile    = false
 -- Window management
 opt.splitbelow = true
 
--- Cursor line highlights (same colors as your vimrc)
-vim.api.nvim_set_hl(0, "CursorLine",   { bg = "#3A3F58", cterm = {} })
-vim.api.nvim_set_hl(0, "CursorLineNr", { fg = "#FFD700", cterm = {} })
-vim.api.nvim_set_hl(0, "LineNr",       { fg = "#33384A", cterm = {} })
-
 -- Remove trailing whitespace on save
 vim.api.nvim_create_autocmd("BufWritePre", {
     pattern = "*",

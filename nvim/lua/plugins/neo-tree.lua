@@ -54,6 +54,7 @@ return {
         },
         window = {
             width = 30,
+            position = "right",
             mappings = {
                 ["<space>"] = "none",
                 ["ga"] = "git_add_file",
@@ -64,6 +65,7 @@ return {
                 ["l"] = "open",
                 ["h"] = "close_node",
                 ["<bs>"] = "navigate_up",
+                ["P"] = { "toggle_preview", config = { use_float = true, use_image_nvim = true } },
                 ["O"] = {
                 function(state)
                     local node = state.tree:get_node()

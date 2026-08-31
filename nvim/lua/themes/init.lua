@@ -60,8 +60,8 @@ function M.load()
     hl("WinSeparator", { fg = c.BORDER })
     hl("EndOfBuffer",  { fg = bg, bg = bg })
 
-    hl("Visual",       { bg = c.BG_SELECTED })
-    hl("VisualNOS",    { bg = c.BG_SELECTED })
+    hl("Visual",       { bg = c.DARK7 })
+    hl("VisualNOS",    { bg = c.DARK7 })
 
     hl("Search",       { fg = c.BG, bg = c.WARNING_LOW })
     hl("IncSearch",    { fg = c.BG, bg = c.URGENT })

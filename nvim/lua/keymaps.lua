@@ -75,3 +75,8 @@ vim.api.nvim_create_autocmd("FileType", {
         map("n",    "l",        "<CR><C-w>p",   { buffer = true, desc = "Open entry and return" })
     end,
 })
+
+--- Diagnostics --------------------------------------------------------------
+map("n",    "gl",   vim.diagnostic.open_float,                          { desc = "Show line diagnostics" })
+map("n",    "]d",   function() vim.diagnostic.jump({ count = 1 }) end,  { desc = "Next diagnostic" })
+map("n",    "[d",   function() vim.diagnostic.jump({ count = -1 }) end, { desc = "Prev diagnostic" })
