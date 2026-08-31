@@ -9,6 +9,7 @@ Column {
     id: root
 
     property bool expanded: false
+    property real dateMetricsHeight: 11
     property real clockPixelSize: 16
 
     spacing: root.expanded ? 2 : 0
@@ -31,7 +32,7 @@ Column {
         id: dateWrapper
         anchors.horizontalCenter: parent.horizontalCenter
         width: dateText.implicitWidth
-        height: root.expanded ? dateMetrics.height : 0
+        height: root.expanded ? root.dateMetricsHeight : 0
         clip: true
 
         Behavior on height {

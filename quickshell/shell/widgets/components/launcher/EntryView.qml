@@ -1,6 +1,8 @@
 /* quickshell/shell/widgets/components/launcher/EntryView.qml */
 
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
@@ -113,6 +115,7 @@ Item {
                 } }
 
                 delegate: Item {
+                    id: entryItem
                     required property var modelData
                     required property int index
                     height: 52
@@ -121,12 +124,12 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         radius: 8
-                        color: index === itemsRoot.currentIndex ? ActiveTheme.colors["DARK4"]
+                        color: entryItem.index === itemsRoot.currentIndex ? ActiveTheme.colors["DARK4"]
                              : mouseArea.containsMouse           ? "#0fffffff"
                              : "transparent"
 
                         Rectangle {
-                            visible: modelData.isModeEntry ?? false
+                            visible: entryItem.modelData.isModeEntry ?? false
                             width: 3
                             anchors.top: parent.top
                             anchors.bottom: parent.bottom
@@ -139,7 +142,7 @@ Item {
                         RowLayout {
                             anchors.fill: parent
                             anchors.margins: 8
-                            anchors.leftMargin: (modelData.isModeEntry ?? false) ? 14 : 8
+                            anchors.leftMargin: (entryItem.modelData.isModeEntry ?? false) ? 14 : 8
                             spacing: 12
 
                             Item {
@@ -149,7 +152,7 @@ Item {
                                 Image {
                                     id: iconImage
                                     anchors.fill: parent
-                                    source: modelData.icon ?? ""
+                                    source: entryItem.modelData.icon ?? ""
                                     fillMode: Image.PreserveAspectFit
                                     smooth: true
                                     visible: status === Image.Ready
@@ -157,15 +160,15 @@ Item {
 
                                 Rectangle {
                                     anchors.fill: parent
-                                    color: (modelData.isModeEntry ?? false)
+                                    color: (entryItem.modelData.isModeEntry ?? false)
                                                 ? ActiveTheme.colors["BG_TINTED"] : ActiveTheme.colors["BG_HIGHLIGHT"]
                                     radius: 4
                                     visible: iconImage.status !== Image.Ready
 
                                     Text {
                                         anchors.centerIn: parent
-                                        text: modelData.fallbackText ?? (modelData.name ?? "").charAt(0).toUpperCase()
-                                        color: (modelData.isModeEntry ?? false)
+                                        text: entryItem.modelData.fallbackText ?? (entryItem.modelData.name ?? "").charAt(0).toUpperCase()
+                                        color: (entryItem.modelData.isModeEntry ?? false)
                                                     ? ActiveTheme.colors["ACCENT_DIM"] : ActiveTheme.colors["FG"]
                                         font.pixelSize: 14
                                         font.weight: Font.Medium
@@ -178,8 +181,8 @@ Item {
                                 spacing: 2
 
                                 Text {
-                                    text: modelData.name ?? ""
-                                    color: (modelData.isModeEntry ?? false)
+                                    text: entryItem.modelData.name ?? ""
+                                    color: (entryItem.modelData.isModeEntry ?? false)
                                             ? ActiveTheme.colors["ACCENT_DIM"] : ActiveTheme.colors["FG"]
                                     font.pixelSize: 14
                                     font.weight: Font.Medium
@@ -188,7 +191,7 @@ Item {
                                 }
 
                                 Text {
-                                    text: modelData.comment ?? ""
+                                    text: entryItem.modelData.comment ?? ""
                                     color: ActiveTheme.colors["FG_DARK"]
                                     font.pixelSize: 12
                                     elide: Text.ElideRight
@@ -198,7 +201,7 @@ Item {
                             }
 
                             Text {
-                                visible: modelData.isModeEntry ?? false
+                                visible: entryItem.modelData.isModeEntry ?? false
                                 text: "→"
                                 color: ActiveTheme.colors["DARK4"]
                                 font.pixelSize: 16
@@ -210,8 +213,8 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: {
-                                root.activated(modelData)
-                                if (!(modelData.stayOpen ?? false))
+                                root.activated(entryItem.modelData)
+                                if (!(entryItem.modelData.stayOpen ?? false))
                                     root.closeRequested()
                             }
                         }
@@ -273,7 +276,7 @@ Item {
 
                     scale: 0.5
                     opacity: 0
-                    z: PathView.z ?? 0
+                    z: cell.PathView.isCurrentItem ? 1 : 0
 
                     Component.onCompleted: {
                         scale   = Qt.binding(() => PathView.isCurrentItem ? 1 : PathView.onPath ? 0.7 : 0)

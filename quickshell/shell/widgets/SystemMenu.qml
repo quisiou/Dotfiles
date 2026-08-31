@@ -50,6 +50,8 @@ PanelWindow {
         onFullCloseRequested: orbitMenu.closeMenu()
         z: 200
 
+        property var bthAdapters: Bluetooth.adapters.values
+
         // ── Entries ────────────────────────────────────────────────────────────
         sets: [
             QtObject {
@@ -74,7 +76,7 @@ PanelWindow {
 
                     // Bluetooth
                     QtObject {
-                        readonly property var adapter: Bluetooth.adapters.values[0] ?? null
+                        readonly property var adapter: orbitMenu.bthAdapters[0] ?? null
 
                         property string name:     "Bluetooth"
                         property string icon:     !(adapter?.enabled ?? false) ? Qt.resolvedUrl("../assets/icons/bluetooth-disabled.svg")
@@ -105,18 +107,18 @@ PanelWindow {
                         property var leftAction:   function() {
                             if (!selected) {
                                 prev_network      = NetworkService.enabled
-                                prev_bluetooth = Bluetooth.adapters.values[0]?.enabled ?? false
+                                prev_bluetooth = orbitMenu.bthAdapters[0]?.enabled ?? false
 
                                 NetworkService.enabled = false
-                                if (Bluetooth.adapters.values[0])
-                                    Bluetooth.adapters.values[0].enabled = false
+                                if (orbitMenu.bthAdapters[0])
+                                    orbitMenu.bthAdapters[0].enabled = false
 
                                 selected = true
                             }
                             else {
                                 NetworkService.enabled = prev_network
-                                if (Bluetooth.adapters.values[0])
-                                    Bluetooth.adapters.values[0].enabled = prev_bluetooth
+                                if (orbitMenu.bthAdapters[0])
+                                    orbitMenu.bthAdapters[0].enabled = prev_bluetooth
 
                                 selected = false
                             }

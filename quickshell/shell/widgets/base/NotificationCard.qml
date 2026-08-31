@@ -86,7 +86,7 @@ Item {
                         Text {
                             id: summaryText
                             visible:          text !== ""
-                            text:             entry?.summary ?? ""
+                            text:             card.entry?.summary ?? ""
                             color:            ActiveTheme.colors["FG"]
                             font.pixelSize:   15
                             font.bold:        true
@@ -119,7 +119,7 @@ Item {
                         Text {
                             id: bodyText
                             visible:          text !== ""
-                            text:             entry?.body ?? ""
+                            text:             card.entry?.body ?? ""
                             color:            ActiveTheme.colors["FG_DARK"]
                             font.pixelSize:   13
                             font.family:      "JetBrainsMono Nerd Font"
@@ -167,7 +167,7 @@ Item {
                 anchors.centerIn: parent
                 width:  parent.width  - 12
                 height: parent.height - 12
-                source:   entry?.icon ?? ""
+                source:   card.entry?.icon ?? ""
                 fillMode: Image.PreserveAspectFit
                 smooth:   true
                 visible:  status !== Image.Error && source !== ""
@@ -175,11 +175,11 @@ Item {
 
             Text {
                 anchors.centerIn: parent
-                text:    entry?.appName?.charAt(0)?.toUpperCase() ?? "?"
+                text:    card.entry?.appName?.charAt(0)?.toUpperCase() ?? "?"
                 color:   card.accentColor
                 font.pixelSize: 20
                 font.family:    "JetBrainsMono Nerd Font"
-                visible: (entry?.icon ?? "") === ""
+                visible: (card.entry?.icon ?? "") === ""
             }
         }
 
@@ -257,7 +257,7 @@ Item {
             easing.type: Easing.InBack
         }
 
-        onStopped: { if (!exitAnim.running) entry?.dismiss() }
+        onStopped: { if (!exitAnim.running) card.entry?.dismiss() }
     }
 
     SequentialAnimation {
@@ -359,7 +359,7 @@ Item {
         anchors.fill: parent
         cursorShape:  Qt.PointingHandCursor
         onClicked: {
-            const actions = entry?._notif?.actions ?? []
+            const actions = card.entry?._notif?.actions ?? []
             const def = actions.find(a => a.identifier === "default")
             if (def) def.invoke()
 

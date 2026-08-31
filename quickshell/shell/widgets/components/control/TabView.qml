@@ -1,9 +1,10 @@
 /* quickshell/shell/widgets/components/control/TabView.qml */
 
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import ElysianShell.Themes
 
 Item {
@@ -51,6 +52,8 @@ Item {
                             Layout.fillWidth: true
                             Layout.preferredHeight: labelCol.implicitHeight
                             
+                            required property int index
+                            required property var modelData
                             readonly property alias labelWidth: label.implicitWidth
                             property bool selected: root.currentIndex === index
 
@@ -60,7 +63,7 @@ Item {
 
                                 Text {
                                     id: icon
-                                    text: (modelData.icon ?? "") === "" ? "X" : modelData.icon
+                                    text: (tabDelegate.modelData.icon ?? "") === "" ? "X" : tabDelegate.modelData.icon
                                     font.pixelSize: 24
                                     color: ActiveTheme.colors[tabDelegate.selected ? "ACCENT_LOW" : "FG"]
                                     anchors.horizontalCenter: parent.horizontalCenter
@@ -72,7 +75,7 @@ Item {
 
                                 Text {
                                     id: label
-                                    text: modelData.name
+                                    text: tabDelegate.modelData.name
                                     font.pixelSize: 15
                                     color: ActiveTheme.colors[tabDelegate.selected ? "ACCENT_LOW" : "FG"]
                                     
@@ -85,7 +88,7 @@ Item {
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: root.tabRequested(index)
+                                onClicked: root.tabRequested(tabDelegate.index)
                             }
                         }
                     }
@@ -138,6 +141,10 @@ Item {
 
                 delegate: Item {
                     id: pageSlot
+
+                    required property int index
+                    required property var modelData
+
                     visible: Math.abs(index - root.currentIndex) <= 1
                     width: pageContainer.width
                     height: pageContainer.height
@@ -150,7 +157,7 @@ Item {
                     }
 
                     Component.onCompleted: {
-                        const page = modelData.item
+                        const page = pageSlot.modelData.item
                         if (page) {
                             page.parent = pageSlot
                             page.anchors.fill = pageSlot

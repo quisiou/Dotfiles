@@ -1,6 +1,8 @@
 /* quickshell/shell/widgets/components/workspace/WorkspaceOSD.qml */
 
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import ElysianShell.Services
 import ElysianShell.Themes
@@ -58,7 +60,7 @@ Item {
 
                     onEntered: wsIndicator.border.width = 2
                     onExited: wsIndicator.border.width = 0
-                    onClicked: WorkspaceService.activate(modelData.id)
+                    onClicked: WorkspaceService.activate(wsIndicator.modelData.id)
                 }
             }
         }

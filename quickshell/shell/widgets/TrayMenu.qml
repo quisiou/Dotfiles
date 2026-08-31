@@ -1,6 +1,8 @@
 /* quickshell/shell/widgets/TrayMenu.qml */
 
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
@@ -161,13 +163,14 @@ PanelWindow {
         id: instantiator
         model: SystemTray.items
         delegate: QtObject {
-            property string name:        modelData.tooltipTitle || modelData.id
-            property string comment:     modelData.tooltipDescription
-            property string icon:        modelData.icon
-            property bool   selected:    true
-            property bool   stateful:    false
-            property var    leftAction:  function() { if (!modelData.onlyMenu) modelData.activate() }
-            property var rightAction: function(index, total) {
+            required property var   modelData
+            property string         name:        modelData.tooltipTitle || modelData.id
+            property string         comment:     modelData.tooltipDescription
+            property string         icon:        modelData.icon
+            property bool           selected:    true
+            property bool           stateful:    false
+            property var            leftAction:  function() { if (!modelData.onlyMenu) modelData.activate() }
+            property var            rightAction: function(index, total) {
                 if (!modelData.hasMenu) return
                 let pos = trayMenu.bubbleCenter(index, total)
                 menuOpener.pendingX = pos.x

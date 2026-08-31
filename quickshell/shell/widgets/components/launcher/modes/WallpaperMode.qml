@@ -67,11 +67,13 @@ Item {
                 if (line.trim() !== "") root._files.push(line.trim())
             }
         }
+        // qmllint disable signal-handler-parameters
         onExited: {
             root._files = [...root._files]
             LockService.refreshWallpaper()
             root._rebuild()
         }
+        // qmllint enable signal-handler-parameters
     }
 
     Process {

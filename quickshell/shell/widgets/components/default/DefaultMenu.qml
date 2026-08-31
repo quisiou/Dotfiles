@@ -103,6 +103,7 @@ Item {
         ClockModule {
             id: clockColumn
             expanded: root.expanded
+            dateMetricsHeight: dateMetrics.height
             clockPixelSize: root._targetClockPixelSize
             anchors.centerIn: parent
         }

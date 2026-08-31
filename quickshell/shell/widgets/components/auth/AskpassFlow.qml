@@ -1,4 +1,6 @@
 // quickshell/shell/widgets/components/auth/AskpassFlow.qml
+
+
 import QtQuick
 import Quickshell.Io
 
@@ -46,9 +48,11 @@ QtObject {
             write(passwd + "\n")
             stdinEnabled = false
         }
-        onExited: {
+        // qmllint disable signal-handler-parameters
+        onExited: (exitCode, exitStatus) => {
             root.isCompleted = true
             if (!wasCancel) root.submitted()
         }
+        // qmllint enable signal-handler-parameters
     }
 }

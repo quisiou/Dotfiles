@@ -73,10 +73,12 @@ Item {
                 root._files.push({ path: path, name: name })
             }
         }
+        // qmllint disable signal-handler-parameters
         onExited: {
             root._files = [...root._files]
             root._rebuild()
         }
+        // qmllint enable signal-handler-parameters
     }
 
     // Apply chain, preserved exactly from the original:
@@ -89,13 +91,17 @@ Item {
     Process {
         id: vscProcess
         running: false
+        // qmllint disable signal-handler-parameters
         onExited: vscPackageProcess.running = true
+        // qmllint enable signal-handler-parameters
     }
 
     Process {
         id: ctProcess
         running: false
+        // qmllint disable signal-handler-parameters
         onExited: vscProcess.running = true
+        // qmllint enable signal-handler-parameters
     }
 
     Component.onCompleted: rescan()

@@ -1,6 +1,8 @@
 /* quickshell/shell/widgets/components/lock/LockScreen.qml */
 
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Quickshell.Io
 import Quickshell.Wayland

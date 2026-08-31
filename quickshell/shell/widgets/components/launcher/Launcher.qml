@@ -1,6 +1,8 @@
 /* quickshell/shell/widgets/components/launcher/Launcher.qml */
 
 
+pragma ComponentBehavior: Bound
+
 import QtQml
 import QtQuick
 import QtQuick.Layouts
@@ -61,6 +63,7 @@ Rectangle {
     Instantiator {
         model: root.launchModes
         delegate: Connections {
+            required property var modelData
             target: modelData
             function onEntriesChanged() { root.refresh() }
         }

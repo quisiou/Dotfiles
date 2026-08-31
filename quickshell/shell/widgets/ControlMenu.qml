@@ -1,8 +1,9 @@
 /* quickshell/shell/widgets/ControlMenu.qml */
 
 
+pragma ComponentBehavior: Bound
+
 import Quickshell
-import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Polkit
 import QtQuick

@@ -3,7 +3,6 @@
 
 import QtQuick
 import Quickshell
-import Quickshell.Widgets
 import ElysianShell.Services
 import ElysianShell.Themes
 

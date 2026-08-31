@@ -1,6 +1,8 @@
 /* quickshell/shell/widgets/base/OrbitMenu.qml */
 
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import ElysianShell.Themes
 
@@ -172,7 +174,7 @@ Item {
                     NumberAnimation {
                         target:             bubbleItem
                         property:           "x"
-                        to:                 targetX - root.bubbleSize / 2
+                        to:                 bubbleItem.targetX - root.bubbleSize / 2
                         duration:           450
                         easing.type:        Easing.OutBack
                         easing.overshoot:   1.5
@@ -180,7 +182,7 @@ Item {
                     NumberAnimation {
                         target:             bubbleItem
                         property:           "y"
-                        to:                 targetY - root.bubbleSize / 2
+                        to:                 bubbleItem.targetY - root.bubbleSize / 2
                         duration:           450
                         easing.type:        Easing.OutBack
                         easing.overshoot:   1.5

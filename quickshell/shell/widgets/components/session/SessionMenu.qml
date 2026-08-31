@@ -1,6 +1,8 @@
 /* quickshell/shell/widgets/components/session/SessionMenu.qml */
 
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Quickshell
 import ElysianShell.Themes
