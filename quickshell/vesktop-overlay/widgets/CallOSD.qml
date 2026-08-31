@@ -10,7 +10,9 @@ import Quickshell.Wayland
 import Quickshell.Widgets
 import ElysianShell.Themes
 
+// qmllint disable uncreatable-type
 PanelWindow {
+// qmllint enable uncreatable-type
     id: panwin
 
     // anchor to a corner/edge — adjust to taste
@@ -19,10 +21,12 @@ PanelWindow {
         left: true
     }
 
+    // qmllint disable unqualified unresolved-type
     margins {
         top: 20
         left: 20
     }
+    // qmllint enable unqualified unresolved-type
 
     // size the window itself — you'll likely want this to grow/shrink
     // with content once CallOSD has real visuals; for now, fix it

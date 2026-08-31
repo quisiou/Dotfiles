@@ -9,7 +9,9 @@ import Quickshell.Wayland
 import Quickshell.Services.SystemTray
 import "base"
 
+// qmllint disable uncreatable-type
 PanelWindow {
+// qmllint enable uncreatable-type
     id: root
     color: "transparent"
     visible: false

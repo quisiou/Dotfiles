@@ -92,21 +92,21 @@ Item {
 
         function triggerExpand() {
             for (let i = 0; i < count; i++) {
-                const item = itemAt(i)
+                const item = itemAt(i) as BubbleItem
                 if (item && item.collapsed) item.expandBubble()
             }
         }
 
         function triggerCollapse() {
             for (let i = 0; i < count; i++) {
-                const item = itemAt(i)
+                const item = itemAt(i) as BubbleItem
                 if (item && !item.collapsed) item.collapseBubble()
             }
         }
 
         function allCollapsed() {
             for (let i = 0; i < count; i++) {
-                const item = itemAt(i)
+                const item = itemAt(i) as BubbleItem
                 if (item && !item.collapsed) return false
             }
             return true
@@ -122,191 +122,194 @@ Item {
             }
         }
 
-        Item {
-            id: bubbleItem
+        delegate: BubbleItem {}
 
-            required property int index
-            
-            property int count: bubbleRepeater.count
+    }
 
-            readonly property var  activeEntries:   root.sets[root.activeSet]?.entries ?? []
-            readonly property var  entry:           activeEntries[index]
-            readonly property real sliceAngle:      (2 * Math.PI) / activeEntries.length
-            readonly property real targetAngle:     index * sliceAngle - Math.PI / 2
-            readonly property real targetX:         root.centerX + Math.cos(targetAngle) * root.orbitRadius
-            readonly property real targetY:         root.centerY + Math.sin(targetAngle) * root.orbitRadius
-            readonly property bool selected:        entry?.selected ?? false
+    component BubbleItem: Item {
+        id: bubbleItem
 
-            property bool hovered:      false
-            property bool collapsed:    true
+        required property int index
+        
+        property int count: bubbleRepeater.count
 
-            width:  root.bubbleSize
-            height: root.bubbleSize
-            x: 0
-            y: 0
-            opacity: 1
+        readonly property var  activeEntries:   root.sets[root.activeSet]?.entries ?? []
+        readonly property var  entry:           activeEntries[index]
+        readonly property real sliceAngle:      (2 * Math.PI) / activeEntries.length
+        readonly property real targetAngle:     index * sliceAngle - Math.PI / 2
+        readonly property real targetX:         root.centerX + Math.cos(targetAngle) * root.orbitRadius
+        readonly property real targetY:         root.centerY + Math.sin(targetAngle) * root.orbitRadius
+        readonly property bool selected:        entry?.selected ?? false
 
-            function expandBubble() {
-                if (collapseAnimation.running) return
-                bubbleItem.x = root.centerX - root.bubbleSize / 2
-                bubbleItem.y = root.centerY - root.bubbleSize / 2
-                expandAnimation.start()
+        property bool hovered:      false
+        property bool collapsed:    true
+
+        width:  root.bubbleSize
+        height: root.bubbleSize
+        x: 0
+        y: 0
+        opacity: 1
+
+        function expandBubble() {
+            if (collapseAnimation.running) return
+            bubbleItem.x = root.centerX - root.bubbleSize / 2
+            bubbleItem.y = root.centerY - root.bubbleSize / 2
+            expandAnimation.start()
+        }
+
+        function collapseBubble() {
+            if (expandAnimation.running) return
+            collapseAnimation.start()
+        }
+
+        SequentialAnimation {
+            id: expandAnimation
+            running: false
+
+            ParallelAnimation {
+                NumberAnimation {
+                    target:      bubbleItem
+                    property:    "scale"
+                    from:        0.0
+                    to:          1.0
+                    duration:    225
+                    easing.type: Easing.OutCubic
+                }
+                NumberAnimation {
+                    target:             bubbleItem
+                    property:           "x"
+                    to:                 bubbleItem.targetX - root.bubbleSize / 2
+                    duration:           450
+                    easing.type:        Easing.OutBack
+                    easing.overshoot:   1.5
+                }
+                NumberAnimation {
+                    target:             bubbleItem
+                    property:           "y"
+                    to:                 bubbleItem.targetY - root.bubbleSize / 2
+                    duration:           450
+                    easing.type:        Easing.OutBack
+                    easing.overshoot:   1.5
+                }
             }
 
-            function collapseBubble() {
-                if (expandAnimation.running) return
-                collapseAnimation.start()
-            }
+            onStopped: bubbleItem.collapsed = false
+        }
 
-            SequentialAnimation {
-                id: expandAnimation
-                running: false
+        SequentialAnimation {
+            id: collapseAnimation
+            running: false
 
-                ParallelAnimation {
+            ParallelAnimation {
+                NumberAnimation {
+                    target:             bubbleItem
+                    property:           "x"
+                    to:                 root.centerX - root.bubbleSize / 2
+                    duration:           450
+                    easing.type:        Easing.InBack
+                    easing.overshoot:   1.5
+                }
+                NumberAnimation {
+                    target:             bubbleItem
+                    property:           "y"
+                    to:                 root.centerY - root.bubbleSize / 2
+                    duration:           450
+                    easing.type:        Easing.InBack
+                    easing.overshoot:   1.5
+                }
+                SequentialAnimation {
+                    PauseAnimation { duration: 450 / 2 }
                     NumberAnimation {
                         target:      bubbleItem
                         property:    "scale"
-                        from:        0.0
-                        to:          1.0
-                        duration:    225
-                        easing.type: Easing.OutCubic
+                        from:        1.0
+                        to:          0.0
+                        duration:    450 / 2
+                        easing.type: Easing.InCubic
                     }
-                    NumberAnimation {
-                        target:             bubbleItem
-                        property:           "x"
-                        to:                 bubbleItem.targetX - root.bubbleSize / 2
-                        duration:           450
-                        easing.type:        Easing.OutBack
-                        easing.overshoot:   1.5
-                    }
-                    NumberAnimation {
-                        target:             bubbleItem
-                        property:           "y"
-                        to:                 bubbleItem.targetY - root.bubbleSize / 2
-                        duration:           450
-                        easing.type:        Easing.OutBack
-                        easing.overshoot:   1.5
-                    }
-                }
-
-                onStopped: bubbleItem.collapsed = false
-            }
-
-            SequentialAnimation {
-                id: collapseAnimation
-                running: false
-
-                ParallelAnimation {
-                    NumberAnimation {
-                        target:             bubbleItem
-                        property:           "x"
-                        to:                 root.centerX - root.bubbleSize / 2
-                        duration:           450
-                        easing.type:        Easing.InBack
-                        easing.overshoot:   1.5
-                    }
-                    NumberAnimation {
-                        target:             bubbleItem
-                        property:           "y"
-                        to:                 root.centerY - root.bubbleSize / 2
-                        duration:           450
-                        easing.type:        Easing.InBack
-                        easing.overshoot:   1.5
-                    }
-                    SequentialAnimation {
-                        PauseAnimation { duration: 450 / 2 }
-                        NumberAnimation {
-                            target:      bubbleItem
-                            property:    "scale"
-                            from:        1.0
-                            to:          0.0
-                            duration:    450 / 2
-                            easing.type: Easing.InCubic
-                        }
-                    }
-                }
-
-                onStopped: {
-                    bubbleItem.collapsed = true
-                    if (bubbleRepeater.allCollapsed()) bubbleRepeater.collapseOrSwitch()
                 }
             }
 
-            // Bubble
-            Rectangle {
+            onStopped: {
+                bubbleItem.collapsed = true
+                if (bubbleRepeater.allCollapsed()) bubbleRepeater.collapseOrSwitch()
+            }
+        }
+
+        // Bubble
+        Rectangle {
+            anchors.fill: parent
+            radius: root.bubbleSize / 2
+
+            color: {
+                if (bubbleItem.hovered)   return ActiveTheme.colors["DARK4"]
+                if (bubbleItem.selected)  return ActiveTheme.colors["BG_HIGHLIGHT"]
+                return ActiveTheme.colors["BG"]
+            }
+
+            border.color: {
+                if (bubbleItem.selected)  return ActiveTheme.colors["FG_DARK"]
+                if (bubbleItem.hovered)   return ActiveTheme.colors["FG"]
+                return ActiveTheme.colors["DARK3"]
+            }
+            border.width: bubbleItem.selected ? 1.5 : 0.5
+
+            Image {
+                id: bubbleIcon
+                anchors.centerIn: parent
+                width: 28; height: 28
+                source: bubbleItem.entry?.icon ?? ""
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                visible: status === Image.Ready
+                opacity: bubbleItem.selected ? 1.0 : 0.75
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: (bubbleItem.entry?.name ?? "").charAt(0).toUpperCase()
+                color: bubbleItem.selected ? ActiveTheme.colors["FG"] : ActiveTheme.colors["DARK3"]
+                font.pixelSize: 16
+                font.weight: Font.Medium
+                visible: bubbleIcon.status !== Image.Ready
+            }
+
+            MouseArea {
                 anchors.fill: parent
-                radius: root.bubbleSize / 2
+                hoverEnabled: true
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                
+                onEntered: bubbleItem.hovered = true
+                onExited: bubbleItem.hovered = false
 
-                color: {
-                    if (bubbleItem.hovered)   return ActiveTheme.colors["DARK4"]
-                    if (bubbleItem.selected)  return ActiveTheme.colors["BG_HIGHLIGHT"]
-                    return ActiveTheme.colors["BG"]
-                }
-
-                border.color: {
-                    if (bubbleItem.selected)  return ActiveTheme.colors["FG_DARK"]
-                    if (bubbleItem.hovered)   return ActiveTheme.colors["FG"]
-                    return ActiveTheme.colors["DARK3"]
-                }
-                border.width: bubbleItem.selected ? 1.5 : 0.5
-
-                Image {
-                    id: bubbleIcon
-                    anchors.centerIn: parent
-                    width: 28; height: 28
-                    source: bubbleItem.entry?.icon ?? ""
-                    fillMode: Image.PreserveAspectFit
-                    smooth: true
-                    visible: status === Image.Ready
-                    opacity: bubbleItem.selected ? 1.0 : 0.75
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: (bubbleItem.entry?.name ?? "").charAt(0).toUpperCase()
-                    color: bubbleItem.selected ? ActiveTheme.colors["FG"] : ActiveTheme.colors["DARK3"]
-                    font.pixelSize: 16
-                    font.weight: Font.Medium
-                    visible: bubbleIcon.status !== Image.Ready
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                    
-                    onEntered: bubbleItem.hovered = true
-                    onExited: bubbleItem.hovered = false
-
-                    onClicked: (mouse) => {
-                        if (mouse.button == Qt.RightButton) {
-                            if (bubbleItem.entry.rightAction)
-                                bubbleItem.entry.rightAction(bubbleItem.index, root.sets[root.activeSet].entries.length)
-                            else console.log("Right click!")
-                        }
-                        else {
-                            bubbleItem.entry.leftAction()
-                            if (!bubbleItem.entry.stateful) root.fullCloseRequested()
-                        }
+                onClicked: (mouse) => {
+                    if (mouse.button == Qt.RightButton) {
+                        if (bubbleItem.entry.rightAction)
+                            bubbleItem.entry.rightAction(bubbleItem.index, root.sets[root.activeSet].entries.length)
+                        else console.log("Right click!")
+                    }
+                    else {
+                        bubbleItem.entry.leftAction()
+                        if (!bubbleItem.entry.stateful) root.fullCloseRequested()
                     }
                 }
             }
+        }
 
-            // Tooltip
-            Tooltip {
-                readonly property real gap: 10
+        // Tooltip
+        Tooltip {
+            readonly property real gap: 10
 
-                title: bubbleItem.entry?.name ?? ""
-                comment: bubbleItem.entry?.comment ?? ""
-                selected: bubbleItem.selected
+            title: bubbleItem.entry?.name ?? ""
+            comment: bubbleItem.entry?.comment ?? ""
+            selected: bubbleItem.selected
 
-                x: Math.cos(bubbleItem.targetAngle) * (root.bubbleSize / 2 + width / 2 + gap) + root.bubbleSize / 2 - width / 2
-                y: Math.sin(bubbleItem.targetAngle) * (root.bubbleSize / 2 + height / 2 + gap) + root.bubbleSize / 2 - height / 2
-                z: root.z + 1
-                visible: (root.fixedTooltip || bubbleItem.hovered) &&
-                            !expandAnimation.running && !collapseAnimation.running &&
-                            ((bubbleItem.entry?.name ?? "") !== "" || (bubbleItem.entry?.comment ?? "") !== "")
-            }
+            x: Math.cos(bubbleItem.targetAngle) * (root.bubbleSize / 2 + width / 2 + gap) + root.bubbleSize / 2 - width / 2
+            y: Math.sin(bubbleItem.targetAngle) * (root.bubbleSize / 2 + height / 2 + gap) + root.bubbleSize / 2 - height / 2
+            z: root.z + 1
+            visible: (root.fixedTooltip || bubbleItem.hovered) &&
+                        !expandAnimation.running && !collapseAnimation.running &&
+                        ((bubbleItem.entry?.name ?? "") !== "" || (bubbleItem.entry?.comment ?? "") !== "")
         }
     }
 

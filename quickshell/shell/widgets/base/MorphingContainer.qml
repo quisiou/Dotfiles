@@ -20,8 +20,8 @@ Item {
 
     readonly property Item item: {
         switch (_activeSlot) {
-            case "A": return loaderA.item
-            case "B": return loaderB.item
+            case "A": return loaderA.item as Item
+            case "B": return loaderB.item as Item
             default:  return defaultItem
         }
     }

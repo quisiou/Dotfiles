@@ -83,7 +83,7 @@ Rectangle {
             const matchedMode = root.launchModes.find(
                 m => rest === "" || m.prefix.startsWith(rest) || rest.startsWith(m.prefix + " "))
 
-            const modePrefix = matchedMode ? prefix + matchedMode.prefix + " " : null
+            const modePrefix = matchedMode ? prefix + matchedMode.prefix + " " : ""
 
             if (matchedMode && text.startsWith(modePrefix)) {
                 const q = text.slice(modePrefix.length).toLowerCase()

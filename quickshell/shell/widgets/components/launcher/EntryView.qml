@@ -21,12 +21,13 @@ Item {
     signal closeRequested()
     signal activated(var entry)
 
-    implicitWidth:  loader.item ? loader.item.implicitWidth  : 0
-    implicitHeight: loader.item ? loader.item.implicitHeight : 0
+    implicitWidth:  loader.item ? (loader.item as EntryDisplay).implicitWidth  : 0
+    implicitHeight: loader.item ? (loader.item as EntryDisplay).implicitHeight : 0
 
     function positionAt(index) {
-        if (loader.item && loader.item.positionAt)
-            loader.item.positionAt(index)
+        const item = loader.item as EntryDisplay
+        if (item)
+            item.positionAt(index)
     }
 
     Loader {
@@ -39,25 +40,31 @@ Item {
             }
         }
         onLoaded: {
-            item.model = root.model
-            item.currentIndex = Qt.binding(() => root.currentIndex)
+            const display = item as EntryDisplay
+            display.model = root.model
+            display.currentIndex = Qt.binding(() => root.currentIndex)
         }
     }
 
     Connections {
         target: root
         function onModelChanged() {
-            if (loader.item) loader.item.model = root.model
+            const display = loader.item as EntryDisplay
+            if (display) display.model = root.model
         }
+    }
+
+    component EntryDisplay: Item {
+        property var model:        []
+        property int currentIndex: 0
+        function positionAt(index) {}
     }
 
     Component {
         id: itemsDisplay
 
-        Item {
+        EntryDisplay {
             id: itemsRoot
-            property var model:        []
-            property int currentIndex: 0
 
             implicitWidth:  600 // 480 before
             implicitHeight: 360
@@ -227,10 +234,8 @@ Item {
     Component {
         id: carouselDisplay
 
-        Item {
+        EntryDisplay {
             id: carouselRoot
-            property var model:        []
-            property int currentIndex: 0
 
             readonly property int itemSize: 180
             implicitWidth:  itemSize * 3 + 60

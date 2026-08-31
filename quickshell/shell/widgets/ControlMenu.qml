@@ -20,7 +20,9 @@ import "components/launcher/modes"
 import "components/session"
 import "components/workspace"
 
+// qmllint disable uncreatable-type
 PanelWindow {
+// qmllint enable uncreatable-type
     id: panwin
     readonly property int topbarHeight: 40
 
@@ -381,7 +383,9 @@ PanelWindow {
             id: authComponent
             Authenticator {
                 id: authItem
+                // qmllint disable unresolved-type
                 flow: polkitAgent.flow
+                // qmllint enable unresolved-type
                 Connections {
                     target: authItem.flow
                     function onIsCompletedChanged() {

@@ -8,7 +8,9 @@ import Quickshell.Bluetooth
 import ElysianShell.Services
 import "base"
 
+// qmllint disable uncreatable-type
 PanelWindow {
+// qmllint enable uncreatable-type
     id: root
     color: "transparent"
     visible: false
@@ -50,7 +52,9 @@ PanelWindow {
         onFullCloseRequested: orbitMenu.closeMenu()
         z: 200
 
+        // qmllint disable unresolved-type
         property var bthAdapters: Bluetooth.adapters.values
+        // qmllint enable unresolved-type
 
         // ── Entries ────────────────────────────────────────────────────────────
         sets: [

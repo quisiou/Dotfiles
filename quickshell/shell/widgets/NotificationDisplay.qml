@@ -11,7 +11,9 @@ import "base"
 Variants {
     model: Quickshell.screens
 
+    // qmllint disable uncreatable-type
     PanelWindow {
+    // qmllint enable uncreatable-type
         required property var modelData
         screen: modelData
 
