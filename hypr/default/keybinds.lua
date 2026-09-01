@@ -11,6 +11,8 @@ hl.bind(Config.mainMod .. " + Q", hl.dsp.exec_cmd(Config.terminal .. " --hold fa
 hl.bind(Config.mainMod .. " + M", hl.dsp.exec_cmd("hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(Config.mainMod .. " + E", hl.dsp.exec_cmd(Config.fileManager))
 
+-- Useful app shortcuts
+hl.bind(Config.mainMod .. " + F1", hl.dsp.exec_cmd(Config.systemMonitor))
 
 -- Window management
 hl.bind(Config.mainMod .. " + X", hl.dsp.window.close())

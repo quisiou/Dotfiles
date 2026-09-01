@@ -9,4 +9,5 @@ Config = {
     mainMod     = "SUPER",
     terminal    = "kitty",
 }
-Config.fileManager = Config.terminal .. " yazi"
+Config.fileManager      = Config.terminal .. " yazi"
+Config.systemMonitor    = Config.terminal .. " btop"
