@@ -19,7 +19,7 @@ Row {
         }
         return players.length > 0 ? players[0] : null
     }
-    property bool _playing: root._activePlayer && root._activePlayer.trackArtUrl
+    readonly property bool _playing: root._activePlayer && root._activePlayer.trackArtUrl
 
     ClippingRectangle {
         id: albumArtMask

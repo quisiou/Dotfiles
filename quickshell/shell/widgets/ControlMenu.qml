@@ -157,10 +157,10 @@ PanelWindow {
                 .sort((a, b) => a.name.localeCompare(b.name))
         }
 
-        DashboardPage   { id: dashboardPage }
-        MediaPage       { id: mediaPage }
-        SystemPage      { id: systemPage }
-        PerformancePage { id: performancePage }
+        DashboardPage   { id: dashboardPage;    visible: false }
+        MediaPage       { id: mediaPage;        visible: false }
+        SystemPage      { id: systemPage;       visible: false }
+        PerformancePage { id: performancePage;  visible: false }
         property int _controlCenterCurrentIndex: 0
         readonly property var _controlCenterTabs: [
             { name: "Dashboard",    item: dashboardPage,    icon: "\udb81\udd6e" },

@@ -161,6 +161,7 @@ Item {
                         if (page) {
                             page.parent = pageSlot
                             page.anchors.fill = pageSlot
+                            page.visible = true
                         }
                     }
                 }
