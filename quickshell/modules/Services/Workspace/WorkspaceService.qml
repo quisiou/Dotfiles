@@ -1,4 +1,4 @@
-/* quickshell/shell/modules/Services/Workspace/WorkspaceService.qml */
+/* quickshell/modules/Services/Workspace/WorkspaceService.qml */
 
 
 pragma Singleton

@@ -1,4 +1,4 @@
-/* quickshell/shell/modules/Services/Battery/BatteryService.qml */
+/* quickshell/modules/Services/Battery/BatteryService.qml */
 
 
 pragma Singleton

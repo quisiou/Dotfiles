@@ -1,4 +1,4 @@
-/* quickshell/shell/modules/Services/Brightness/BrightnessService.qml */
+/* quickshell/modules/Services/Brightness/BrightnessService.qml */
 
 
 pragma Singleton

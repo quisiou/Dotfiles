@@ -1,4 +1,4 @@
-/* quickshell/shell/modules/Services/Volume/VolumeService.qml */
+/* quickshell/modules/Services/Volume/VolumeService.qml */
 
 
 pragma Singleton

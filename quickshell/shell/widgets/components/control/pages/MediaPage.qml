@@ -6,8 +6,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Widgets
-import Quickshell.Services.Mpris
 import ElysianShell.Themes
+import ElysianShell.Services
 
 Item {
     id: root
@@ -16,15 +16,6 @@ Item {
     implicitHeight: textColumn.implicitHeight
 
     anchors.fill: parent
-
-    readonly property var _activePlayer: {
-        const players = Mpris.players.values
-        for (let p of players) {
-            if (p.isPlaying) return p
-        }
-        return players.length > 0 ? players[0] : null
-    }
-    readonly property bool _playing: root._activePlayer && root._activePlayer.trackArtUrl
 
     Row {
         id: contentRow
@@ -43,13 +34,13 @@ Item {
                 text: "\udb81\udf5b"
                 font.pixelSize: albumArtMask.height
                 color: ActiveTheme.colors["FG_MUTED"]
-                visible: !root._playing
+                visible: !MediaService.hasPlayer
                 anchors.centerIn: parent
             }
 
             Image {
                 anchors.fill: parent
-                source: root._playing ? root._activePlayer.trackArtUrl : ""
+                source: MediaService.artUrl
                 sourceSize {
                     width:  albumArtMask.width
                     height: albumArtMask.height
@@ -58,7 +49,7 @@ Item {
                 height: albumArtMask.height
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
-                visible: root._playing
+                visible: MediaService.hasPlayer
             }
         }
 
@@ -72,7 +63,7 @@ Item {
                 id: titleText
                 Layout.alignment: Qt.AlignHCenter
                 Layout.maximumWidth: root.width
-                text: root._activePlayer ? root._activePlayer.trackTitle : "Idle"
+                text: MediaService.title || "Idle"
                 color: ActiveTheme.colors["ACCENT_LOW"]
                 font.pixelSize: 17
                 font.bold: true
@@ -83,7 +74,7 @@ Item {
             Text {
                 id: albumText
                 Layout.alignment: Qt.AlignHCenter
-                text: root._activePlayer ? root._activePlayer.trackAlbum : "No media playing"
+                text: MediaService.album || "No media playing"
                 color: ActiveTheme.colors["FG_MUTED"]
                 font.pixelSize: 13
                 elide: Text.ElideRight
@@ -92,7 +83,7 @@ Item {
             Text {
                 id: artistText
                 Layout.alignment: Qt.AlignHCenter
-                text: root._activePlayer ? root._activePlayer.trackArtist : "No media playing"
+                text: MediaService.artist || "No media playing"
                 color: ActiveTheme.colors["FG"]
                 font.pixelSize: 13
                 elide: Text.ElideRight

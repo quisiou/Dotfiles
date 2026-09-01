@@ -1,4 +1,4 @@
-# quickshell/shell/modules/Themes/CMakeLists.txt
+# quickshell/modules/Themes/CMakeLists.txt
 
 
 qt_add_library(elysianshell-themes SHARED)

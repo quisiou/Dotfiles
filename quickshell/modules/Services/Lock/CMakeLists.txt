@@ -1,4 +1,4 @@
-# quickshell/shell/modules/Services/Lock/CMakeLists.txt
+# quickshell/modules/Services/Lock/CMakeLists.txt
 
 
 set_source_files_properties(LockService.qml

@@ -1,4 +1,4 @@
-# quickshell/shell/modules/Services/Workspace/CMakeLists.txt
+# quickshell/modules/Services/Workspace/CMakeLists.txt
 
 
 set_source_files_properties(WorkspaceService.qml

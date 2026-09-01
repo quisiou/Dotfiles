@@ -1,4 +1,4 @@
-/* quickshell/shell/modules/Services/Lock/LockService.qml */
+/* quickshell/modules/Services/Lock/LockService.qml */
 
 
 pragma Singleton
@@ -7,7 +7,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-QtObject {
+Singleton {
     id: service
     property string currentWallpaper: Quickshell.env("HOME") + "/.config/awww/default/Leshy.jpg"
 

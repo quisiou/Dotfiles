@@ -1,4 +1,4 @@
-# quickshell/shell/modules/Services/Network/CMakeLists.txt
+# quickshell/modules/Services/Network/CMakeLists.txt
 
 
 target_sources(elysianshell-services PRIVATE

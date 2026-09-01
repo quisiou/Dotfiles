@@ -1,4 +1,4 @@
-# quickshell/shell/modules/Services/CMakeLists.txt
+# quickshell/modules/Services/CMakeLists.txt
 
 
 qt_add_library(elysianshell-services SHARED)
@@ -12,6 +12,7 @@ add_subdirectory(Battery)
 add_subdirectory(Bluetooth)
 add_subdirectory(Brightness)
 add_subdirectory(Lock)
+add_subdirectory(Media)
 add_subdirectory(Network)
 add_subdirectory(Notification)
 add_subdirectory(Volume)

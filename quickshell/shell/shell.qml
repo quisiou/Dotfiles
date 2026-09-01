@@ -16,10 +16,6 @@ ShellRoot {
     readonly property Widgets.ControlMenu   controlMenu:    controlMenuLoader.item      as Widgets.ControlMenu
 
     Loader {
-        source: "widgets/ThemeLoader.qml"
-    }
-
-    Loader {
         id: systemMenuLoader
         active: false
         source: "widgets/SystemMenu.qml"

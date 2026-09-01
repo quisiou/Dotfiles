@@ -1,4 +1,4 @@
-# quickshell/shell/modules/Services/Notification/CMakeLists.txt
+# quickshell/modules/Services/Notification/CMakeLists.txt
 
 
 set_source_files_properties(NotificationService.qml

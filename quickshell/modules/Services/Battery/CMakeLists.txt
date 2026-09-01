@@ -1,4 +1,4 @@
-# quickshell/shell/modules/Services/Battery/CMakeLists.txt
+# quickshell/modules/Services/Battery/CMakeLists.txt
 
 
 set_source_files_properties(BatteryService.qml

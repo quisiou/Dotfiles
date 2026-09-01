@@ -1,4 +1,4 @@
-# quickshell/shell/modules/Services/Brightness/CMakeLists.txt
+# quickshell/modules/Services/Brightness/CMakeLists.txt
 
 
 set_source_files_properties(BrightnessService.qml

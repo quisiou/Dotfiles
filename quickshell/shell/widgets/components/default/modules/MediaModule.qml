@@ -3,8 +3,8 @@
 
 import QtQuick
 import Quickshell.Widgets
-import Quickshell.Services.Mpris
 import ElysianShell.Themes
+import ElysianShell.Services
 
 Row {
     id: root
@@ -12,15 +12,7 @@ Row {
     clip: true
 
     property real textMaxWidth: 90
-    readonly property var _activePlayer: {
-        const players = Mpris.players.values
-        for (let p of players) {
-            if (p.isPlaying) return p
-        }
-        return players.length > 0 ? players[0] : null
-    }
-    readonly property bool _playing: root._activePlayer && root._activePlayer.trackArtUrl
-
+    
     ClippingRectangle {
         id: albumArtMask
         width: 32
@@ -33,13 +25,13 @@ Row {
             text: "\udb81\udf5b"
             font.pixelSize: 32
             color: ActiveTheme.colors["FG_MUTED"]
-            visible: !root._playing
+            visible: !MediaService.hasPlayer
             anchors.centerIn: parent
         }
 
         Image {
             anchors.fill: parent
-            source: root._playing ? root._activePlayer.trackArtUrl : ""
+            source: MediaService.artUrl
             sourceSize {
                 width:  48
                 height: 48
@@ -48,7 +40,7 @@ Row {
             height: 48
             fillMode: Image.PreserveAspectFit
             asynchronous: true
-            visible: root._playing
+            visible: MediaService.hasPlayer
         }
     }
 
@@ -67,7 +59,7 @@ Row {
 
             Text {
                 id: titleText
-                text: root._activePlayer ? root._activePlayer.trackTitle : "Idle"
+                text: MediaService.title || "Idle"
                 color: ActiveTheme.colors["FG"]
                 font.bold: true
                 font.pixelSize: 11
@@ -112,7 +104,7 @@ Row {
 
         Text {
             width: parent.width
-            text: root._activePlayer ? root._activePlayer.trackArtist : "No media playing"
+            text: MediaService.artist || "No media playing"
             color: ActiveTheme.colors["FG_MUTED"]
             font.pixelSize: 10
             maximumLineCount: 1

@@ -1,4 +1,4 @@
-# quickshell/shell/modules/Services/Volume/CMakeLists.txt
+# quickshell/modules/Services/Volume/CMakeLists.txt
 
 
 set_source_files_properties(VolumeService.qml
