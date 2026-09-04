@@ -15,6 +15,7 @@ add_subdirectory(Lock)
 add_subdirectory(Media)
 add_subdirectory(Network)
 add_subdirectory(Notification)
+add_subdirectory(Visualizer)
 add_subdirectory(Volume)
 add_subdirectory(Workspace)
 
