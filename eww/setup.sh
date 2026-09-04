@@ -2,7 +2,8 @@
 # eww/setup.sh
 
 
-name="eww"
+ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
+name=$(basename "$ROOT_DIR")
 
 flag_clean=false
 flag_force=false
@@ -22,7 +23,6 @@ echo "╚═══════════════════════�
 echo ""
 
 CONFIG_DIR="$HOME/.config"
-ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT_DIR"
 
 echo "Creating symlink in $CONFIG_DIR..."

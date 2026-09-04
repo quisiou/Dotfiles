@@ -2,7 +2,8 @@
 # vencord/setup.sh
 
 
-name="vencord"
+ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
+name=$(basename "$ROOT_DIR")
 
 flag_force=false
 
@@ -19,7 +20,6 @@ echo "║ Setting up Vencord configuration ║"
 echo "╚══════════════════════════════════╝"
 echo ""
 
-ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 VENCORD_DIR="$HOME/.local/share/Vencord"
 
 cd "$ROOT_DIR"

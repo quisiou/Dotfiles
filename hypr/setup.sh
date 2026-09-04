@@ -2,7 +2,8 @@
 # hypr/setup.sh
 
 
-name="hypr"
+ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
+name=$(basename "$ROOT_DIR")
 
 flag_force=false
 flag_no_link=false
@@ -22,7 +23,6 @@ echo "╚═══════════════════════�
 echo ""
 
 CONFIG_DIR="$HOME/.config"
-ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 USER_DIR="$ROOT_DIR/user"
 
 create_file() {

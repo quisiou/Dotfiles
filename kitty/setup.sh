@@ -2,7 +2,8 @@
 # kitty/setup.sh
 
 
-name="kitty"
+ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
+name=$(basename "$ROOT_DIR")
 
 flag_force=false
 flag_overwrite=false
@@ -22,7 +23,6 @@ echo "╚═══════════════════════�
 echo ""
 
 CONFIG_DIR="$HOME/.config"
-ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 
 echo "Creating symlink in $CONFIG_DIR..."
 
