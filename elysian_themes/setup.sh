@@ -2,12 +2,17 @@
 # elysian_themes/setup.sh
 
 
+name="elysian_themes"
+
 flag_force=false
-while getopts "fn" opt; do
-    case "$opt" in
-        f) flag_force=true ;;
-        n) ;;
-        *) echo "Usage: $0 [-f]"; exit 1 ;;
+flag_overwrite=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --"$name"-f) flag_force=true ;;
+        --"$name"-o) flag_overwrite=true ;;
+        --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
+        *) ;;            # not my flag, ignore
     esac
 done
 
@@ -54,10 +59,10 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 
 echo "Setting active theme configuration files..."
 
-if [ -d "$ROOT_DIR/active_theme" ] && [ "$flag_force" = false ]; then
+if [ -d "$ROOT_DIR/active_theme" ] && [ "$flag_overwrite" = false ]; then
     echo "    skipped    $ROOT_DIR/active_theme/:  directory already exists"
 else
-    if [ "$flag_force" = true ]; then
+    if [ "$flag_overwrite" = true ]; then
         rm -rf "$ROOT_DIR/active_theme"
     fi
 

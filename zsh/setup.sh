@@ -2,13 +2,17 @@
 # zsh/setup.sh
 
 
+name="zsh"
+
 flag_force=false
-flag_no_main_link=false
-while getopts "fn" opt; do
-    case "$opt" in
-        f) flag_force=true ;;
-        n) flag_no_main_link=true ;;
-        *) echo "Usage: $0 [-f] [-n]"; exit 1 ;;
+flag_no_link=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --"$name"-f) flag_force=true ;;
+        --"$name"-n) flag_no_link=true ;;
+        --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
+        *) ;;            # not my flag, ignore
     esac
 done
 
@@ -63,7 +67,7 @@ fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
-if [ "$flag_no_main_link" = true ]; then
+if [ "$flag_no_link" = true ]; then
     echo "Skipping main scripts symlinks (make do on your own)"
 else
     echo "Linking main scripts..."

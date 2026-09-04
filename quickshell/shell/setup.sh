@@ -2,14 +2,6 @@
 # quickshell/shell/setup.sh
 
 
-while getopts "fn" opt; do
-    case "$opt" in
-        f) ;;
-        n) ;;
-        *) echo "Usage: $0 [-f]"; exit 1 ;;
-    esac
-done
-
 ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 cd "$ROOT_DIR"
 

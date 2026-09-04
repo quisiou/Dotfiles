@@ -2,12 +2,17 @@
 # awww/setup.sh
 
 
+name="awww"
+
 flag_force=false
-while getopts "fn" opt; do
-    case "$opt" in
-        f) flag_force=true ;;
-        n) ;;
-        *) echo "Usage: $0 [-f]"; exit 1 ;;
+flag_overwrite=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --"$name"-f) flag_force=true ;;
+        --"$name"-o) flag_overwrite=true ;;
+        --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
+        *) ;;            # not my flag, ignore
     esac
 done
 
@@ -67,7 +72,7 @@ fi
 
 CACHE_FILE="$HOME/.cache/awww/$AWWW_VERSION/eDP-1"
 
-if [ -f "$CACHE_FILE" ] && [ "$flag_force" = false ]; then
+if [ -f "$CACHE_FILE" ] && [ "$flag_overwrite" = false ]; then
     echo "    skipped    $CACHE_FILE:  cached wallpaper already exists"
 else
     awww img "$ROOT_DIR/default/Leshy.jpg" --transition-type center

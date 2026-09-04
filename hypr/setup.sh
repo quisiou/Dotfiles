@@ -2,13 +2,17 @@
 # hypr/setup.sh
 
 
+name="hypr"
+
 flag_force=false
-flag_no_configlink=false
-while getopts "fn" opt; do
-    case "$opt" in
-        f) flag_force=true ;;
-        n) flag_no_configlink=true ;;
-        *) echo "Usage: $0 [-f]"; exit 1 ;;
+flag_no_link=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --"$name"-f) flag_force=true ;;
+        --"$name"-n) flag_no_link=true ;;
+        --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
+        *) ;;            # not my flag, ignore
     esac
 done
 
@@ -38,7 +42,7 @@ EOF
     echo "    created   $USER_DIR/$1"
 }
 
-if [ "$flag_no_configlink" = true ]; then
+if [ "$flag_no_link" = true ]; then
     echo "Skipping symlink in $CONFIG_DIR (-n set)..."
 else
     echo "Creating symlink in $CONFIG_DIR..."

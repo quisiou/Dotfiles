@@ -2,12 +2,17 @@
 # starship/setup.sh
 
 
+name="starship"
+
 flag_force=false
-while getopts "fn" opt; do
-    case "$opt" in
-        f) flag_force=true ;;
-        n) ;;
-        *) echo "Usage: $0 [-f]"; exit 1 ;;
+flag_overwrite=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --"$name"-f) flag_force=true ;;
+        --"$name"-o) flag_overwrite=true ;;
+        --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
+        *) ;;            # not my flag, ignore
     esac
 done
 
@@ -44,7 +49,7 @@ dir="$CONFIG_DIR/elysian_themes/active_theme/starship.toml"
 
 echo "Setting up main configuration file..."
 
-if [ "$flag_force" = true ]; then
+if [ "$flag_overwrite" = true ]; then
     rm -f "$target"
 fi
 

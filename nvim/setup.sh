@@ -2,12 +2,17 @@
 # nvim/setup.sh
 
 
+name="nvim"
+
 flag_force=false
-while getopts "fn" opt; do
-    case "$opt" in
-        f) flag_force=true ;;
-        n) ;;
-        *) echo "Usage: $0 [-f]"; exit 1 ;;
+flag_overwrite=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --"$name"-f) flag_force=true ;;
+        --"$name"-o) flag_overwrite=true ;;
+        --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
+        *) ;;            # not my flag, ignore
     esac
 done
 
@@ -44,7 +49,11 @@ echo "Creating symlink for theme file..."
 theme_file_src="$CONFIG_DIR/elysian_themes/active_theme/colors.lua"
 theme_file_dst="$ROOT_DIR/lua/themes/active.lua"
 
-mkdir -p "$(dirname "theme_file_dst")"
+mkdir -p "$(dirname "$theme_file_dst")"
+
+if [ "$flag_overwrite" = true ]; then
+    rm -f "$theme_file_dst"
+fi
 
 if [ -L "$theme_file_dst" ]; then
     echo "    skipped    $theme_file_dst: file already exists (symlink)"

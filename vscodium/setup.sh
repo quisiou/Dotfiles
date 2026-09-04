@@ -2,12 +2,21 @@
 # vscodium/setup.sh
 
 
+name="vscodium"
+
 flag_force=false
-while getopts "fn" opt; do
-    case "$opt" in
-        f) flag_force=true ;;
-        n) ;;
-        *) echo "Usage: $0 [-f]"; exit 1 ;;
+flag_overwrite_config=false
+flag_overwrite_package=false
+flag_overwrite_theme=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --"$name"-f)    flag_force=true ;;
+        --"$name"-oC)   flag_overwrite_config=true ;;
+        --"$name"-oP)   flag_overwrite_package=true ;;
+        --"$name"-oT)   flag_overwrite_theme=true ;;
+        --"$name"-*)    echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
+        *) ;;            # not my flag, ignore
     esac
 done
 
@@ -50,7 +59,7 @@ for file in "$ROOT_DIR"/config/*; do
     target="$CODIUM_USER_DIR/$(basename "$file")"
     file="$symlink_dst/config/$(basename "$file")"
 
-    if [ "$flag_force" = true ]; then
+    if [ "$flag_overwrite_config" = true ]; then
         rm -rf "$target"
     fi
 
@@ -88,7 +97,7 @@ echo "Creating color theme extension package file..."
 
 PACKAGE_FILE="$symlink_dst/package.json"
 
-if [ "$flag_force" = true ]; then
+if [ "$flag_overwrite_package" = true ]; then
     rm -rf "$PACKAGE_FILE"
 fi
 
@@ -112,7 +121,7 @@ for file in "$COLOR_THEMES_DIR" "$PACKAGE_FILE"; do
     file="${file%/}"
     target="$EXTENSION_DIR/$(basename "$file")"
 
-    if [ "$flag_force" = true ]; then
+    if [ "$flag_overwrite_theme" = true ]; then
         rm -rf "$target"
     fi
 

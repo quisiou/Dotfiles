@@ -2,19 +2,17 @@
 # quickshell/setup.sh
 
 
-set --
-flag_f=false
-flag_n=false
-while getopts "fn" opt; do
-    case "$opt" in
-        f) flag_f=true ;;
-        n) flag_n=true ;;
-        *) echo "Usage: $0 [-f] [-n]"; exit 1 ;;
+name="quickshell"
+
+flag_force=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --"$name"-f) flag_force=true ;;
+        --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
+        *) ;;            # not my flag, ignore
     esac
 done
-
-[ "$flag_f" = true ] && set -- "$@" "-f"
-[ "$flag_n" = true ] && set -- "$@" "-n"
 
 echo "╔═════════════════════════════════════╗"
 echo "║ Setting up quickshell configuration ║"
@@ -30,7 +28,7 @@ echo "Creating symlink in $CONFIG_DIR..."
 symlink_src="${ROOT_DIR%/}"
 symlink_dst="$CONFIG_DIR/$(basename "$symlink_src")"
 
-if [ "$flag_f" = true ]; then
+if [ "$flag_force" = true ]; then
     rm -f "$symlink_dst"
 fi
 
@@ -53,7 +51,7 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 
 for dir in "$ROOT_DIR"/*/; do
     script="${dir}setup.sh"
-    [ -f "$script" ] && chmod +x "$script" && "$script" "$@"
+    [ -f "$script" ] && sh "$script" "$@"
 done
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"

@@ -2,12 +2,17 @@
 # eww/setup.sh
 
 
+name="eww"
+
+flag_clean=false
 flag_force=false
-while getopts "fn" opt; do
-    case "$opt" in
-        f) flag_force=true ;;
-        n) ;;
-        *) echo "Usage: $0 [-f]"; exit 1 ;;
+
+for arg in "$@"; do
+    case "$arg" in
+        --"$name"-c) flag_clean=true ;;
+        --"$name"-f) flag_force=true ;;
+        --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
+        *) ;;            # not my flag, ignore
     esac
 done
 
@@ -42,7 +47,7 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 
 echo "Compiling source code..."
 
-if [ "$flag_force" = true ]; then
+if [ "$flag_clean" = true ]; then
     make clean
 fi
 
