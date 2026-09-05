@@ -16,10 +16,16 @@ Item {
     readonly property int _animDuration: 200
     property bool _pagesReady: false
 
+    readonly property Item _currentPageItem:
+        (root.currentIndex >= 0 && root.currentIndex < root.tabs.length)
+            ? root.tabs[root.currentIndex].item
+            : null
+
     signal tabRequested(int newIndex)
 
     Component.onCompleted: Qt.callLater(() => root._pagesReady = true)
 
+    Keys.forwardTo:         root._currentPageItem ? [root._currentPageItem] : []
     Keys.onRightPressed:    root.tabRequested(Math.min(root.currentIndex + 1, root.tabs.length - 1))
     Keys.onLeftPressed:     root.tabRequested(Math.max(root.currentIndex - 1, 0))
 

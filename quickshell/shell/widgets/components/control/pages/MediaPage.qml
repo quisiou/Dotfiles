@@ -8,6 +8,7 @@ import QtQuick.Layouts
 import Quickshell.Widgets
 import ElysianShell.Themes
 import ElysianShell.Services
+import "../../../base"
 
 Item {
     id: root
@@ -15,9 +16,11 @@ Item {
     property string visualizerShape: "sphere"
 
     implicitWidth: 320
-    implicitHeight: textColumn.implicitHeight
+    implicitHeight: playerColumn.implicitHeight
 
     anchors.fill: parent
+
+    Keys.onSpacePressed: MediaService.toggle()
 
     Row {
         id: contentRow
@@ -284,39 +287,216 @@ Item {
 
 
         ColumnLayout {
-            id: textColumn
+            id: playerColumn
             anchors.verticalCenter: parent.verticalCenter
             Layout.maximumWidth: root.width
-            spacing: 6
+            spacing: 20
 
-            Text {
-                id: titleText
-                Layout.alignment: Qt.AlignHCenter
-                Layout.maximumWidth: root.width
-                text: MediaService.title || "Idle"
-                color: ActiveTheme.colors["ACCENT_LOW"]
-                font.pixelSize: 17
-                font.bold: true
-                elide: Text.ElideRight
-                horizontalAlignment: Text.AlignHCenter
+            ColumnLayout {
+                id: textInfoColumn
+                Layout.fillWidth: true
+                spacing: 6
+
+                Text {
+                    id: titleText
+                    Layout.fillWidth: true
+                    text: MediaService.title || "Idle"
+                    color: ActiveTheme.colors["ACCENT_LOW"]
+                    font.pixelSize: 17
+                    font.bold: true
+                    elide: Text.ElideRight
+                    horizontalAlignment: Text.AlignHCenter
+                }
+
+                Text {
+                    id: albumText
+                    Layout.fillWidth: true
+                    text: MediaService.album || "No media playing"
+                    color: ActiveTheme.colors["FG_MUTED"]
+                    font.pixelSize: 13
+                    elide: Text.ElideRight
+                    horizontalAlignment: Text.AlignHCenter
+                }
+
+                Text {
+                    id: artistText
+                    Layout.fillWidth: true
+                    text: MediaService.artist || "No media playing"
+                    color: ActiveTheme.colors["FG"]
+                    font.pixelSize: 13
+                    elide: Text.ElideRight
+                    horizontalAlignment: Text.AlignHCenter
+                }
             }
 
-            Text {
-                id: albumText
-                Layout.alignment: Qt.AlignHCenter
-                text: MediaService.album || "No media playing"
-                color: ActiveTheme.colors["FG_MUTED"]
-                font.pixelSize: 13
-                elide: Text.ElideRight
-            }
+            ColumnLayout {
+                id: playerControls
+                Layout.fillWidth: true
+                spacing: 10
 
-            Text {
-                id: artistText
-                Layout.alignment: Qt.AlignHCenter
-                text: MediaService.artist || "No media playing"
-                color: ActiveTheme.colors["FG"]
-                font.pixelSize: 13
-                elide: Text.ElideRight
+                // --- Progress bar with time labels ---
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    Text {
+                        text: playerControls._formatTime(MediaService.position)
+                        color: ActiveTheme.colors["FG_MUTED"]
+                        font.pixelSize: 11
+                    }
+
+                    SlideBar {
+                        id: progressBar
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 150
+                        Layout.preferredHeight: 6
+
+                        minValue: 0
+                        maxValue: MediaService.duration > 0 ? MediaService.duration : 1
+
+                        // Resync whenever MediaService reports a new position
+                        // (covers seeks, track changes, and the periodic 1s refresh)
+                        onSetValue: (newValue) => {
+                            if (MediaService.canSeek) MediaService.seek(newValue)
+                        }
+
+                        Connections {
+                            target: MediaService
+                            function onPositionChanged() {
+                                if (!progressBar.pressed) progressBar.value = MediaService.position
+                            }
+                        }
+
+                        // Smoothly advance locally between MediaService refreshes
+                        Timer {
+                            interval: 200
+                            running: MediaService.isPlaying && !progressBar.pressed
+                            repeat: true
+                            onTriggered: {
+                                progressBar.value = Math.min(
+                                    progressBar.value + interval / 1000,
+                                    progressBar.maxValue
+                                )
+                            }
+                        }
+                    }
+
+                    Text {
+                        text: playerControls._formatTime(MediaService.duration)
+                        color: ActiveTheme.colors["FG_MUTED"]
+                        font.pixelSize: 11
+                    }
+                }
+
+                // --- Transport controls ---
+                RowLayout {
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: 20
+
+                    // Previous
+                    Rectangle {
+                        id: previousButton
+                        Layout.preferredWidth: 36
+                        Layout.preferredHeight: 36
+                        radius: 18
+                        color: "transparent"
+                        opacity: MediaService.canPrev ? 1 : 0.4
+
+                        Behavior on color {
+                            ColorAnimation { duration: 150; easing.type: Easing.InOutCubic }
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "\udb81\udcae"
+                            font.pixelSize: 30
+                            color: ActiveTheme.colors["FG"]
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            enabled: MediaService.canPrev
+                            hoverEnabled: true
+
+                            onEntered:  previousButton.color = ActiveTheme.colors["ACCENT_HIGH"].replace("#", "#40")
+                            onExited:   previousButton.color = "transparent"
+                            onClicked: MediaService.prev()
+                        }
+                    }
+
+                    // Play / Pause
+                    Rectangle {
+                        id: playPauseButton
+                        Layout.preferredWidth: 40
+                        Layout.preferredHeight: 40
+                        radius: Layout.preferredHeight / 2
+                        color: ActiveTheme.colors["ACCENT_LOW"]
+                        opacity: MediaService.canToggle ? 1 : 0.4
+
+                        Behavior on color {
+                            ColorAnimation { duration: 150; easing.type: Easing.InOutCubic }
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: MediaService.isPlaying ? "\uf04c" : "\uf04b"
+                            font.pixelSize: 25
+                            color: ActiveTheme.colors["BG"]
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            enabled: MediaService.canToggle
+                            hoverEnabled: true
+
+                            onEntered:  playPauseButton.color = ActiveTheme.colors["ACCENT_HIGH"]
+                            onExited:   playPauseButton.color = ActiveTheme.colors["ACCENT_LOW"]
+                            onClicked: MediaService.toggle()
+                        }
+                    }
+
+                    // Next
+                    Rectangle {
+                        id: nextButton
+                        Layout.preferredWidth: 36
+                        Layout.preferredHeight: 36
+                        radius: 18
+                        color: "transparent"
+                        opacity: MediaService.canNext ? 1 : 0.4
+
+                        Behavior on color {
+                            ColorAnimation { duration: 150; easing.type: Easing.InOutCubic }
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "\udb81\udcad"
+                            font.pixelSize: 30
+                            color: ActiveTheme.colors["FG"]
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            enabled: MediaService.canNext
+                            hoverEnabled: true
+
+                            onEntered:  nextButton.color = ActiveTheme.colors["ACCENT_HIGH"].replace("#", "#40")
+                            onExited:   nextButton.color = "transparent"
+                            onClicked: MediaService.next()
+                        }
+                    }
+                }
+
+                function _formatTime(seconds) {
+                    if (isNaN(seconds) || seconds < 0) return "0:00"
+                    const total = Math.floor(seconds)
+                    const m = Math.floor(total / 60)
+                    const s = total % 60
+                    return m + ":" + (s < 10 ? "0" + s : s)
+                }
             }
         }
     }
