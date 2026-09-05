@@ -297,15 +297,61 @@ Item {
                 Layout.fillWidth: true
                 spacing: 6
 
-                Text {
-                    id: titleText
+                Item {
+                    id: titleClip
                     Layout.fillWidth: true
-                    text: MediaService.title || "Idle"
-                    color: ActiveTheme.colors["ACCENT_LOW"]
-                    font.pixelSize: 17
-                    font.bold: true
-                    elide: Text.ElideRight
-                    horizontalAlignment: Text.AlignHCenter
+                    implicitHeight: titleText.implicitHeight
+                    clip: true
+
+                    property bool shouldMarquee: titleText.implicitWidth > titleClip.width
+
+                    Text {
+                        id: titleText
+                        text: MediaService.title || "Idle"
+                        color: ActiveTheme.colors["ACCENT_LOW"]
+                        font.pixelSize: 17
+                        font.bold: true
+                    }
+
+                    SequentialAnimation {
+                        id: marqueeAnim
+                        loops: Animation.Infinite
+
+                        PauseAnimation { duration: 2000 }
+
+                        NumberAnimation {
+                            target: titleText
+                            property: "x"
+                            to: titleClip.width - titleText.implicitWidth - 6
+                            duration: Math.max(1200, (titleText.implicitWidth - titleClip.width) * 40)
+                            easing.type: Easing.Linear
+                        }
+
+                        PauseAnimation { duration: 1200 }
+
+                        NumberAnimation {
+                            target: titleText
+                            property: "x"
+                            to: 0
+                            duration: Math.max(1200, (titleText.implicitWidth - titleClip.width) * 40)
+                            easing.type: Easing.Linear
+                        }
+
+                        PauseAnimation { duration: 500 }
+                    }
+
+                    onShouldMarqueeChanged: restartMarquee()
+                    Component.onCompleted: restartMarquee()
+
+                    function restartMarquee() {
+                        marqueeAnim.stop()
+                        if (shouldMarquee) {
+                            titleText.x = 0
+                            marqueeAnim.start()
+                        } else {
+                            titleText.x = (titleClip.width - titleText.implicitWidth) / 2
+                        }
+                    }
                 }
 
                 Text {
