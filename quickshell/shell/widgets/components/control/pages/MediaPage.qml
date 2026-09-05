@@ -16,7 +16,7 @@ Item {
     property string visualizerShape: "sphere"
 
     implicitWidth: 320
-    implicitHeight: playerColumn.implicitHeight
+    implicitHeight: contentRow.implicitHeight
 
     anchors.fill: parent
 
@@ -31,6 +31,7 @@ Item {
             id: visualizerItem
 
             property int   artSize: 160
+            property int   canvasPadding: 10   // extra breathing room so spiking points/bars don't clip
 
             // Rect visualizer options
             property int   radius: artSize/2 + 5 // +N is the gap between art and visualizer
@@ -46,7 +47,7 @@ Item {
 
             anchors.verticalCenter: parent.verticalCenter
 
-            width: (radius + maxBarHeight) * 2
+            width: (radius + maxBarHeight) * 2 + canvasPadding * 2
             height: width
 
             // drive the cava process only while this is actually visible
@@ -59,6 +60,7 @@ Item {
                 const cosY = Math.cos(rotY), sinY = Math.sin(rotY)
                 const tilt = tiltDeg * Math.PI / 180
                 const cosX = Math.cos(tilt), sinX = Math.sin(tilt)
+                const maxRadius = R + spike   // hard cap: no point should ever project further than this
 
                 let out = []
                 for (let i = 0; i < points.length; i++) {
@@ -75,7 +77,17 @@ Item {
 
                     const px = x1 * r, py = y2 * r, pz = z2 * r
                     const persp = 300 / (300 + pz)
-                    out.push({ x: px * persp, y: py * persp, z: pz, s: persp })
+
+                    let fx = px * persp
+                    let fy = py * persp
+                    const dist = Math.sqrt(fx * fx + fy * fy)
+                    if (dist > maxRadius) {
+                        const clampScale = maxRadius / dist
+                        fx *= clampScale
+                        fy *= clampScale
+                    }
+
+                    out.push({ x: fx, y: fy, z: pz, s: persp })
                 }
                 return out
             }

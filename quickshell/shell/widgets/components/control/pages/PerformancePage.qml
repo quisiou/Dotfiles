@@ -4,5 +4,6 @@
 import QtQuick
 
 Rectangle {
-    color: "blue"
+    implicitHeight: 300
+    color: "transparent"
 }

@@ -9,7 +9,7 @@ Item {
     property int currentIndex: 0
 
     implicitWidth: 700
-    implicitHeight: 400
+    implicitHeight: tabView.implicitHeight + 32
     width: root.implicitWidth
     height: root.implicitHeight
 
@@ -25,9 +25,12 @@ Item {
 
         clip: true
         anchors {
-            fill: parent
+            top: parent.top
+            left: parent.left
+            right: parent.right
             margins: 16
         }
+        height: implicitHeight
 
         onTabRequested: (index) => root.tabChanged(index)
         Keys.onEscapePressed: root.closeRequested()
