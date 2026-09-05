@@ -147,5 +147,9 @@ ShellRoot {
             root.closeOtherMenus(controlMenuLoader)
             root.controlMenu.askPass(prompt, pipe)
         }
+        function openControlTab(tabName: string): void {
+            root.closeOtherMenus(controlMenuLoader)
+            root.controlMenu.openControlTab(tabName)
+        }
     }
 }

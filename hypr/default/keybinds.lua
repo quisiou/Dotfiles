@@ -8,7 +8,7 @@
 
 -- Essential for any Hyprland session (overridable)
 hl.bind(Config.mainMod .. " + Q", hl.dsp.exec_cmd(Config.terminal .. " --hold fastfetch"))
-hl.bind(Config.mainMod .. " + M", hl.dsp.exec_cmd("hyprctl dispatch 'hl.dsp.exit()'"))
+hl.bind(Config.mainMod .. " + CTRL + ALT + E", hl.dsp.exec_cmd("hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(Config.mainMod .. " + E", hl.dsp.exec_cmd(Config.fileManager))
 
 -- Useful app shortcuts
@@ -122,4 +122,8 @@ hl.bind(
 hl.bind(
     Config.mainMod .. " + L",
     hl.dsp.exec_cmd("qs -c shell ipc call controlMenu lockSession")
+)
+hl.bind(
+    Config.mainMod .. " + M",
+    hl.dsp.exec_cmd("qs -c shell ipc call controlMenu openControlTab Media")
 )

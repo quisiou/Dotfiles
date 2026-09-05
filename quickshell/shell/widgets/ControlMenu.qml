@@ -516,4 +516,9 @@ PanelWindow {
     function lockSession(): void { root.lockSession() }
     function reset(): void { root.reset() }
     function askPass(prompt: string, pipe: string): void { root.askPass(prompt, pipe) }
+    function openControlTab(tabName: string): void {
+        const idx = root._controlCenterTabs.findIndex(t => t.name === tabName)
+        root._controlCenterCurrentIndex = idx >= 0 ? idx : 0
+        root.pillWidget = "control"
+    }
 }
