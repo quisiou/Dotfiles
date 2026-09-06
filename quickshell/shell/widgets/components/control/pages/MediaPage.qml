@@ -35,12 +35,12 @@ Item {
 
             // Rect visualizer options
             property int   radius: artSize/2 + 5 // +N is the gap between art and visualizer
-            property int   barWidth: 5
+            property int   barWidth: VisualizerService.bars * 4 / radius
             property int   maxBarHeight: 40
             property color barColor: ActiveTheme.colors["ACCENT_LOW"]
 
             // Sphere visualizer options
-            property int   spherePointCount: 220
+            property int   spherePointCount: VisualizerService.bars * 3
             property real  sphereRotationSpeed: 0.4 // deg/frame
             property real  sphereTiltDeg: 20
             property real  sphereRotationY: 0
@@ -262,7 +262,7 @@ Item {
                 anchors.fill: parent
                 visible: root.visualizerShape === "sphere" && MediaService.hasPlayer
                 antialiasing: true
-                opacity: 0.25
+                opacity: 0.15
 
                 Timer {
                     interval: 1000 / VisualizerService.frameRate
@@ -377,6 +377,7 @@ Item {
                     font.pixelSize: 13
                     elide: Text.ElideRight
                     horizontalAlignment: Text.AlignHCenter
+                    visible: MediaService.hasPlayer
                 }
 
                 Text {
@@ -394,6 +395,7 @@ Item {
                 id: playerControls
                 Layout.fillWidth: true
                 spacing: 10
+                visible: MediaService.hasPlayer
 
                 // --- Progress bar with time labels ---
                 RowLayout {

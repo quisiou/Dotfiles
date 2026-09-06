@@ -10,7 +10,7 @@ Singleton {
     id: root
 
     // --- tunables ---
-    property int    bars: 60
+    property int    bars: 100
     property int    frameRate: 60
     property real   noiseReduction: 30   // lower than before — let our own envelope do the smoothing
     property real   sensitivity: 100

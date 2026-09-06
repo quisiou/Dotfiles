@@ -34,8 +34,8 @@ Singleton {
     function                next()      { if (canNext) _player.next() }
 
     // Per-track playing info
-    property real           duration:       0
-    property real           position:       0
+    property real           duration:       hasPlayer && _player.lengthSupported ? _player.length : 0
+    property real           position:       hasPlayer && _player.positionSupported ? _player.position : 0
     readonly property bool  canSeek:        hasPlayer && _player.canSeek && _player.positionSupported
     function                seek(newPos)    {
         if (!canSeek) return
@@ -44,21 +44,7 @@ Singleton {
         if (_player.positionSupported) _player.position = target
         else _player.seek(target - _player.position)
 
-        position = target
-    }
-
-    on_PlayerChanged: _refreshPlayback()
-    
-    Component.onCompleted: _refreshPlayback()
-
-    // Refresh on track change (reset immediately, then re-sync once
-    // postTrackChanged fires in case length/art arrived late).
-    Connections {
-        target: root._player
-        enabled: root.hasPlayer
-        function onTrackChanged()     { root.duration = 0; root.position = 0 }
-        function onPostTrackChanged() { root._refreshPlayback() }
-        function onPositionChanged()  { root.position = root._player.position }
+        _player.positionChanged()
     }
 
     // Keep `position` reactive without relying on the player pushing updates.
@@ -67,20 +53,14 @@ Singleton {
         running: root.hasPlayer && root._player.playbackState === MprisPlaybackState.Playing
         interval: 1000
         repeat: true
-        onTriggered: root._refreshPlayback()
+        onTriggered: root._player.positionChanged()
     }
 
-
     // Internal properties and functions, not accessible from outside this singleton
-    readonly property MprisPlayer   _player: {
+    readonly property MprisPlayer _player: {
         const players = Mpris.players.values
         for (let p of players)
             if (p.isPlaying) return p
         return players.length > 0 ? players[0] : null
-    }
-
-    function _refreshPlayback() {
-        duration = hasPlayer ? _player.length   : 0
-        position = hasPlayer ? _player.position : 0
     }
 }
