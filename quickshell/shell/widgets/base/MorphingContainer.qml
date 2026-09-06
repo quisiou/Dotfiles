@@ -56,6 +56,7 @@ Item {
         if (defaultItem) {
             defaultItem.parent = contentClip
             defaultItem.opacity = Qt.binding(() => root._activeSlot === "default" ? 1 : 0)
+            defaultItem.enabled = Qt.binding(() => root._activeSlot === "default")
         }
     }
 
