@@ -9,6 +9,7 @@ Item {
     property real value: 0.5
     property real minValue: 0
     property real maxValue: 1
+    property bool liveUpdate: true
 
     readonly property real progress: {
         let range = maxValue - minValue
@@ -66,27 +67,34 @@ Item {
         cursorShape: root.growHorizontal ? Qt.SizeHorCursor : Qt.SizeVerCursor
         preventStealing: true
 
-        function updateValue(mouse) {
+        function fractionFor(mouse) {
             let fraction = root.growHorizontal
                 ? mouse.x / root.width
                 : 1 - (mouse.y / root.height)
-            
-            // Clamp fraction between 0 and 1
-            fraction = Math.max(0, Math.min(1, fraction))
+            return Math.max(0, Math.min(1, fraction))
+        }
 
-            // Map fraction back to range [minValue, maxValue]
-            let computedValue = root.minValue + fraction * (root.maxValue - root.minValue)
-            
-            root.value = computedValue
-            root.setValue(computedValue)
+        function valueFor(mouse) {
+            const fraction = fractionFor(mouse)
+            return root.minValue + fraction * (root.maxValue - root.minValue)
+        }
+
+        function updateValue(mouse) {
+            const v = valueFor(mouse)
+            root.value = v
+            if (root.liveUpdate) root.setValue(v)
         }
 
         onPressed: (mouse) => updateValue(mouse)
         onPositionChanged: (mouse) => { if (pressed) updateValue(mouse) }
+        onReleased: (mouse) => {
+            const v = valueFor(mouse)
+            root.value = v
+            root.setValue(v)
+        }
         onWheel: (wheel) => {
             let step = (root.maxValue - root.minValue) * 0.02
             let delta = wheel.angleDelta.y > 0 ? step : -step
-
             let newValue = Math.max(root.minValue, Math.min(root.maxValue, root.value + delta))
             root.value = newValue
             root.setValue(newValue)

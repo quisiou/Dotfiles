@@ -37,7 +37,15 @@ Singleton {
     property real           duration:       0
     property real           position:       0
     readonly property bool  canSeek:        hasPlayer && _player.canSeek && _player.positionSupported
-    function                seek(newPos)    { if (canSeek) _player.seek(Math.max(0, Math.min(newPos, duration)) - position) }
+    function                seek(newPos)    {
+        if (!canSeek) return
+        const target = Math.max(0, Math.min(newPos, duration))
+
+        if (_player.positionSupported) _player.position = target
+        else _player.seek(target - _player.position)
+
+        position = target
+    }
 
     on_PlayerChanged: _refreshPlayback()
     
@@ -48,8 +56,9 @@ Singleton {
     Connections {
         target: root._player
         enabled: root.hasPlayer
-        function onTrackChanged()       { root.duration = 0; root.position = 0 }
-        function onPostTrackChanged()   { root._refreshPlayback() }
+        function onTrackChanged()     { root.duration = 0; root.position = 0 }
+        function onPostTrackChanged() { root._refreshPlayback() }
+        function onPositionChanged()  { root.position = root._player.position }
     }
 
     // Keep `position` reactive without relying on the player pushing updates.

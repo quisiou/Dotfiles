@@ -328,9 +328,7 @@ Item {
                     SequentialAnimation {
                         id: marqueeAnim
                         loops: Animation.Infinite
-
                         PauseAnimation { duration: 2000 }
-
                         NumberAnimation {
                             target: titleText
                             property: "x"
@@ -338,9 +336,7 @@ Item {
                             duration: Math.max(1200, (titleText.implicitWidth - titleClip.width) * 40)
                             easing.type: Easing.Linear
                         }
-
                         PauseAnimation { duration: 1200 }
-
                         NumberAnimation {
                             target: titleText
                             property: "x"
@@ -348,11 +344,18 @@ Item {
                             duration: Math.max(1200, (titleText.implicitWidth - titleClip.width) * 40)
                             easing.type: Easing.Linear
                         }
-
                         PauseAnimation { duration: 500 }
                     }
 
                     onShouldMarqueeChanged: restartMarquee()
+                    onWidthChanged: restartMarquee()
+
+                    Connections {
+                        target: titleText
+                        function onTextChanged() { titleClip.restartMarquee() }
+                        function onImplicitWidthChanged() { titleClip.restartMarquee() }
+                    }
+
                     Component.onCompleted: restartMarquee()
 
                     function restartMarquee() {
@@ -411,6 +414,7 @@ Item {
 
                         minValue: 0
                         maxValue: MediaService.duration > 0 ? MediaService.duration : 1
+                        liveUpdate: false
 
                         // Resync whenever MediaService reports a new position
                         // (covers seeks, track changes, and the periodic 1s refresh)
