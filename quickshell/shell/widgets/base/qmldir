@@ -2,8 +2,10 @@
 
 
 ClockText 1.0 ClockText.qml
+FillMeter 1.0 FillMeter.qml
 MorphingContainer 1.0 MorphingContainer.qml
 NotificationCard 1.0 NotificationCard.qml
 OrbitMenu 1.0 OrbitMenu.qml
+RingMeter 1.0 RingMeter.qml
 SlideBar 1.0 SlideBar.qml
 Tooltip 1.0 Tooltip.qml
