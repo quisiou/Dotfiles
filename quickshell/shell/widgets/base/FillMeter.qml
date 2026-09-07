@@ -7,7 +7,11 @@ import ElysianShell.Themes
 Item {
     id: root
     
-    property string infoText: ""
+    property var infoTextFormat: (value, displayValue) => { return Math.round(displayValue * 100) + "%" }
+    property string _infoText: infoTextFormat(root.value, root.smoothLevel)
+
+    property var infoSubTextFormat: (value, displayValue) => { return "" }
+    property string _infoSubText: infoSubTextFormat(root.value, root.smoothLevel)
 
     property real minValue: 0
     property real value:    0.5
@@ -82,8 +86,8 @@ Item {
         id: percentLabel
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: root.infoText.length > 0 ? -10 : 0
-        text: Math.round(root.smoothLevel * 100) + "%"
+        anchors.verticalCenterOffset: root._infoSubText.length > 0 ? -10 : 0
+        text: root._infoText
         font.pixelSize: 24
         font.weight: Font.Medium
         color: ActiveTheme.colors["FG"]
@@ -93,9 +97,9 @@ Item {
         anchors.top: percentLabel.bottom
         anchors.topMargin: 2
         anchors.horizontalCenter: parent.horizontalCenter
-        text: root.infoText
+        text: root._infoSubText
         font.pixelSize: 12
         color: ActiveTheme.colors["FG_MUTED"]
-        visible: root.infoText.length > 0
+        visible: root._infoSubText.length > 0
     }
 }

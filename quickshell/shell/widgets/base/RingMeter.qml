@@ -8,6 +8,12 @@ import ElysianShell.Themes
 Item {
     id: root
 
+    property var infoTextFormat: (value, displayValue) => { return Math.round(value) + "°C" }
+    property string _infoText: infoTextFormat(root.smoothValue, root.level)
+
+    property var infoSubTextFormat: (value, displayValue) => { return "" }
+    property string _infoSubText: infoSubTextFormat(root.smoothValue, root.level)
+
     property real minValue: 0
     property real value:    50
     property real maxValue: 100
@@ -36,8 +42,8 @@ Item {
     property real startAngle: 120   // 3 o'clock = 0, clockwise positive
     property real sweepTotal: 300   // leaves a 90° gap centered at top
 
-    implicitWidth: 200
-    implicitHeight: 200
+    implicitWidth: 2 * ringRadius + ringThickness
+    implicitHeight: 2 * ringRadius + ringThickness
 
     Shape {
         anchors.fill: parent
@@ -83,12 +89,22 @@ Item {
     }
 
     Text {
+        id: infoLabel
         anchors.bottom: parent.bottom
-        // anchors.bottomMargin: 14
         anchors.horizontalCenter: parent.horizontalCenter
-        text: Math.round(root.smoothValue) + "°C"
+        text: root._infoText
         font.pixelSize: 18
         font.weight: Font.Medium
         color: ActiveTheme.colors["FG"]
+    }
+
+    Text {
+        anchors.top: infoLabel.bottom
+        anchors.topMargin: 2
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: root._infoSubText
+        font.pixelSize: 12
+        color: ActiveTheme.colors["FG_MUTED"]
+        visible: root._infoSubText.length > 0
     }
 }

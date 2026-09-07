@@ -40,11 +40,8 @@ int main(int argc, char *argv[]) {
         long total = 0, avail = 0;
 
         if (read_meminfo(f, &total, &avail) && total > 0) {
-            int used_percentage = 100 - (int)((double)avail / total * 100);
-
-            printf("{\"used\": %.2f, \"used_percentage\": %d, \"total\": %.2f}\n",
+            printf("{\"used\": %.2f, \"total\": %.2f}\n",
                    (double)(total - avail) / (1024 * 1024),
-                   used_percentage,
                    (double)total / (1024 * 1024));
             fflush(stdout);
         }

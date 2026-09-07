@@ -18,7 +18,7 @@
 typedef struct {
     const char *name;
     int  (*init)(void);
-    int  (*read)(unsigned int *usage, unsigned int *temp); /* 0 = success */
+    int  (*read)(double *usage, double *temp); /* 0 = success */
     void (*shutdown)(void);
 } GpuBackend;
 
@@ -138,15 +138,15 @@ static int nvidia_init(void) {
     return 0;
 }
 
-static int nvidia_read(unsigned int *usage, unsigned int *temp) {
+static int nvidia_read(double *usage, double *temp) {
     nvmlUtilization_t util = {0, 0};
     unsigned int t = 0;
 
     nvmlReturn_t r1 = nvmlDeviceGetUtilizationRates_fn(nv_device, &util);
     nvmlReturn_t r2 = nvmlDeviceGetTemperature_fn(nv_device, NVML_TEMPERATURE_GPU, &t);
 
-    *usage = (r1 == NVML_SUCCESS) ? util.gpu : 0;
-    *temp  = (r2 == NVML_SUCCESS) ? t : 0;
+    *usage = (r1 == NVML_SUCCESS) ? (double)util.gpu : 0;
+    *temp  = (r2 == NVML_SUCCESS) ? (double)t : 0;
     return (r1 == NVML_SUCCESS && r2 == NVML_SUCCESS) ? 0 : 1;
 }
 
@@ -233,9 +233,9 @@ static int amd_init(void) {
     return 0;
 }
 
-static int amd_read(unsigned int *usage, unsigned int *temp) {
-    *usage = (unsigned int)read_val_fd(amd_busy_fd);
-    *temp = amd_temp_fd >= 0 ? (unsigned int)(read_val_fd(amd_temp_fd) / 1000.0) : 0;
+static int amd_read(double *usage, double *temp) {
+    *usage = read_val_fd(amd_busy_fd);
+    *temp = amd_temp_fd >= 0 ? (read_val_fd(amd_temp_fd) / 1000.0) : 0;
     return 0;
 }
 
@@ -280,9 +280,9 @@ int main(int argc, char *argv[]) {
     setvbuf(stdout, NULL, _IOLBF, 0);
 
     while (running) {
-        unsigned int usage = 0, temp = 0;
+        double usage = 0, temp = 0;
         backend->read(&usage, &temp);
-        printf("{\"vendor\": \"%s\", \"used_percentage\": %u, \"temp\": %u}\n",
+        printf("{\"vendor\": \"%s\", \"perc\": %.2f, \"temp\": %.2f}\n",
                backend->name, usage, temp);
         fflush(stdout);
         usleep(interval_ms * 1000);

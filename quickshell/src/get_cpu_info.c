@@ -137,8 +137,7 @@ int main(int argc, char *argv[]) {
 
         double cpu_temp = temp_fd >= 0 ? read_val() : 0.0;
 
-        printf("{\"used_percentage\": %.0f, \"used_decimals\": %.2f, \"temp\": %.1f}\n",
-               cpu_usage, cpu_usage, cpu_temp);
+        printf("{\"perc\": %.2f, \"temp\": %.2f}\n", cpu_usage, cpu_temp);
         fflush(stdout);
 
         usleep(interval_ms * 1000);
