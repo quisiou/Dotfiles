@@ -2,10 +2,13 @@
 
 
 import QtQuick
+import ElysianShell.Themes
 
 Item {
     id: root
     
+    property string infoText: ""
+
     property real minValue: 0
     property real value:    0.5
     property real maxValue: 1
@@ -13,10 +16,13 @@ Item {
         ? Math.max(0, Math.min(1, (value - minValue) / (maxValue - minValue)))
         : 0
 
-    property color liquidColor: "#1D9E75"
+    property real smoothLevel: level
+    Behavior on smoothLevel { NumberAnimation { duration: 500; easing.type: Easing.OutCubic } }
+
+    property color liquidColor: ActiveTheme.colors["ACCENT_LOW"]
     property real waveAmplitude: 5
     property real waveLengthFactor: 1.5
-    property int animDuration: 1500
+    property int animDuration: 2000
 
     implicitWidth: 140
     implicitHeight: 140
@@ -31,7 +37,7 @@ Item {
     }
 
     onPhaseChanged: canvas.requestPaint()
-    onLevelChanged: canvas.requestPaint()
+    onSmoothLevelChanged: canvas.requestPaint()
 
     Canvas {
         id: canvas
@@ -48,7 +54,7 @@ Item {
             ctx.arc(cx, cy, r, 0, Math.PI * 2);
             ctx.clip();
 
-            var waterY = cy + r - (root.level * 2 * r);
+            var waterY = cy + r - (root.smoothLevel * 2 * r);
             ctx.beginPath();
             ctx.moveTo(cx - r - 4, waterY);
             var waveLength = w / root.waveLengthFactor;
@@ -67,16 +73,29 @@ Item {
             ctx.beginPath();
             ctx.arc(cx, cy, r, 0, Math.PI * 2);
             ctx.lineWidth = 1.5;
-            ctx.strokeStyle = "#33888888";
+            ctx.strokeStyle = ActiveTheme.colors["FG_MUTED"];
             ctx.stroke();
         }
     }
 
     Text {
-        anchors.centerIn: parent
-        text: Math.round(root.level * 100) + "%"
+        id: percentLabel
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: root.infoText.length > 0 ? -10 : 0
+        text: Math.round(root.smoothLevel * 100) + "%"
         font.pixelSize: 24
         font.weight: Font.Medium
-        color: "#ffffff"
+        color: ActiveTheme.colors["FG"]
+    }
+
+    Text {
+        anchors.top: percentLabel.bottom
+        anchors.topMargin: 2
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: root.infoText
+        font.pixelSize: 12
+        color: ActiveTheme.colors["FG_MUTED"]
+        visible: root.infoText.length > 0
     }
 }
