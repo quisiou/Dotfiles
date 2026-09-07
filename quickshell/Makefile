@@ -11,16 +11,8 @@ SOURCES = $(wildcard $(SRC)/*.c)
 TARGETS = $(patsubst $(SRC)/%.c,$(BUILD)/%,$(SOURCES))
 LDFLAGS =
 
-# For volume-related, link these libs
-$(BUILD)/get_volume: LDFLAGS += -lasound -lm
-$(BUILD)/set_volume: LDFLAGS += -lasound -lm
-
-# For network-related binaries, link libnm and pass compile flags
-$(BUILD)/get_netinfo: LDFLAGS += $(shell pkg-config --libs libnm)
-$(OBJDIR)/get_netinfo.o: FLAGS += $(shell pkg-config --cflags libnm)
-
-$(BUILD)/get_netlist: LDFLAGS += $(shell pkg-config --libs libnm)
-$(OBJDIR)/get_netlist.o: FLAGS += $(shell pkg-config --cflags libnm)
+# For GPU (NVIDIA), link libdl for dlopen/dlsym
+$(BUILD)/get_gpu_info: LDFLAGS += -ldl
 
 all: $(TARGETS)
 

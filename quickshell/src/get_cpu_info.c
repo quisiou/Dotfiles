@@ -1,11 +1,13 @@
 /* quickshell/src/get_cpu_info.c */
 
+
 #define _DEFAULT_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <fcntl.h>
 
 #define BASE_PATH "/sys/class/hwmon"
 
@@ -13,24 +15,28 @@ typedef struct {
     unsigned long long user, nice, system, idle, iowait, irq, softirq, steal;
 } CPUStats;
 
+static int stat_fd = -1; // raw fd for /proc/stat
+static int temp_fd = -1; // raw fd for the resolved hwmon temp file
+
 static void get_stats(CPUStats *s) {
-    FILE *fp = fopen("/proc/stat", "r");
-    if (!fp) return;
+    if (stat_fd < 0) return;
     char buffer[256];
-    if (fgets(buffer, sizeof(buffer), fp)) {
-        sscanf(buffer, "cpu %llu %llu %llu %llu %llu %llu %llu %llu",
-            &s->user, &s->nice, &s->system, &s->idle,
-            &s->iowait, &s->irq, &s->softirq, &s->steal);
-    }
-    fclose(fp);
+    ssize_t n = pread(stat_fd, buffer, sizeof(buffer) - 1, 0); // pread always re-reads from the kernel, offset 0
+    if (n <= 0) return;
+    buffer[n] = '\0';
+    sscanf(buffer, "cpu %llu %llu %llu %llu %llu %llu %llu %llu",
+        &s->user, &s->nice, &s->system, &s->idle,
+        &s->iowait, &s->irq, &s->softirq, &s->steal);
 }
 
-static double read_val(const char *path) {
-    FILE *f = fopen(path, "r");
-    if (!f) return 0;
+static double read_val(void) {
+    if (temp_fd < 0) return 0;
+    char buffer[32];
+    ssize_t n = pread(temp_fd, buffer, sizeof(buffer) - 1, 0);
+    if (n <= 0) return 0;
+    buffer[n] = '\0';
     double val = 0;
-    if (fscanf(f, "%lf", &val) != 1) val = 0;
-    fclose(f);
+    if (sscanf(buffer, "%lf", &val) != 1) val = 0;
     return val / 1000.0; // millidegrees -> Celsius
 }
 
@@ -101,6 +107,11 @@ int main(int argc, char *argv[]) {
     char cpu_temp_path[560] = {0};
     int have_temp_path = find_cpu_temp_path(cpu_temp_path, sizeof(cpu_temp_path));
 
+    stat_fd = open("/proc/stat", O_RDONLY);
+    if (have_temp_path) {
+        temp_fd = open(cpu_temp_path, O_RDONLY);
+    }
+
     while (1) {
         CPUStats s1, s2;
 
@@ -124,7 +135,7 @@ int main(int argc, char *argv[]) {
             cpu_usage = 100.0 * (total_diff - idle_diff) / total_diff;
         }
 
-        double cpu_temp = have_temp_path ? read_val(cpu_temp_path) : 0.0;
+        double cpu_temp = temp_fd >= 0 ? read_val() : 0.0;
 
         printf("{\"used_percentage\": %.0f, \"used_decimals\": %.2f, \"temp\": %.1f}\n",
                cpu_usage, cpu_usage, cpu_temp);
@@ -133,5 +144,7 @@ int main(int argc, char *argv[]) {
         usleep(interval_ms * 1000);
     }
 
+    if (stat_fd >= 0) close(stat_fd);
+    if (temp_fd >= 0) close(temp_fd);
     return 0;
 }
