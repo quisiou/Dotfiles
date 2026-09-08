@@ -17,8 +17,8 @@ hl.bind(Config.mainMod .. " + F1", hl.dsp.exec_cmd(Config.systemMonitor))
 -- Window management
 hl.bind(Config.mainMod .. " + X", hl.dsp.window.close())
 hl.bind(Config.mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(Config.mainMod .. " + P", hl.dsp.window.pseudo())
-hl.bind(Config.mainMod .. " + Y", hl.dsp.layout("togglesplit"))    -- dwindle only
+hl.bind(Config.mainMod .. " + Y", hl.dsp.window.pseudo())
+hl.bind(Config.mainMod .. " + T", hl.dsp.layout("togglesplit"))    -- dwindle only
 hl.bind(Config.mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(Config.mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(Config.mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
@@ -126,4 +126,8 @@ hl.bind(
 hl.bind(
     Config.mainMod .. " + M",
     hl.dsp.exec_cmd("qs -c shell ipc call controlMenu openControlTab Media")
+)
+hl.bind(
+    Config.mainMod .. " + P",
+    hl.dsp.exec_cmd("qs -c shell ipc call controlMenu openControlTab Performance")
 )

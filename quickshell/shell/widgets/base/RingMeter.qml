@@ -39,8 +39,11 @@ Item {
 
     property real ringRadius: 90
     property real ringThickness: 8
-    property real startAngle: 120   // 3 o'clock = 0, clockwise positive
-    property real sweepTotal: 300   // leaves a 90° gap centered at top
+    property real startAngle: -30   // 3 o'clock = 0, clockwise positive
+    property real sweepTotal: 300
+
+    property real textRadius: root.ringRadius + root.ringThickness
+    property real gapAngle: (root.startAngle + 180 + root.sweepTotal / 2) * Math.PI / 180
 
     implicitWidth: 2 * ringRadius + ringThickness
     implicitHeight: 2 * ringRadius + ringThickness
@@ -88,23 +91,29 @@ Item {
         }
     }
 
-    Text {
-        id: infoLabel
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: root._infoText
-        font.pixelSize: 18
-        font.weight: Font.Medium
-        color: ActiveTheme.colors["FG"]
-    }
+    Column {
+        id: gapLabel
+        spacing: 2
 
-    Text {
-        anchors.top: infoLabel.bottom
-        anchors.topMargin: 2
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: root._infoSubText
-        font.pixelSize: 12
-        color: ActiveTheme.colors["FG_MUTED"]
-        visible: root._infoSubText.length > 0
+        x: root.width / 2 + root.textRadius * Math.cos(root.gapAngle) - width / 2
+            + (width / 2) * Math.cos(root.gapAngle)
+        y: root.height / 2 + root.textRadius * Math.sin(root.gapAngle) - height / 2
+
+        Text {
+            id: infoLabel
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: root._infoText
+            font.pixelSize: 15
+            font.weight: Font.Medium
+            color: ActiveTheme.colors["FG"]
+        }
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: root._infoSubText
+            font.pixelSize: 12
+            color: ActiveTheme.colors["FG_MUTED"]
+            visible: root._infoSubText.length > 0
+        }
     }
 }
