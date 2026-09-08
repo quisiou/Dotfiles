@@ -434,6 +434,7 @@ PanelWindow {
             ControlCenter {
                 tabs: root._controlCenterTabs
                 currentIndex: root._controlCenterCurrentIndex
+                settled: !root._morphing
 
                 onTabChanged: (newIndex) => { root._controlCenterCurrentIndex = newIndex }
                 onCloseRequested: root.pillWidget = "default"

@@ -12,9 +12,9 @@ Item {
 
     property var tabs: []   // [{ name: "Dashboard", item: <Item> }, ...]
     property int currentIndex: 0
+    property bool settled: false
 
     readonly property int _animDuration: 200
-    property bool _pagesReady: false
 
     readonly property Item _currentPageItem:
         (root.currentIndex >= 0 && root.currentIndex < root.tabs.length)
@@ -26,8 +26,6 @@ Item {
     implicitHeight: tabBarContainer.height + separator.height + 8 + pageContainer.height
 
     signal tabRequested(int newIndex)
-
-    Component.onCompleted: Qt.callLater(() => root._pagesReady = true)
 
     Keys.forwardTo:         root._currentPageItem ? [root._currentPageItem] : []
     Keys.onRightPressed:    root.tabRequested(Math.min(root.currentIndex + 1, root.tabs.length - 1))
@@ -164,7 +162,7 @@ Item {
                 x: (index - root.currentIndex) * pageContainer.width
 
                 Behavior on x {
-                    enabled: root._pagesReady
+                    enabled: root.settled
                     NumberAnimation { duration: root._animDuration; easing.type: Easing.InOutCubic }
                 }
 

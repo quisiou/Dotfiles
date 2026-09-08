@@ -7,6 +7,7 @@ Item {
     id: root
     property var tabs: []
     property int currentIndex: 0
+    property bool settled: true
 
     implicitWidth: 700
     implicitHeight: tabView.implicitHeight + 32
@@ -22,6 +23,7 @@ Item {
         id: tabView
         tabs: root.tabs
         currentIndex: root.currentIndex
+        settled: root.settled
 
         clip: true
         anchors {
