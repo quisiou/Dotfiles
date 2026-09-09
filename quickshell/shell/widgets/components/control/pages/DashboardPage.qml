@@ -2,8 +2,9 @@
 
 
 import QtQuick
+import "../../../base"
 
-Rectangle {
+Calendar {
+    implicitWidth: 400
     implicitHeight: 300
-    color: "transparent"
 }

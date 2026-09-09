@@ -124,6 +124,10 @@ hl.bind(
     hl.dsp.exec_cmd("qs -c shell ipc call controlMenu lockSession")
 )
 hl.bind(
+    Config.mainMod .. " + D",
+    hl.dsp.exec_cmd("qs -c shell ipc call controlMenu openControlTab Dashboard")
+)
+hl.bind(
     Config.mainMod .. " + M",
     hl.dsp.exec_cmd("qs -c shell ipc call controlMenu openControlTab Media")
 )

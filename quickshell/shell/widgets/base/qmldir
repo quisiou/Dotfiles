@@ -1,6 +1,7 @@
 # quickshell/shell/widgets/base/qmldir
 
 
+Calendar 1.0 Calendar.qml
 ClockText 1.0 ClockText.qml
 FillMeter 1.0 FillMeter.qml
 MorphingContainer 1.0 MorphingContainer.qml
