@@ -21,6 +21,10 @@ return {
                 if not stat or stat.type ~= "directory" then
                     return
                 end
+
+                local dir = vim.fn.fnamemodify(args.file, ":p")
+                vim.cmd.cd(vim.fn.fnameescape(dir))
+
                 require("neo-tree")
                 return true -- run once
             end,
