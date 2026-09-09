@@ -17,6 +17,15 @@ Item {
             id: daysRow
             Layout.fillWidth: true
             locale: grid.locale
+
+            delegate: Text {
+                required property var model
+                horizontalAlignment: Text.AlignHCenter
+                text: model.shortName
+                font.pixelSize: 15
+                font.bold: true
+                color: ActiveTheme.colors["FG"]
+            }
         }
 
         MonthGrid {
@@ -51,8 +60,8 @@ Item {
                         if (dayCell.model.today)
                             return ActiveTheme.colors["BG"];
                         if (dayCell.model.month === grid.month)
-                            return ActiveTheme.colors["FG_MUTED"];
-                        return ActiveTheme.colors["BG_ACTIVE"];
+                            return ActiveTheme.colors["FG_LIGHT"];
+                        return ActiveTheme.colors["BG_SELECTED"];
                     }
                 }
             }
