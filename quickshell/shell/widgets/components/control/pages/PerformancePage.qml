@@ -27,7 +27,7 @@ Item {
     Process {
         id: cpuProc
         command: [
-            Quickshell.env("HOME") + "/.config/quickshell/.bin/get_cpu_info",
+            Quickshell.shellDir + "/bin/get_cpu_info",
             "1000"
         ]
         running: true
@@ -47,7 +47,7 @@ Item {
     Process {
         id: memProc
         command: [
-            Quickshell.env("HOME") + "/.config/quickshell/.bin/get_mem_info",
+            Quickshell.shellDir + "/bin/get_mem_info",
             "1000"
         ]
         running: true
@@ -67,7 +67,7 @@ Item {
     Process {
         id: diskProc
         command: [
-            Quickshell.env("HOME") + "/.config/quickshell/.bin/get_disk_info",
+            Quickshell.shellDir + "/bin/get_disk_info",
             "1000"
         ]
         running: true
@@ -87,7 +87,7 @@ Item {
     Process {
         id: gpuProc
         command: [
-            Quickshell.env("HOME") + "/.config/quickshell/.bin/get_gpu_info",
+            Quickshell.shellDir + "/bin/get_gpu_info",
             "1000"
         ]
         running: true

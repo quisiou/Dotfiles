@@ -520,28 +520,6 @@
          (box :class "main-container"
               :orientation "v"
               :halign "center"
-              :space-evenly false
-              (box :class "profile-container"
-                   :space-evenly false
-                   (box :class "profile"
-                        :space-evenly false
-                        :valign "start"
-                        :halign "start"
-                        (box :class "pfp")
-                        (box :class "pfp-text"
-                             :orientation "v"
-                             :space-evenly false
-                             (box :class "username"
-                                  :space-evenly false
-                                  (label :text "QuiSioU")
-                             )
-                             (box :class "uptime"
-                                  :space-evenly false
-                                  (label :limit-width 25 :text "${uptime}")
-                             )
-                        )
-                   )
-              )
               (box :class "monitor-container"
                    :orientation "v"
                    :space-evenly false
@@ -567,98 +545,12 @@
                                   )
                              )
                         )
-                        (box :class "divider-h")
-                        (box :class "sys"
-                            (box :class "cpu-box"
-                                 :orientation "v"
-                                 :space-evenly false
-                                 (eventbox :class "cpu-hover"
-                                           :tooltip "Used: ${cpu_data.used_decimals}%"
-                                           (circular-progress :class "cpu"
-                                                    :value "${cpu_data.used_decimals}"
-                                                    :thickness 5
-													:start-at 75
-                                                    (box :class "cpuico"
-                                                        (label :text " ")
-                                                    )
-                                           )
-                                 )
-                                 (box :class "cpu-text"
-                                      :space-evenly false
-                                      :halign "center"
-                                      (box :class "cpu01"
-                                        "CPU "
-                                      )
-                                      (box :class "cpu02"
-                                        "${cpu_data.used_percentage}%"
-                                      )
-                                 )
-                            )
-                            (box :class "ram-box"
-                                 :orientation "v"
-                                 :space-evenly false
-                                 (eventbox :class "ram-hover"
-                                           :tooltip "Used: ${ram_data.used}GB / ${ram_data.total}GB"
-                                           (circular-progress :class "ram"
-                                                    :value "${ram_data.used_percentage}"
-                                                    :thickness 5
-													:start-at 75
-                                                    (box :class "ramico"
-                                                         (label :text " ")
-                                                    )
-                                           )
-                                 )
-                                 (box :class "ram-text"
-                                      :space-evenly false
-                                      :halign "center"
-                                      (box :class "ram01"
-                                        "RAM "
-                                      )
-                                      (box :class "ram02"
-                                        "${ram_data.used_percentage}%"
-                                      )
-                                 )
-                            )
-                            (box :class "disk-box"
-                                 :orientation "v"
-                                 :space-evenly false
-                                 (eventbox :class "disk-hover"
-                                           :tooltip "Used: ${disk_data.used}GB / ${disk_data.total}GB"
-                                           (circular-progress :class "disk"
-                                                    :value "${disk_data.used_percentage}"
-                                                    :thickness 5
-													:start-at 75
-                                                    (box :class "diskico"
-                                                         (label :text " ")
-                                                    )
-                                           )
-                                 )
-                                 (box :class "disk-text"
-                                      :space-evenly false
-                                      :halign "center"
-                                      (box :class "disk01"
-                                        "DISK "
-                                      )
-                                      (box :class "disk02"
-                                        "${disk_data.used_percentage}%"
-                                      )
-                                 )
-                            )
-                        )
                    )
               )
          )
      ;     (cpu-panel)
-         (music-player)
          )
     ))
-)
-
-(deflisten music :initial "{}" "./scripts/music.sh")
-(deflisten pmusic :initial "{}" "./scripts/pmusic.sh")
-
-(defpoll cmusic :interval "1s"
-    "playerctl -l"
 )
 
 (defwidget cpu-panel []
@@ -707,47 +599,6 @@
     )
 )
 
-(defwidget music-player []
-    (revealer :transition "slidedown"
-                   :reveal {"${cmusic}" == "" || "${music.title}" == "" ? false : true}
-         (box :class "music-container"
-              :space-evenly false
-              :orientation "v"
-              (box :class "music-title"
-                   :orientation "h"
-                   :space-evenly false
-                   (box :class "music-thumbnail"
-                        :style "background-image: url('${music.thumbnail}');"
-                   )
-                   (box :class "music-desc"
-                        :orientation "v"
-                        :space-evenly false
-                        (label :class "main-title" :halign "start" :limit-width 21 :text "${music.title}")
-                        (label :class "artist" :halign  "start" :limit-width 31 :text "By ${music.artist}")
-                   )
-              )
-              (scale :class "music-slider"
-                     :min 0
-                     :max {music.length}
-                     :value {pmusic.position}
-                     :onchange "playerctl position {}"
-              )
-              (box :class "music-timer"
-                   (label :halign "start" :text "${pmusic.positionStr}")
-                   (label :halign "end" :text "${music.lengthStr}")
-              )
-              (box :class "music-action"
-                   :orientation "h"
-                   :space-evenly false
-                   :halign "center"
-                   :spacing 45
-                   (eventbox :class "mico" :cursor "pointer" :onclick "playerctl previous" "󰒮")
-                   (eventbox :class "mico" :cursor "pointer" :onclick "playerctl play-pause" {music.status == "Playing" ? "󰓛" : "󰐊"})
-                   (eventbox :class "mico" :cursor "pointer" :onclick "playerctl next" "󰒭")
-              )
-         ))
-
-)
 
 (defwindow topbar
     :monitor 0
