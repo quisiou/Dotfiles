@@ -27,8 +27,9 @@ opt.list        = true
 opt.listchars   = { leadmultispace = "¦   ", trail = "·" }
 
 -- Folding
-opt.foldmethod  = "indent"
-opt.foldlevel   = 20
+opt.foldmethod  = "expr"
+opt.foldexpr    = "v:lua.vim.treesitter.foldexpr()"
+opt.foldlevel   = 99
 
 -- Encoding & file format
 opt.encoding    = "utf-8"
