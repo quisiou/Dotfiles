@@ -43,10 +43,14 @@ return {
         })
 
         -- Indentation (experimental, provided by the plugin)
+        local indent_blacklist = { "qml" }
         vim.api.nvim_create_autocmd("FileType", {
             pattern = filetypes,
-            callback = function()
-                vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+            callback = function(args)
+                if vim.tbl_contains(indent_blacklist, vim.bo[args.buf].filetype) then
+                    return
+                end
+                vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
             end,
         })
     end,

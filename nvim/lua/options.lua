@@ -3,6 +3,14 @@
 
 local opt = vim.opt
 
+-- Don't auto-insert comment leader on new lines
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "*",
+    callback = function()
+        opt.formatoptions:remove({ "r", "o", "t" })
+    end,
+})
+
 -- Line numbers
 opt.number          = true
 opt.relativenumber  = true
@@ -38,6 +46,9 @@ opt.fileformat  = "unix"
 -- Wrapping
 opt.textwidth   = 90
 opt.wrap        = true
+opt.linebreak   = true
+opt.breakindent = true
+opt.showbreak   = "↳ "
 
 -- No swap files
 opt.swapfile    = false
