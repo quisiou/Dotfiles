@@ -3,6 +3,9 @@
 
 local opt = vim.opt
 
+-- Set color theme
+vim.cmd.colorscheme("elysian")
+
 -- Don't auto-insert comment leader on new lines
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "*",
