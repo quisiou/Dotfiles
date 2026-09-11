@@ -1,17 +1,21 @@
 /* quickshell/src/get_disk_info.c */
 
 
-#define _DEFAULT_SOURCE
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/statvfs.h>
 
-// Reads used/total bytes (in GiB) for a given mount path.
-static int read_diskinfo(const char *path, double *used_gb, double *total_gb) {
+// Reads used/total bytes (in GiB) for an already-resolved mount path fd.
+// fstatvfs avoids re-walking the path (directory lookups, symlink
+// resolution) on every tick the way statvfs(path, ...) would; the fd was
+// resolved once at startup and stays pinned to that same target.
+static int read_diskinfo(int fd, double *used_gb, double *total_gb) {
     struct statvfs ds;
 
-    if (statvfs(path, &ds) != 0) {
+    if (fstatvfs(fd, &ds) != 0) {
         return 0;
     }
 
@@ -40,10 +44,20 @@ int main(int argc, char *argv[]) {
 
     setvbuf(stdout, NULL, _IOLBF, 0);
 
+    // O_PATH: just a reference to the resolved location, no read
+    // permission or regular open-file overhead required — exactly what
+    // fstatvfs needs and nothing more.
+    int fd = open(path, O_PATH);
+    if (fd < 0) {
+        printf("{\"error\": \"could not open path\"}\n");
+        fflush(stdout);
+        return 1;
+    }
+
     while (1) {
         double used_gb, total_gb;
 
-        if (read_diskinfo(path, &used_gb, &total_gb)) {
+        if (read_diskinfo(fd, &used_gb, &total_gb)) {
             printf("{\"used\": %.2f, \"total\": %.2f}\n", used_gb, total_gb);
             fflush(stdout);
         } else {
@@ -54,5 +68,6 @@ int main(int argc, char *argv[]) {
         usleep(interval_ms * 1000);
     }
 
+    close(fd);
     return 0;
 }

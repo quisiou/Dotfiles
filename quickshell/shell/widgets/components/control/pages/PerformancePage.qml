@@ -29,7 +29,7 @@ Item {
     Process {
         id: cpuProc
         command: [
-            Quickshell.shellDir + "/bin/get_cpu_info",
+            Quickshell.shellDir + "/bin/daemon_cpu_info",
             "1000"
         ]
         running: true
@@ -49,7 +49,7 @@ Item {
     Process {
         id: memProc
         command: [
-            Quickshell.shellDir + "/bin/get_mem_info",
+            Quickshell.shellDir + "/bin/daemon_mem_info",
             "1000"
         ]
         running: true
@@ -69,7 +69,7 @@ Item {
     Process {
         id: diskProc
         command: [
-            Quickshell.shellDir + "/bin/get_disk_info",
+            Quickshell.shellDir + "/bin/daemon_disk_info",
             "1000"
         ]
         running: true
@@ -89,7 +89,7 @@ Item {
     Process {
         id: gpuProc
         command: [
-            Quickshell.shellDir + "/bin/get_gpu_info",
+            Quickshell.shellDir + "/bin/daemon_gpu_info",
             "1000"
         ]
         running: true

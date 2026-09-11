@@ -18,15 +18,23 @@ typedef struct {
 static int stat_fd = -1; // raw fd for /proc/stat
 static int temp_fd = -1; // raw fd for the resolved hwmon temp file
 
-static void get_stats(CPUStats *s) {
-    if (stat_fd < 0) return;
+// Returns 1 on a successful read, 0 otherwise. On failure the caller's
+// struct is left untouched rather than partially overwritten.
+static int get_stats(CPUStats *s) {
+    if (stat_fd < 0) return 0;
     char buffer[256];
     ssize_t n = pread(stat_fd, buffer, sizeof(buffer) - 1, 0); // pread always re-reads from the kernel, offset 0
-    if (n <= 0) return;
+    if (n <= 0) return 0;
     buffer[n] = '\0';
-    sscanf(buffer, "cpu %llu %llu %llu %llu %llu %llu %llu %llu",
-        &s->user, &s->nice, &s->system, &s->idle,
-        &s->iowait, &s->irq, &s->softirq, &s->steal);
+
+    CPUStats tmp = {0};
+    if (sscanf(buffer, "cpu %llu %llu %llu %llu %llu %llu %llu %llu",
+            &tmp.user, &tmp.nice, &tmp.system, &tmp.idle,
+            &tmp.iowait, &tmp.irq, &tmp.softirq, &tmp.steal) != 8) {
+        return 0;
+    }
+    *s = tmp;
+    return 1;
 }
 
 static double read_val(void) {
@@ -112,35 +120,48 @@ int main(int argc, char *argv[]) {
         temp_fd = open(cpu_temp_path, O_RDONLY);
     }
 
+    // Usage is computed as a delta between this tick's sample and the
+    // previous tick's, rather than two samples taken 100ms apart within
+    // the same tick. That halves the /proc/stat reads (1 pread per tick
+    // instead of 2) and means the reported interval actually matches
+    // interval_ms instead of interval_ms + a hardcoded 100ms sampling
+    // window on top of it.
+    CPUStats prev = {0};
+    int have_prev = get_stats(&prev);
+
     while (1) {
-        CPUStats s1, s2;
+        usleep(interval_ms * 1000);
 
-        get_stats(&s1);
-        usleep(100000); // 100ms sampling window for the usage delta
-        get_stats(&s2);
-
-        unsigned long long idle1 = s1.idle + s1.iowait;
-        unsigned long long idle2 = s2.idle + s2.iowait;
-
-        unsigned long long total1 = s1.user + s1.nice + s1.system + s1.idle +
-            s1.iowait + s1.irq + s1.softirq + s1.steal;
-        unsigned long long total2 = s2.user + s2.nice + s2.system + s2.idle +
-            s2.iowait + s2.irq + s2.softirq + s2.steal;
-
-        unsigned long long total_diff = total2 - total1;
-        unsigned long long idle_diff = idle2 - idle1;
+        CPUStats cur;
+        if (!get_stats(&cur)) {
+            continue; // /proc/stat read failed this tick; try again next tick
+        }
 
         double cpu_usage = 0.0;
-        if (total_diff != 0) {
-            cpu_usage = 100.0 * (total_diff - idle_diff) / total_diff;
+        if (have_prev) {
+            unsigned long long idle_prev = prev.idle + prev.iowait;
+            unsigned long long idle_cur = cur.idle + cur.iowait;
+
+            unsigned long long total_prev = prev.user + prev.nice + prev.system +
+                prev.idle + prev.iowait + prev.irq + prev.softirq + prev.steal;
+            unsigned long long total_cur = cur.user + cur.nice + cur.system +
+                cur.idle + cur.iowait + cur.irq + cur.softirq + cur.steal;
+
+            unsigned long long total_diff = total_cur - total_prev;
+            unsigned long long idle_diff = idle_cur - idle_prev;
+
+            if (total_diff != 0) {
+                cpu_usage = 100.0 * (total_diff - idle_diff) / total_diff;
+            }
         }
+
+        prev = cur;
+        have_prev = 1;
 
         double cpu_temp = temp_fd >= 0 ? read_val() : 0.0;
 
         printf("{\"perc\": %.2f, \"temp\": %.2f}\n", cpu_usage, cpu_temp);
         fflush(stdout);
-
-        usleep(interval_ms * 1000);
     }
 
     if (stat_fd >= 0) close(stat_fd);
