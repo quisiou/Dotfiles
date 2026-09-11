@@ -22,6 +22,8 @@ Item {
 
     Keys.onSpacePressed: MediaService.toggle()
 
+    function refresh() {}
+
     Row {
         id: contentRow
         anchors.centerIn: parent

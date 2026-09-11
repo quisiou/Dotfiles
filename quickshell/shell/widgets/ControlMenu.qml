@@ -44,7 +44,7 @@ PanelWindow {
 
     anchors { top: true; right: true; left: true }
     color: "transparent"
-    
+
     focusable: true
 
     // ── Content ───────────────────────────────────────────────────────────────
@@ -110,7 +110,7 @@ PanelWindow {
                 pillWidget = "auth-askpass"
             }
         }
-        
+
         anchors {
             top: parent.top
             horizontalCenter: parent.horizontalCenter
@@ -216,7 +216,8 @@ PanelWindow {
             target: VolumeService
 
             function onOsdRequested() {
-                if (root.pillWidget === "launcher" || root.pillWidget === "lock" || root.pillWidget === "auth") return
+                if (root.pillWidget === "launcher" || root.pillWidget === "lock"
+                    || root.pillWidget === "auth" || (root.pillWidget === "default" && defaultMenu.expanded)) return
 
                 root.pillWidget = "volume"
                 if (pillHoverHandler.hovered) volumeOsdTimer.stop()
@@ -228,7 +229,8 @@ PanelWindow {
             target: BrightnessService
 
             function onBrightnessChanged() {
-                if (root.pillWidget === "launcher" || root.pillWidget === "lock" || root.pillWidget === "auth") return
+                if (root.pillWidget === "launcher" || root.pillWidget === "lock"
+                    || root.pillWidget === "auth" || (root.pillWidget === "default" && defaultMenu.expanded)) return
 
                 root.pillWidget = "brightness"
                 if (pillHoverHandler.hovered) brightnessOsdTimer.stop()
@@ -240,7 +242,8 @@ PanelWindow {
             target: WorkspaceService
 
             function onSwitched() {
-                if (root.pillWidget === "launcher" || root.pillWidget === "lock" || root.pillWidget === "auth") return
+                if (root.pillWidget === "launcher" || root.pillWidget === "lock"
+                    || root.pillWidget === "auth" || (root.pillWidget === "default" && defaultMenu.expanded)) return
 
                 root.pillWidget = "workspace"
                 if (pillHoverHandler.hovered) workspaceTimer.stop()

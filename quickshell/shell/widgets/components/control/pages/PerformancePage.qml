@@ -24,6 +24,8 @@ Item {
     property real gpuPerc: 0
     property real gpuTemp: 0
 
+    function refresh() {}
+
     Process {
         id: cpuProc
         command: [

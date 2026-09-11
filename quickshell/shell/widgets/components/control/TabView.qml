@@ -20,6 +20,7 @@ Item {
         (root.currentIndex >= 0 && root.currentIndex < root.tabs.length)
             ? root.tabs[root.currentIndex].item
             : null
+    on_CurrentPageItemChanged: root._currentPageItem?.refresh()
 
     readonly property real _pageHeight: root._currentPageItem ? root._currentPageItem.implicitHeight : 0
 
@@ -30,6 +31,7 @@ Item {
     Keys.forwardTo:         root._currentPageItem ? [root._currentPageItem] : []
     Keys.onRightPressed:    root.tabRequested(Math.min(root.currentIndex + 1, root.tabs.length - 1))
     Keys.onLeftPressed:     root.tabRequested(Math.max(root.currentIndex - 1, 0))
+
 
     Item {
         id: tabBarContainer

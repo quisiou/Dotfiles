@@ -4,7 +4,19 @@
 import QtQuick
 import "../../../base"
 
-Calendar {
-    implicitWidth: 400
-    implicitHeight: 300
+Item {
+    id: root
+    implicitWidth: calendar.implicitWidth
+    implicitHeight: calendar.implicitHeight
+
+    function refresh() {
+        calendar.refreshLocale()
+    }
+
+    Calendar {
+        id: calendar
+        anchors.centerIn: parent
+        width: 300
+        height: 250
+    }
 }

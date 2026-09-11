@@ -6,4 +6,6 @@ import QtQuick
 Rectangle {
     implicitHeight: 300
     color: "transparent"
+
+    function refresh() {}
 }
