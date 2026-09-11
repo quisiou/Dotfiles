@@ -9,5 +9,6 @@ Config = {
     mainMod     = "SUPER",
     terminal    = "kitty",
 }
+Config.editor           = Config.terminal .. " " .. os.getenv("EDITOR")
 Config.fileManager      = Config.terminal .. " yazi"
 Config.systemMonitor    = Config.terminal .. " btop"

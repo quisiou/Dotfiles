@@ -7,11 +7,13 @@ name=$(basename "$ROOT_DIR")
 
 flag_force=false
 flag_overwrite=false
+flag_no_link=false
 
 for arg in "$@"; do
     case "$arg" in
         --"$name"-f) flag_force=true ;;
         --"$name"-o) flag_overwrite=true ;;
+        --"$name"-n) flag_no_link=true ;;
         --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
         *) ;;            # not my flag, ignore
     esac
@@ -24,22 +26,26 @@ echo ""
 
 CONFIG_DIR="$HOME/.config"
 
-echo "Creating symlink in $CONFIG_DIR..."
-
-symlink_src="${ROOT_DIR%/}"
-symlink_dst="$CONFIG_DIR/$(basename "$symlink_src")"
-
-if [ "$flag_force" = true ]; then
-    rm -f "$symlink_dst"
-fi
-
-if [ -L "$symlink_dst" ]; then
-    echo "    skipped    $symlink_dst: file already exists (symlink)"
-elif [ -e "$symlink_dst" ]; then
-    echo "    skipped    $symlink_dst: file already exists (not symlink)"
+if [ "$flag_no_link" = true ]; then
+    echo "Skipping symlink in $CONFIG_DIR (-n set)..."
 else
-    ln -s "$symlink_src" "$symlink_dst"
-    echo "    linked     $symlink_src -> $symlink_dst"
+    echo "Creating symlink in $CONFIG_DIR..."
+
+    symlink_src="${ROOT_DIR%/}"
+    symlink_dst="$CONFIG_DIR/$(basename "$symlink_src")"
+
+    if [ "$flag_force" = true ]; then
+        rm -f "$symlink_dst"
+    fi
+
+    if [ -L "$symlink_dst" ]; then
+        echo "    skipped    $symlink_dst: file already exists (symlink)"
+    elif [ -e "$symlink_dst" ]; then
+        echo "    skipped    $symlink_dst: file already exists (not symlink)"
+    else
+        ln -s "$symlink_src" "$symlink_dst"
+        echo "    linked     $symlink_src -> $symlink_dst"
+    fi
 fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"

@@ -12,7 +12,8 @@ hl.bind(Config.mainMod .. " + CTRL + ALT + E", hl.dsp.exec_cmd("hyprctl dispatch
 hl.bind(Config.mainMod .. " + E", hl.dsp.exec_cmd(Config.fileManager))
 
 -- Useful app shortcuts
-hl.bind(Config.mainMod .. " + F1", hl.dsp.exec_cmd(Config.systemMonitor))
+hl.bind(Config.mainMod .. " + F1", hl.dsp.exec_cmd(Config.editor .. " " .. os.getenv("HOME")))
+hl.bind(Config.mainMod .. " + F3", hl.dsp.exec_cmd(Config.systemMonitor))
 
 -- Window management
 hl.bind(Config.mainMod .. " + X", hl.dsp.window.close())
