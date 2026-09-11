@@ -30,7 +30,7 @@ Singleton {
     property list<real> envelope: []        // internal attack/release smoothed
     property list<real> displayValues: []   // final shaped output — bind visualizers to THIS
 
-    property bool active: false
+    property bool active: true
     onActiveChanged: root._restartProcess()
 
     readonly property string _cavaConfigFile: Quickshell.env("HOME") + "/.config/cava/config"
