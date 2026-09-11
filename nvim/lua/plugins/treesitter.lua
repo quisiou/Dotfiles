@@ -42,6 +42,14 @@ return {
             end,
         })
 
+        vim.api.nvim_create_autocmd({ 'BufWritePost', 'InsertLeave' }, {
+            pattern = '*',
+            callback = function(args)
+                local parser = vim.treesitter.get_parser(args.buf)
+                if parser then parser:parse(true) end
+            end,
+        })
+
         -- Indentation (experimental, provided by the plugin)
         local indent_blacklist = { "qml" }
         vim.api.nvim_create_autocmd("FileType", {
