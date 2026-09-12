@@ -100,8 +100,6 @@ Item {
         id: centerContainer
         anchors.fill: parent
 
-        // CAVA Visualizer (Left of Clock) - grows away from the clock,
-        // which itself shifts right only enough to keep the pair balanced
         Row {
             id: cavaRow
             spacing: 2
@@ -147,7 +145,7 @@ Item {
                     id: bar
 
                     required property var modelData
-                    readonly property real targetHeight: Math.max(3, (modelData / 150) * 20)
+                    readonly property real targetHeight: Math.max(3, (modelData / 125) * 20)
 
                     width: 3
                     height: targetHeight

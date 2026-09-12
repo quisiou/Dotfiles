@@ -5,6 +5,7 @@ pragma Singleton
 
 import Quickshell
 import Quickshell.Io
+import ElysianShell.Services
 
 Singleton {
     id: root
@@ -30,7 +31,7 @@ Singleton {
     property list<real> envelope: []        // internal attack/release smoothed
     property list<real> displayValues: []   // final shaped output — bind visualizers to THIS
 
-    property bool active: true
+    property bool active: MediaService.hasPlayer
     onActiveChanged: root._restartProcess()
 
     readonly property string _cavaConfigFile: Quickshell.env("HOME") + "/.config/cava/config"
@@ -65,9 +66,8 @@ Singleton {
 
     function _restartProcess() {
         proc.running = false
-        if (root.active) {
+        if (root.active)
             proc.running = true
-        }
     }
 
     FileView {

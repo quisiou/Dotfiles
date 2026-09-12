@@ -52,11 +52,6 @@ Item {
             width: (radius + maxBarHeight) * 2 + canvasPadding * 2
             height: width
 
-            // drive the cava process only while this is actually visible
-            // onVisibleChanged: VisualizerService.active = visible
-            // Component.onCompleted: VisualizerService.active = visible
-            // Component.onDestruction: VisualizerService.active = false
-
             // shared projection helper
             function _projectSpherePoints(points, values, rotY, tiltDeg, bars, R, spike) {
                 const cosY = Math.cos(rotY), sinY = Math.sin(rotY)
