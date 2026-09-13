@@ -14,6 +14,15 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
+-- Goto definitions
+vim.api.nvim_create_autocmd('LspAttach', {
+    callback = function(args)
+        vim.keymap.set('n', 'gd', function()
+            require('goto-preview').goto_preview_definition()
+        end, { buffer = args.buf, desc = 'Go to / preview definition' })
+    end,
+})
+
 -- Line numbers
 opt.number          = true
 opt.relativenumber  = true
