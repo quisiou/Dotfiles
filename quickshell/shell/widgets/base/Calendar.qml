@@ -60,79 +60,146 @@ Rectangle {
         anchors.margins: root.padding
         spacing: 4
 
-        RowLayout {
-            id: headerRow
-            Layout.fillWidth: true
+        component NavButton: Rectangle {
+            id: navBtn
+            property alias text: navText.text
+            signal clicked()
+            Layout.preferredWidth: 20
+            Layout.preferredHeight: 20
+            radius: 4
+            color: navMouseArea.containsMouse ? ActiveTheme.colors["ACCENT_LOW"] : "transparent"
+
+            Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
+
+            Text {
+                id: navText
+                anchors.centerIn: parent
+                font.pixelSize: Math.round(16 * root._scale)
+                font.bold: true
+                color: navMouseArea.containsMouse ? ActiveTheme.colors["BG"] : ActiveTheme.colors["FG"]
+
+                Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
+            }
+
+            MouseArea {
+                id: navMouseArea
+                cursorShape: Qt.PointingHandCursor
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: navBtn.clicked()
+            }
+        }
+
+        component NavLabel: RowLayout {
+            id: navLabelRow
             spacing: 0
 
-            component NavButton: Rectangle {
-                id: navBtn
-                property alias text: navLabel.text
-                signal clicked()
-                Layout.preferredWidth: 20
-                Layout.preferredHeight: 20
-                radius: 4
-                color: navMouseArea.containsMouse ? ActiveTheme.colors["ACCENT_LOW"] : "transparent"
+            property string text: ""
+            property var prev: () => {}
+            property var next: () => {}
+            property int direction: 1
+
+            NavButton {
+                text: "\u2039"
+                onClicked: {
+                    navLabelRow.direction = -1
+                    navLabelRow.prev()
+                }
+            }
+
+            Item {
+                id: textSlot
+                Layout.fillWidth: true
+                Layout.preferredHeight: outText.implicitHeight
+                clip: true
 
                 Text {
-                    id: navLabel
-                    anchors.centerIn: parent
-                    font.pixelSize: Math.round(16 * root._scale)
+                    id: outText
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: textSlot.width
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pixelSize: Math.round(14 * root._scale)
+                    font.bold: true
                     color: ActiveTheme.colors["FG"]
                 }
 
-                MouseArea {
-                    id: navMouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: navBtn.clicked()
+                Text {
+                    id: inText
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: textSlot.width
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pixelSize: Math.round(14 * root._scale)
+                    font.bold: true
+                    color: ActiveTheme.colors["FG"]
+                    visible: false
+                }
+
+                NumberAnimation {
+                    id: outAnim
+                    target: outText
+                    property: "x"
+                    duration: 220
+                    easing.type: Easing.InOutCubic
+                    onStopped: {
+                        outText.text = inText.text
+                        outText.x = 0
+                        inText.visible = false
+                    }
+                }
+
+                NumberAnimation {
+                    id: inAnim
+                    target: inText
+                    property: "x"
+                    duration: 220
+                    easing.type: Easing.InOutCubic
+                }
+
+                Component.onCompleted: outText.text = navLabelRow.text
+            }
+
+            onTextChanged: {
+                if (outText.text === text) return
+
+                inText.text = text
+                inText.x = direction > 0 ? textSlot.width : -textSlot.width
+                inText.visible = true
+
+                outAnim.to = direction > 0 ? -textSlot.width : textSlot.width
+                inAnim.to = 0
+
+                outAnim.restart()
+                inAnim.restart()
+            }
+
+            NavButton {
+                text: "\u203A"
+                onClicked: {
+                    navLabelRow.direction = 1
+                    navLabelRow.next()
                 }
             }
+        }
 
-            NavButton {
-                text: "\u2039"
-                onClicked: root.goToPreviousMonth()
-            }
+        RowLayout {
+            id: headerRow
+            Layout.fillWidth: false
+            Layout.preferredWidth: parent.implicitWidth * 0.8
+            Layout.alignment: Qt.AlignHCenter
+            spacing: 0
 
-            Item { Layout.fillWidth: true }
-
-            Text {
-                horizontalAlignment: Text.AlignHCenter
+            NavLabel {
                 text: root.locale.monthName(root.currentMonth, Locale.ShortFormat)
-                font.pixelSize: Math.round(14 * root._scale)
-                font.bold: true
-                color: ActiveTheme.colors["FG"]
+                prev: root.goToPreviousMonth
+                next: root.goToNextMonth
             }
 
             Item { Layout.fillWidth: true }
 
-            NavButton {
-                text: "\u203A"
-                onClicked: root.goToNextMonth()
-            }
-
-            Item { Layout.preferredWidth: 12 } // fixed gap between month/year clusters
-
-            NavButton {
-                text: "\u2039"
-                onClicked: root.currentYear -= 1
-            }
-
-            Item { Layout.fillWidth: true }
-
-            Text {
-                horizontalAlignment: Text.AlignHCenter
+            NavLabel {
                 text: root.currentYear
-                font.pixelSize: Math.round(14 * root._scale)
-                font.bold: true
-                color: ActiveTheme.colors["FG"]
-            }
-
-            Item { Layout.fillWidth: true }
-
-            NavButton {
-                text: "\u203A"
-                onClicked: root.currentYear += 1
+                prev: () => { root.currentYear -= 1 }
+                next: () => { root.currentYear += 1 }
             }
         }
 
@@ -144,7 +211,7 @@ Rectangle {
             delegate: Text {
                 required property var model
                 horizontalAlignment: Text.AlignHCenter
-                text: model.shortName
+                text: model.narrowName
                 font.pixelSize: Math.round(15 * root._scale)
                 font.bold: true
                 color: ActiveTheme.colors["FG"]
@@ -180,8 +247,12 @@ Rectangle {
                     text: dayCell.model.day
                     font.pixelSize: Math.round(14 * root._scale)
                     color: {
+                        let dayOfWeek = dayCell.model.date.getDay()
+
                         if (dayCell.model.today)
                             return ActiveTheme.colors["BG"];
+                        if ((dayOfWeek === 0 || dayOfWeek === 6) && dayCell.model.month === grid.month)
+                            return ActiveTheme.colors["ANSI_RED"]
                         if (dayCell.model.month === grid.month)
                             return ActiveTheme.colors["FG_LIGHT"];
                         return ActiveTheme.colors["FG_GHOST"];
