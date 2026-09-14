@@ -32,6 +32,4 @@ rules = [
   { mime = "video/*",         fg = "{{ colors.TERTIARY }}" },
   { mime = "audio/*",         fg = "{{ colors.TERTIARY }}" },
   { mime = "application/zip", fg = "{{ colors.URGENT }}" },
-  { url = "*.toml",           fg = "{{ colors.ANSI_BLUE }}" },
-  { url = "*.lua",            fg = "{{ colors.ANSI_BLUE }}" },
 ]

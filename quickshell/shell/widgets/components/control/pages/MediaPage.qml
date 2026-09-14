@@ -13,7 +13,7 @@ import "../../../base"
 Item {
     id: root
 
-    property string visualizerShape: "rect"
+    property string visualizerShape: "sphere"
 
     implicitWidth: 320
     implicitHeight: contentRow.implicitHeight
@@ -367,6 +367,16 @@ Item {
                 }
 
                 Text {
+                    id: artistText
+                    Layout.fillWidth: true
+                    text: MediaService.artist || "No media playing"
+                    color: ActiveTheme.colors["FG"]
+                    font.pixelSize: 13
+                    elide: Text.ElideRight
+                    horizontalAlignment: Text.AlignHCenter
+                }
+
+                Text {
                     id: albumText
                     Layout.fillWidth: true
                     text: MediaService.album || "No media playing"
@@ -375,16 +385,6 @@ Item {
                     elide: Text.ElideRight
                     horizontalAlignment: Text.AlignHCenter
                     visible: MediaService.hasPlayer
-                }
-
-                Text {
-                    id: artistText
-                    Layout.fillWidth: true
-                    text: MediaService.artist || "No media playing"
-                    color: ActiveTheme.colors["FG"]
-                    font.pixelSize: 13
-                    elide: Text.ElideRight
-                    horizontalAlignment: Text.AlignHCenter
                 }
             }
 

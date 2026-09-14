@@ -2,6 +2,7 @@
 
 
 import QtQuick
+import ElysianShell.Themes
 import "../../../base"
 
 Item {
@@ -18,5 +19,6 @@ Item {
         anchors.centerIn: parent
         width: 300
         height: 250
+        color: ActiveTheme.colors["BG_HIGHLIGHT"]
     }
 }

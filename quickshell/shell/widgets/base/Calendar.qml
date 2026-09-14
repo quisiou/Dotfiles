@@ -19,7 +19,7 @@ Rectangle {
     height: implicitHeight
 
     clip: true
-    color: ActiveTheme.colors["BG_FOCUSED"]
+    color: "transparent"
 
     radius: 12
 
