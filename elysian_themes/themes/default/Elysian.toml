@@ -1,0 +1,123 @@
+# elysian_themes/themes/default/HighTheme.toml
+
+
+[meta]
+name    = "High Theme"
+id      = "high-theme"
+type    = "dark"
+author  = "quisiou"
+
+
+[colors]
+
+# --- Backgrounds --- (darker than Tokyo Carbon, cold blue-grey undertone from Nord Polar Night)
+BG                      = "#0d0f12"     # main surface — app background
+BG_DARK                 = "#0a0c0e"     # recessed surface — panels, sidebars, bars, titlebar
+BG_DEEP                 = "#050607"     # deeply recessed surface — borders, inner panels
+BG_DARKEST              = "#020203"     # near-black edge — outermost window borders
+BG_POPUP                = "#111418"     # floating surface — inputs, dropdowns, popups
+BG_HIGHLIGHT            = "#181c22"     # subtle highlight — current line, drop targets, menu hover
+BG_FOCUSED              = "#141820"     # focus state — inactive selection, focused container bg
+BG_ACTIVE               = "#1c212a"     # active interactive — pressed/active item, selected row
+BG_HOVER                = "#12151a"     # hover state — pointer-over row or item
+BG_SELECTED             = "#1e2430"     # selected state — status bar item hover, chosen option
+BG_STRIPE               = "#161a20"     # structural guide — indent / tree line background
+BG_OVERLAY              = "#151920"     # overlay tint — context menus, label backgrounds
+BG_TINTED               = "#1b2b3f"     # tinted accent surface — focused containers, accent panels
+
+# --- Foregrounds --- (Nord Snow Storm inspired, cool neutrals)
+FG                      = "#eceff4"     # primary text — body, cursor, identifiers
+FG_DARK                 = "#d8dee9"     # secondary text — input content, list items
+FG_MUTED                = "#9aa5b1"     # muted ui text — sidebars, status bars, terminal fg
+FG_BRIGHT               = "#e5e9f0"     # bright ui text — badge labels, active links
+FG_DIM                  = "#c0c8d4"     # dimmed text — supplementary values, chart labels
+FG_LIGHT                = "#cdd6e0"     # light text — readable on dark diagnostic backgrounds
+FG_SUBTLE               = "#aab4c0"     # subtle text — preformatted spans, between muted and dim
+FG_DISABLED             = "#616e7c"     # disabled text — unavailable controls
+FG_ON_ACCENT            = "#ffffff"     # text on accent — labels on colored buttons or badges
+FG_GHOST                = "#4c566a"     # ghost text — documentation comments, mid-tone placeholder (Nord Polar Night 4)
+FG_HINT                 = "#525c6b"     # hint text — inline hints, trailing annotations, ghost completions
+
+# --- Inactive / Structural --- (straight from Nord Polar Night)
+DARK3                   = "#4c566a"     # description text — metadata, breadcrumbs, ignored items
+DARK4                   = "#434c5e"     # comment text — code comments, secondary annotations
+DARK5                   = "#3b4252"     # structural punctuation — delimiters in muted contexts
+DARK6                   = "#2e3440"     # inactive border — match outlines, inactive tab borders
+DARK7                   = "#272c36"     # secondary control bg — inactive icon fg, secondary buttons
+
+# --- ANSI Terminal Colors --- (Nord Aurora + Frost)
+ANSI_BLACK              = "#2e3440"     # ansiBlack — line numbers, whitespace markers
+ANSI_RED                = "#f7768e"     # ansiRed
+ANSI_GREEN              = "#a3be8c"     # ansiGreen
+ANSI_YELLOW             = "#e0af68"     # ansiYellow
+ANSI_BLUE               = "#81a1c1"     # ansiBlue
+ANSI_MAGENTA            = "#bb9af7"     # ansiMagenta
+ANSI_CYAN               = "#7dcfff"     # ansiCyan
+ANSI_WHITE              = "#7d8ba1"     # ansiWhite
+
+# --- Primary Brand / Accent --- (Nord Frost)
+ACCENT                  = "#5e81ac"     # primary accent — buttons, progress bars, active indicators
+ACCENT_SUBTLE           = "#81a1c1"     # mid accent — between ACCENT and ANSI_BLUE
+ACCENT_MUTED            = "#88c0d0"     # muted accent — links, subtle highlights
+ACCENT_DIM              = "#7a9cc6"     # dim accent — mid-tone highlighted foreground
+ACCENT_LOW              = "#a8c4e0"     # light accent — structural punctuation, soft highlights
+ACCENT_HIGH             = "#c3d8ee"     # even light accent
+
+# --- Secondary Brand / Accent --- (Tokyo Night vivid cyan — kept punchy against Nord darks)
+SECONDARY               = "#7dcfff"     # bright cyan — keywords, prominent tokens
+SECONDARY_SUBTLE        = "#89ddff"     # sky blue — operators, punctuation, escape sequences
+SECONDARY_MUTED         = "#2ac3de"     # vivid cyan — built-in / library identifiers
+SECONDARY_DIM           = "#b4f9f8"     # pale mint — special literals, regex strings
+
+# --- Tertiary Brand / Accent ---
+TERTIARY                = "#bb9af7"     # secondary accent — keywords, attributes
+TERTIARY_SUBTLE         = "#9d7cd8"     # dim secondary — modifiers, mixins, muted purple
+TERTIARY_MUTED          = "#b267e6"     # vivid violet — special debug / trace tokens
+TERTIARY_DIM            = "#ba3c97"     # deep magenta — structural tag punctuation
+TERTIARY_LOW            = "#de5971"     # pink — unrecognized or custom tag names
+
+# --- Info ---
+INFO                    = "#0db9d7"     # info — diagnostic info, notable identifiers
+INFO_SUBTLE             = "#0da0ba"     # dim info — subtle info indicators, hint icons
+INFO_ALT                = "#1abc9c"     # emerald outlier — teal-green info variant
+
+# --- Success (green) ---
+SUCCESS                 = "#73daca"     # success — positive state, object keys, links
+SUCCESS_SUBTLE          = "#41a6b5"     # dim success — muted positive, merge additions
+SUCCESS_MUTED           = "#9ece6a"     # muted success — strings, secondary positive tokens
+VCS_ADDED               = "#449dab"     # vcs added — new / renamed / untracked files
+
+# --- Warning (yellow / orange) ---
+WARNING                 = "#e0af68"     # warning — caution state, match borders, lightbulb
+WARNING_SUBTLE          = "#c49a5a"     # muted warning — warning text in lists and consoles
+WARNING_MUTED           = "#bba461"     # dim warning — subtle warning icons
+WARNING_LOW             = "#ffdb69"     # bright warning — high-visibility warning tokens
+WARNING_SURFACE         = "#c2985b"     # warning background — validation warning surfaces
+URGENT                  = "#ff9e64"     # urgent — constants, booleans, high-emphasis values
+
+# --- Error (red) ---
+ERROR                   = "#db4b4b"     # error — diagnostic error, breakpoints
+ERROR_SUBTLE            = "#bb616b"     # muted error — error text in lists and consoles
+ERROR_LOW               = "#fc7b7b"     # bright error — high-visibility error tokens
+ERROR_HIGH              = "#ff5370"     # vivid error — invalid / illegal tokens
+ERROR_SURFACE           = "#85353e"     # error background — validation error surfaces
+ERROR_BORDER            = "#963c47"     # error border — validation error outlines
+ERROR_DIM               = "#c24242"     # dim error — unverified / inactive error markers
+
+
+# --- VCS ---
+VCS_MODIFIED            = "#6183bb"     # vcs modified — changed files
+VCS_DELETED             = "#914c54"     # vcs deleted — removed files
+VCS_IGNORED             = "#515670"     # vcs ignored — excluded files
+
+# --- Borders ---
+BORDER                  = "#0f0f14"     # input border — fields, chat request borders
+
+# --- Rainbow / Hierarchy ---
+# Vivid — nesting levels, bracket pairs, hierarchy colouring
+RAINBOW_1               = "#7aa2f7"
+RAINBOW_2               = "#0db9d7"
+RAINBOW_3               = "#7dcfff"
+RAINBOW_4               = "#bb9af7"
+RAINBOW_5               = "#e0af68"
+RAINBOW_6               = "#f7768e"

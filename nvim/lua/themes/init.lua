@@ -254,16 +254,46 @@ function M.load()
     hl("IblIndent", { fg = c.DARK7 })
     hl("IblScope",  { fg = c.DARK5 })
 
-    -- NvimTree / neo-tree
-    hl("NvimTreeNormal",     { fg = c.FG_DIM, bg = M.config.transparent and "NONE" or c.BG_DARK })
-    hl("NvimTreeFolderIcon", { fg = c.SECONDARY })
-    hl("NvimTreeFolderName", { fg = c.FG_DIM })
-    hl("NvimTreeOpenedFolderName", { fg = c.ACCENT_LOW })
-    hl("NvimTreeRootFolder", { fg = c.TERTIARY, bold = true })
-    hl("NvimTreeIndentMarker", { fg = c.DARK7 })
-    hl("NvimTreeGitDirty",   { fg = c.VCS_MODIFIED })
-    hl("NvimTreeGitNew",     { fg = c.VCS_ADDED })
-    hl("NvimTreeGitDeleted", { fg = c.VCS_DELETED })
+    ----------------------------------------------------------------------
+    -- Neo-tree
+    ----------------------------------------------------------------------
+    hl("NeoTreeNormal",       { fg = c.FG_DIM, bg = M.config.transparent and "NONE" or c.BG_DARK })
+    hl("NeoTreeNormalNC",     { fg = c.FG_DIM, bg = M.config.transparent and "NONE" or c.BG_DARK })
+    hl("NeoTreeEndOfBuffer",  { fg = c.BG_DARK, bg = M.config.transparent and "NONE" or c.BG_DARK })
+    hl("NeoTreeWinSeparator", { fg = c.BORDER, bg = M.config.transparent and "NONE" or c.BG_DARK })
+    hl("NeoTreeVertSplit",    { fg = c.BORDER, bg = M.config.transparent and "NONE" or c.BG_DARK })
+    hl("NeoTreeCursorLine",   { bg = c.BG_HIGHLIGHT })
+
+    hl("NeoTreeRootName",     { fg = c.TERTIARY, bold = true })
+    hl("NeoTreeDirectoryIcon",{ fg = c.SECONDARY })
+    hl("NeoTreeDirectoryName",{ fg = c.FG_DIM })
+    hl("NeoTreeFileIcon",     { fg = c.FG_MUTED })
+    hl("NeoTreeFileName",     { fg = c.FG_DIM })
+    hl("NeoTreeFileNameOpened", { fg = c.ACCENT_LOW })
+    hl("NeoTreeSymbolicLinkTarget", { fg = c.SECONDARY_MUTED, italic = true })
+    hl("NeoTreeModified",     { fg = c.WARNING_LOW })
+    hl("NeoTreeIndentMarker", { fg = c.DARK7 })
+    hl("NeoTreeExpander",     { fg = c.FG_GHOST })
+    hl("NeoTreeDotfile",      { fg = c.FG_DISABLED })
+    hl("NeoTreeDimText",      { fg = c.FG_GHOST })
+    hl("NeoTreeFilterTerm",   { fg = c.WARNING, bold = true })
+
+    hl("NeoTreeFloatBorder",  { fg = c.BORDER, bg = M.config.transparent and "NONE" or c.BG_POPUP })
+    hl("NeoTreeFloatTitle",   { fg = c.ACCENT_LOW, bg = M.config.transparent and "NONE" or c.BG_POPUP })
+    hl("NeoTreeTitleBar",     { fg = c.BG, bg = c.ACCENT_LOW })
+    hl("NeoTreeStatusLine",   { fg = c.FG_DIM, bg = c.BG_DARK })
+    hl("NeoTreeStatusLineNC", { fg = c.FG_GHOST, bg = c.BG_DARK })
+
+    -- Git status
+    hl("NeoTreeGitAdded",     { fg = c.VCS_ADDED })
+    hl("NeoTreeGitModified",  { fg = c.VCS_MODIFIED })
+    hl("NeoTreeGitDeleted",   { fg = c.VCS_DELETED })
+    hl("NeoTreeGitConflict",  { fg = c.URGENT, bold = true })
+    hl("NeoTreeGitUntracked", { fg = c.SECONDARY_MUTED })
+    hl("NeoTreeGitIgnored",   { fg = c.VCS_IGNORED })
+    hl("NeoTreeGitStaged",    { fg = c.SUCCESS })
+    hl("NeoTreeGitUnstaged",  { fg = c.WARNING })
+    hl("NeoTreeGitRenamed",   { fg = c.TERTIARY_MUTED })
 end
 
 return M
