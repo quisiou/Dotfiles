@@ -14,8 +14,8 @@ return {
             elysian_theme = {
                 normal = {
                     a = { fg = c.BG, bg = c.ACCENT_LOW, gui = "bold" },
-                    b = { fg = c.FG_DIM, bg = c.BG_ACTIVE },
-                    c = { fg = c.FG_MUTED, bg = c.BG_DARK },
+                    b = { fg = c.FG_DARK, bg = c.BG_ACTIVE },
+                    c = { fg = c.FG_DIM, bg = c.BG_DARK },
                 },
                 insert  = { a = { fg = c.BG, bg = c.SUCCESS_MUTED, gui = "bold" } },
                 visual  = { a = { fg = c.BG, bg = c.TERTIARY, gui = "bold" } },
