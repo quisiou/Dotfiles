@@ -30,7 +30,7 @@ return {
 
         -- LSP diagnostics
         vim.diagnostic.config({
-            virtual_text = { current_line = true },  -- inline message on the line your cursor is on
+            virtual_text = false,  -- inline message on current line handled by tiny-inline-diagnostic
             severity_sort = true,
             float = { border = "rounded", source = true },
         })
