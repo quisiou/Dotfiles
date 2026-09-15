@@ -179,7 +179,7 @@ function M.load()
     ----------------------------------------------------------------------
     hl("@variable",          { fg = c.FG_DARK })
     hl("@variable.builtin",  { fg = c.ANSI_RED, italic = true })
-    hl("@variable.parameter",{ fg = c.FG_DARK })
+    hl("@variable.parameter",{ fg = c.URGENT })
     hl("@variable.member",   { fg = c.SECONDARY })
 
     hl("@property",          { fg = c.SECONDARY })
@@ -199,7 +199,7 @@ function M.load()
     hl("@operator",          { fg = c.TERTIARY })
     hl("@conditional",       { fg = c.TERTIARY })
 
-    hl("@type",              { fg = c.URGENT, bold = true })
+    hl("@type",              { fg = c.TERTIARY_LOW })
     hl("@type.builtin",      { fg = c.SECONDARY, italic = true })
     hl("@attribute",         { fg = c.SECONDARY_MUTED })
     hl("@namespace",         { fg = c.ANSI_RED })

@@ -1,9 +1,9 @@
-# elysian_themes/themes/default/HighTheme.toml
+# elysian_themes/themes/default/Elysian.toml
 
 
 [meta]
-name    = "High Theme"
-id      = "high-theme"
+name    = "Elysian"
+id      = "elysian"
 type    = "dark"
 author  = "quisiou"
 
@@ -74,7 +74,7 @@ TERTIARY                = "#bb9af7"     # secondary accent — keywords, attribu
 TERTIARY_SUBTLE         = "#9d7cd8"     # dim secondary — modifiers, mixins, muted purple
 TERTIARY_MUTED          = "#b267e6"     # vivid violet — special debug / trace tokens
 TERTIARY_DIM            = "#ba3c97"     # deep magenta — structural tag punctuation
-TERTIARY_LOW            = "#de5971"     # pink — unrecognized or custom tag names
+TERTIARY_LOW            = "#ff96f8"     # pink — unrecognized or custom tag names
 
 # --- Info ---
 INFO                    = "#0db9d7"     # info — diagnostic info, notable identifiers
