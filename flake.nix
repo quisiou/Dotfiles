@@ -27,12 +27,27 @@
                     then import toolsFile pkgs
                     else [];
 
+            getDeps = name:
+                let depsFile = self + "/${name}/deps.nix";
+                in  if builtins.pathExists depsFile
+                    then import depsFile
+                    else [];
+
             mkApp = name: {
                 type = "app";
                 program = "${pkgs.writeShellApplication {
                     name = "setup-${name}";
                     runtimeInputs = getTools name;
                     text = ''
+                        ${builtins.concatStringsSep "\n" (map (dep: ''
+                            if [ -e "$HOME/.config/${dep}" ]; then
+                                echo "── Skipping dependency '${dep}': already set up ──"
+                            else
+                                echo "── Running dependency: ${dep} ──"
+                                (cd "${self}/${dep}" && ./setup.sh)
+                            fi
+                        '') (getDeps name))}
+
                         cd "${self}/${name}"
                         ./setup.sh
                     '';
@@ -41,10 +56,8 @@
 
             mkShell = name: pkgs.mkShell {
                 name = "dotfiles-${name}";
-                buildInputs = getTools name;
-                shellHook = ''
-                    echo "Dev shell for '${name}'. Run ./setup.sh in ${self}/${name} to apply, or just poke around."
-                '';
+                buildInputs = getTools name ++ builtins.concatMap getTools (getDeps name);
+                shellHook = ''echo "Dev shell for '${name}' (+ deps: ${toString (getDeps name)})."'';
             };
 
             perModuleApps   = builtins.listToAttrs (map (n: { name = n; value = mkApp n; }) moduleNames);
