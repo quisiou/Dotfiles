@@ -27,11 +27,18 @@
                     then import toolsFile pkgs
                     else [];
 
-            getDeps = name:
+            getDepsDirect = name:
                 let depsFile = self + "/${name}/deps.nix";
                 in  if builtins.pathExists depsFile
                     then import depsFile
                     else [];
+
+            getDeps = name:
+                let
+                    direct = getDepsDirect name;
+                    nested = builtins.concatMap getDeps direct;
+                in
+                    pkgs.lib.unique (nested ++ direct);
 
             mkApp = name: {
                 type = "app";
@@ -80,6 +87,8 @@
                     buildInputs = builtins.concatMap getTools moduleNames;
                 };
             };
+
+            _debugDeps = builtins.listToAttrs (map (n: { name = n; value = getDeps n; }) moduleNames);
         }
     );
 }
