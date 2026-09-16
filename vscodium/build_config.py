@@ -61,7 +61,7 @@ def build_keybindings(config_dir: Path):
         f.write(json.dumps(
             [
                 {
-                    "key": "ctrl+alt+z", 
+                    "key": "ctrl+alt+z",
                     "command": "workbench.action.terminal.newWithProfile",
                     "args": { "profileName": "zsh" }
                 }
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         print_usage()
         exit(1)
 
-    config_dir: Path = Path(__file__).resolve().parent / "config"
+    config_dir: Path = Path.home() / ".config" / "vscodium" / "config"
     config_dir.mkdir(exist_ok=True, parents=True)
 
     if not Path(config_dir, "settings.json").exists():

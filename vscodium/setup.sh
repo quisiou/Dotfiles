@@ -5,14 +5,13 @@
 ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 name=$(basename "$ROOT_DIR")
 
-flag_force=false
 flag_overwrite_config=false
 flag_overwrite_package=false
 flag_overwrite_theme=false
 
 for arg in "$@"; do
     case "$arg" in
-        --"$name"-f)    flag_force=true ;;
+        --"$name"-f) ;;
         --"$name"-oC)   flag_overwrite_config=true ;;
         --"$name"-oP)   flag_overwrite_package=true ;;
         --"$name"-oT)   flag_overwrite_theme=true ;;
@@ -27,24 +26,18 @@ echo "╚═══════════════════════�
 echo ""
 
 CONFIG_DIR="$HOME/.config"
+DEST="$CONFIG_DIR/vscodium"
 
-echo "Creating symlink in $CONFIG_DIR..."
+echo "Setting up $DEST..."
 
-symlink_src="${ROOT_DIR%/}"
-symlink_dst="$CONFIG_DIR/$(basename "$symlink_src")"
+mkdir -p "$DEST"
 
-if [ "$flag_force" = true ]; then
-    rm -f "$symlink_dst"
-fi
+ln -sf "$ROOT_DIR/build_config.py"  "$DEST/build_config.py"
+ln -sf "$ROOT_DIR/build_theme.py"   "$DEST/build_theme.py"
+ln -sf "$ROOT_DIR/build_package.py" "$DEST/build_package.py"
+ln -sf "$ROOT_DIR/template.json"    "$DEST/template.json"
 
-if [ -L "$symlink_dst" ]; then
-    echo "    skipped    $symlink_dst: file already exists (symlink)"
-elif [ -e "$symlink_dst" ]; then
-    echo "    skipped    $symlink_dst: file already exists (not symlink)"
-else
-    ln -s "$symlink_src" "$symlink_dst"
-    echo "    linked     $symlink_src -> $symlink_dst"
-fi
+echo "    linked     build_config.py, build_theme.py, build_package.py, template.json"
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
@@ -53,11 +46,14 @@ echo "Setting up configuration files..."
 CODIUM_USER_DIR="$CONFIG_DIR/VSCodium/User"
 mkdir -p "$CODIUM_USER_DIR"
 
-python3 "$ROOT_DIR/build_config.py"
+CONFIG_GEN_DIR="$DEST/config"
+mkdir -p "$CONFIG_GEN_DIR"
 
-for file in "$ROOT_DIR"/config/*; do
+python3 "$DEST/build_config.py"
+
+for file in "$CONFIG_GEN_DIR"/*; do
+    [ -e "$file" ] || continue
     target="$CODIUM_USER_DIR/$(basename "$file")"
-    file="$symlink_dst/config/$(basename "$file")"
 
     if [ "$flag_overwrite_config" = true ]; then
         rm -rf "$target"
@@ -77,14 +73,14 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 
 echo "Setting up color themes..."
 
-COLOR_THEMES_DIR="$symlink_dst/themes/"
+COLOR_THEMES_DIR="$DEST/themes/"
 mkdir -p "$COLOR_THEMES_DIR"
 
 THEME_SRC_DIR="$CONFIG_DIR/elysian_themes/themes/default"
 if [ -d "$THEME_SRC_DIR" ]; then
     for file in "$THEME_SRC_DIR"/*; do
         [ -e "$file" ] || continue
-        python3 "$ROOT_DIR/build_theme.py" "$file" "$COLOR_THEMES_DIR"
+        python3 "$DEST/build_theme.py" "$file" "$COLOR_THEMES_DIR"
         echo "    completed  $file"
     done
 else
@@ -95,18 +91,16 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 
 echo "Creating color theme extension package file..."
 
-PACKAGE_FILE="$symlink_dst/package.json"
+PACKAGE_FILE="$DEST/package.json"
 
 if [ "$flag_overwrite_package" = true ]; then
-    rm -rf "$PACKAGE_FILE"
+    rm -f "$PACKAGE_FILE"
 fi
 
-if [ -L "$PACKAGE_FILE" ]; then
-    echo "    skipped    $PACKAGE_FILE: file already exists (symlink)"
-elif [ -e "$PACKAGE_FILE" ]; then
-    echo "    skipped    $PACKAGE_FILE: file already exists (not symlink)"
+if [ -e "$PACKAGE_FILE" ]; then
+    echo "    skipped    $PACKAGE_FILE: file already exists"
 else
-    python3 "$ROOT_DIR/build_package.py"
+    python3 "$DEST/build_package.py"
     echo "    created    $PACKAGE_FILE"
 fi
 

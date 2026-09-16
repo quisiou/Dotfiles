@@ -44,7 +44,7 @@ if __name__ == "__main__":
         print_usage()
         exit(1)
 
-    root_dir: Path = Path(__file__).resolve().parent
+    root_dir: Path = Path.home() / ".config" / "vscodium"
 
     theme_dir: Path = root_dir / "themes" if argc == 1 else Path(argv[1]).resolve()
 

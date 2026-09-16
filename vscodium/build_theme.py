@@ -31,9 +31,8 @@ if __name__ == "__main__":
         print_usage()
         exit(1)
 
-    root_dir: Path = Path(__file__).resolve().parent
-
-    argv_2: Path = root_dir / "themes" if argc == 2 else Path(argv[2]).resolve()
+    script_dir: Path = Path(__file__).resolve().parent
+    dest_dir: Path = (Path.home() / ".config" / "vscodium" / "themes") if argc == 2 else Path(argv[2]).resolve()
 
     selected_theme: dict[str, dict[str, str]] = parse_toml(Path(argv[1]).resolve())
     fallback_theme: dict[str, dict[str, str]] = parse_toml(
@@ -45,8 +44,8 @@ if __name__ == "__main__":
         for k in fallback_theme
     }
 
-    env = Environment(loader=FileSystemLoader(root_dir))
+    env = Environment(loader=FileSystemLoader(script_dir))
     env.filters["rgba"] = lambda color, a: f"{color}{a}"
 
-    f = argv_2 / f"{theme['meta']['id']}-color-theme.json"
+    f = dest_dir / f"{theme['meta']['id']}-color-theme.json"
     f.write_text(env.get_template("template.json").render(colors=theme["colors"], meta=theme["meta"]) + '\n')

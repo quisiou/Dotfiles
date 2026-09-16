@@ -6,7 +6,7 @@
 
 themes_dir="${1:?Usage: $0 <themes_dir>}"
 
-find "$themes_dir" -type f -iname '*.toml' -print0 |
+find -L "$themes_dir" -type f -iname '*.toml' -print0 |
 while IFS= read -r -d '' f; do
     name=$(awk '
         /^\[meta\]/ { in_meta=1; next }
