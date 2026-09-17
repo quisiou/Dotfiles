@@ -13,6 +13,19 @@ return {
             cmd = { "qmlls", "-E" },
         })
 
+        vim.lsp.config("clangd", {
+            cmd = {
+                "clangd",
+                "--query-driver=/usr/bin/gcc,/usr/bin/cc,/usr/bin/*gcc*", -- let clangd ask gcc for its system/kernel include paths
+                "--header-insertion=never",   -- kernel code doesn't play well with clangd's IWYU-style auto-includes
+                "--background-index",
+            },
+            root_dir = function(fname)
+                local util = require("lspconfig.util")
+                return util.root_pattern("compile_commands.json", ".clangd", ".git")(fname)
+            end,
+        })
+
         vim.lsp.enable({
             "lua_ls",
             "vimls",
