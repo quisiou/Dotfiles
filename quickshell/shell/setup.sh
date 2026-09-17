@@ -5,18 +5,19 @@
 ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 cd "$ROOT_DIR"
 
-echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+if [ -w "$ROOT_DIR" ]; then
+    echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
-echo "Creating default quick apps list..."
+    echo "Creating default quick apps list..."
 
-quickAppsfile="quickapps.json"
+    quickAppsfile="quickapps.json"
 
-if [ -L "$quickAppsfile" ]; then
-    echo "    skipped    $quickAppsfile: file already exists (symlink)"
-elif [ -e "$quickAppsfile" ]; then
-    echo "    skipped    $quickAppsfile: file already exists (not symlink)"
-else
-    cat > $quickAppsfile <<EOF
+    if [ -L "$quickAppsfile" ]; then
+        echo "    skipped    $quickAppsfile: file already exists (symlink)"
+    elif [ -e "$quickAppsfile" ]; then
+        echo "    skipped    $quickAppsfile: file already exists (not symlink)"
+    else
+        cat > $quickAppsfile <<EOF
 [
     "codium",
     "firefox",
@@ -25,30 +26,33 @@ else
     "gimp"
 ]
 EOF
-    echo "    created    $quickAppsfile"
-fi
+        echo "    created    $quickAppsfile"
+    fi
 
-echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+    echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
-echo "Creating default ignore apps' notifications list..."
+    echo "Creating default ignore apps' notifications list..."
 
-ignoreNotificationsFile="ignoreNotifications.json"
+    ignoreNotificationsFile="ignoreNotifications.json"
 
-if [ -L "$ignoreNotificationsFile" ]; then
-    echo "    skipped    $ignoreNotificationsFile: file already exists (symlink)"
-elif [ -e "$ignoreNotificationsFile" ]; then
-    echo "    skipped    $ignoreNotificationsFile: file already exists (not symlink)"
-else
-    cat > $ignoreNotificationsFile <<EOF
+    if [ -L "$ignoreNotificationsFile" ]; then
+        echo "    skipped    $ignoreNotificationsFile: file already exists (symlink)"
+    elif [ -e "$ignoreNotificationsFile" ]; then
+        echo "    skipped    $ignoreNotificationsFile: file already exists (not symlink)"
+    else
+        cat > $ignoreNotificationsFile <<EOF
 [
     "OpenRazer"
 ]
 EOF
-    echo "    created    $ignoreNotificationsFile"
+        echo "    created    $ignoreNotificationsFile"
+    fi
+
+    echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+
+    echo "Ensuring scripts are executable..."
+
+    [ -d scripts ] && chmod +x scripts/* 2>/dev/null
+else
+    echo "    skipped    $ROOT_DIR: source is read-only, quickapps/ignoreNotifications stubs not created"
 fi
-
-echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
-
-echo "Ensuring scripts are executable..."
-
-[ -d scripts ] && chmod +x scripts/*

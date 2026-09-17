@@ -5,12 +5,11 @@
 ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 name=$(basename "$ROOT_DIR")
 
-flag_force=false
 flag_overwrite=false
 
 for arg in "$@"; do
     case "$arg" in
-        --"$name"-f) flag_force=true ;;
+        --"$name"-f) ;;
         --"$name"-o) flag_overwrite=true ;;
         --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
         *) ;;            # not my flag, ignore
@@ -22,29 +21,20 @@ echo "║ Setting up kitty configuration ║"
 echo "╚════════════════════════════════╝"
 echo ""
 
+
 CONFIG_DIR="$HOME/.config"
+DEST="$CONFIG_DIR/kitty"
 
-echo "Creating symlink in $CONFIG_DIR..."
+echo "Setting up $DEST..."
 
-symlink_src="${ROOT_DIR%/}"
-symlink_dst="$CONFIG_DIR/$(basename "$symlink_src")"
+mkdir -p "$DEST"
+ln -sf "$ROOT_DIR/kitty.conf" "$DEST/kitty.conf"
 
-if [ "$flag_force" = true ]; then
-    rm -f "$symlink_dst"
-fi
-
-if [ -L "$symlink_dst" ]; then
-    echo "    skipped    $symlink_dst: file already exists (symlink)"
-elif [ -e "$symlink_dst" ]; then
-    echo "    skipped    $symlink_dst: file already exists (not symlink)"
-else
-    ln -s "$symlink_src" "$symlink_dst"
-    echo "    linked     $symlink_src -> $symlink_dst"
-fi
+echo "    linked     kitty.conf"
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
-target="$ROOT_DIR/theme.conf"
+target="$DEST/theme.conf"
 dir="$CONFIG_DIR/elysian_themes/active_theme/kitty.conf"
 
 echo "Setting up color theme configuration file..."

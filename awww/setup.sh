@@ -48,13 +48,17 @@ echo "Creating user directory..."
 
 USER_DIR="$ROOT_DIR/user"
 
-if [ -L "$USER_DIR" ]; then
-    echo "    skipped    $USER_DIR: directory already exists (symlink)"
-elif [ -e "$USER_DIR" ]; then
-    echo "    skipped    $USER_DIR: directory already exists (not symlink)"
+if [ -w "$ROOT_DIR" ]; then
+    if [ -L "$USER_DIR" ]; then
+        echo "    skipped    $USER_DIR: directory already exists (symlink)"
+    elif [ -e "$USER_DIR" ]; then
+        echo "    skipped    $USER_DIR: directory already exists (not symlink)"
+    else
+        mkdir -p "$USER_DIR"
+        echo "    created    $USER_DIR"
+    fi
 else
-    mkdir -p "$ROOT_DIR/user"
-    echo "    created    $USER_DIR"
+    echo "    skipped    $USER_DIR: source is read-only, user directory not created"
 fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"

@@ -5,13 +5,12 @@
 ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 name=$(basename "$ROOT_DIR")
 
-flag_force=false
 flag_overwrite=false
 flag_no_link=false
 
 for arg in "$@"; do
     case "$arg" in
-        --"$name"-f) flag_force=true ;;
+        --"$name"-f) ;;
         --"$name"-o) flag_overwrite=true ;;
         --"$name"-n) flag_no_link=true ;;
         --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
@@ -24,28 +23,27 @@ echo "║ Setting up neovim configuration ║"
 echo "╚═════════════════════════════════╝"
 echo ""
 
+
 CONFIG_DIR="$HOME/.config"
+DEST="$CONFIG_DIR/nvim"
+
+mkdir -p "$DEST" "$DEST/lua"
 
 if [ "$flag_no_link" = true ]; then
-    echo "Skipping symlink in $CONFIG_DIR (-n set)..."
+    echo "Skipping static links in $CONFIG_DIR (-n set)..."
 else
-    echo "Creating symlink in $CONFIG_DIR..."
+    echo "Linking static files into $DEST..."
 
-    symlink_src="${ROOT_DIR%/}"
-    symlink_dst="$CONFIG_DIR/$(basename "$symlink_src")"
+    ln -sf "$ROOT_DIR/init.lua"        "$DEST/init.lua"
+    ln -sf "$ROOT_DIR/lazy-lock.json"  "$DEST/lazy-lock.json"
+    ln -sf "$ROOT_DIR/colors"          "$DEST/colors"
 
-    if [ "$flag_force" = true ]; then
-        rm -f "$symlink_dst"
-    fi
+    ln -sf "$ROOT_DIR/lua/keymaps.lua"     "$DEST/lua/keymaps.lua"
+    ln -sf "$ROOT_DIR/lua/lazy-config.lua" "$DEST/lua/lazy-config.lua"
+    ln -sf "$ROOT_DIR/lua/options.lua"     "$DEST/lua/options.lua"
+    ln -sf "$ROOT_DIR/lua/plugins"         "$DEST/lua/plugins"
 
-    if [ -L "$symlink_dst" ]; then
-        echo "    skipped    $symlink_dst: file already exists (symlink)"
-    elif [ -e "$symlink_dst" ]; then
-        echo "    skipped    $symlink_dst: file already exists (not symlink)"
-    else
-        ln -s "$symlink_src" "$symlink_dst"
-        echo "    linked     $symlink_src -> $symlink_dst"
-    fi
+    echo "    linked     init.lua, lazy-lock.json, colors/, lua/*.lua, lua/plugins/"
 fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
@@ -53,7 +51,7 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 echo "Creating symlink for theme file..."
 
 theme_file_src="$CONFIG_DIR/elysian_themes/active_theme/colors.lua"
-theme_file_dst="$ROOT_DIR/lua/themes/active.lua"
+theme_file_dst="$DEST/lua/themes/active.lua"
 
 mkdir -p "$(dirname "$theme_file_dst")"
 

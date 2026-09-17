@@ -5,12 +5,11 @@
 ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 name=$(basename "$ROOT_DIR")
 
-flag_force=false
 flag_no_link=false
 
 for arg in "$@"; do
     case "$arg" in
-        --"$name"-f) flag_force=true ;;
+        --"$name"-f) ;;
         --"$name"-n) flag_no_link=true ;;
         --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
         *) ;;            # not my flag, ignore
@@ -23,6 +22,7 @@ echo "╚═══════════════════════�
 echo ""
 
 CONFIG_DIR="$HOME/.config"
+DEST="$CONFIG_DIR/hypr"
 USER_DIR="$ROOT_DIR/user"
 
 create_file() {
@@ -42,26 +42,21 @@ EOF
     echo "    created   $USER_DIR/$1"
 }
 
+mkdir -p "$DEST"
+
 if [ "$flag_no_link" = true ]; then
-    echo "Skipping symlink in $CONFIG_DIR (-n set)..."
+    echo "Skipping default/user/hyprland.lua links in $CONFIG_DIR (-n set)..."
 else
-    echo "Creating symlink in $CONFIG_DIR..."
+    echo "Linking static files into $DEST..."
 
-    symlink_src="${ROOT_DIR%/}"
-    symlink_dst="$CONFIG_DIR/$(basename "$symlink_src")"
+    ln -sf "$ROOT_DIR/hyprland.lua" "$DEST/hyprland.lua"
+    echo "    linked     hyprland.lua"
 
-    if [ "$flag_force" = true ]; then
-        rm -f "$symlink_dst"
-    fi
+    ln -sf "$ROOT_DIR/default"      "$DEST/default"
+    echo "    linked     default/"
 
-    if [ -L "$symlink_dst" ]; then
-        echo "    skipped    $symlink_dst: file already exists (symlink)"
-    elif [ -e "$symlink_dst" ]; then
-        echo "    skipped    $symlink_dst: file already exists (not symlink)"
-    else
-        ln -s "$symlink_src" "$symlink_dst"
-        echo "    linked     $symlink_src -> $symlink_dst"
-    fi
+    ln -sf "$ROOT_DIR/user"         "$DEST/user"
+    echo "    linked     user/"
 fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
@@ -69,7 +64,7 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 echo "Creating symlink for theme file..."
 
 theme_file_src="$CONFIG_DIR/elysian_themes/active_theme/colors.lua"
-theme_file_dst="$ROOT_DIR/theme.lua"
+theme_file_dst="$DEST/theme.lua"
 
 if [ -L "$theme_file_dst" ]; then
     echo "    skipped    $theme_file_dst: file already exists (symlink)"
@@ -84,20 +79,22 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 
 echo "Creating override files in hypr/user/ directory..."
 
-mkdir -p "$USER_DIR"
+if [ -w "$ROOT_DIR" ]; then
+    mkdir -p "$USER_DIR"
 
-create_file "env.lua"              "ENVIRONMENT VARIABLES CONFIGURATION"
-create_file "variables.lua"        "GENERAL SETTINGS"
-create_file "monitors.lua"         "MONITORS CONFIGURATION"
-create_file "look_and_feel.lua"    "LOOK AND FEEL CONFIGURATION"
-create_file "input.lua"            "INPUT CONFIGURATION"
-create_file "keybinds.lua"         "KEYBINDS CONFIGURATION"
-create_file "windowrules.lua"      "WINDOW RULES CONFIGURATION"
-create_file "autostart.lua"        "AUTO START CONFIGURATION"
+    create_file "env.lua"              "ENVIRONMENT VARIABLES CONFIGURATION"
+    create_file "variables.lua"        "GENERAL SETTINGS"
+    create_file "monitors.lua"         "MONITORS CONFIGURATION"
+    create_file "look_and_feel.lua"    "LOOK AND FEEL CONFIGURATION"
+    create_file "input.lua"            "INPUT CONFIGURATION"
+    create_file "keybinds.lua"         "KEYBINDS CONFIGURATION"
+    create_file "windowrules.lua"      "WINDOW RULES CONFIGURATION"
+    create_file "autostart.lua"        "AUTO START CONFIGURATION"
 
-echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
-
-echo "Edit files in $USER_DIR to override defaults."
+    echo "Edit files in $USER_DIR to override defaults."
+else
+    echo "    skipped    $USER_DIR: source is read-only, override stubs not created"
+fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 

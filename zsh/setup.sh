@@ -46,15 +46,16 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 
 echo "Creating user scripts directory structure..."
 
-mkdir -p "$ROOT_DIR/user"
-private_script="$ROOT_DIR/user/env.zsh"
+if [ -w "$ROOT_DIR" ]; then
+    mkdir -p "$ROOT_DIR/user"
+    private_script="$ROOT_DIR/user/env.zsh"
 
-if [ -L "$private_script" ]; then
-    echo "    skipped    $private_script: file already exists (symlink)"
-elif [ -e "$private_script" ]; then
-    echo "    skipped    $private_script: file already exists (not symlink)"
-else
-    cat > "$private_script" <<EOF
+    if [ -L "$private_script" ]; then
+        echo "    skipped    $private_script: file already exists (symlink)"
+    elif [ -e "$private_script" ]; then
+        echo "    skipped    $private_script: file already exists (not symlink)"
+    else
+        cat > "$private_script" <<EOF
 #!/usr/bin/env zsh
 # zsh/user/env.zsh
 
@@ -62,7 +63,10 @@ else
 # Place your personal environment variables here...
 
 EOF
-    echo "    created    $private_script"
+        echo "    created    $private_script"
+    fi
+else
+    echo "    skipped    $ROOT_DIR/user: source is read-only, user script not created"
 fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
