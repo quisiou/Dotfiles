@@ -53,6 +53,18 @@ map("t",                "<C-q>",    "<C-\\><C-n><cmd>q<CR>",    { desc = "Close 
 --- Terminal ------------------------------------------------------------------
 map("n",    "<leader>t",    "<cmd>split | resize 10 | term<CR>i",            { desc = "Open terminal" })
 
+-- Move "set mark" from m to M, freeing m for multicursor
+map({ "n", "v" }, "m", "<Nop>", { desc = "Disabled (multicursor prefix)" })
+map("n", "<leader>m", function()
+    local char = vim.fn.getcharstr()
+    vim.cmd("normal! m" .. char)
+end, { desc = "Set mark" })
+
+vim.keymap.set({ "n", "v" }, "gm", function()
+    local char = vim.fn.getcharstr()
+    vim.cmd("normal! `" .. char)
+end, { desc = "Jump to mark (exact position)" })
+
 --- Search & Grep ------------------------------------------------------------
 -- Clear highlights with Esc
 map("n",    "<Esc>",        "<cmd>nohlsearch<CR>",  { desc = "Clear search highlight" })

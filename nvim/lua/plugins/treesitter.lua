@@ -20,6 +20,7 @@ return {
             "c",
             "cpp",
             "python",
+            "latex"
         }
 
         require("nvim-treesitter").install(parsers):wait(300000)
