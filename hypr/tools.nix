@@ -8,7 +8,5 @@ pkgs: with pkgs; [
     cliphist
     playerctl
     pavucontrol
-    libnotify
-    inotify-tools
     brightnessctl
 ]

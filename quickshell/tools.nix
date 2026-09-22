@@ -6,6 +6,4 @@ pkgs: with pkgs; [
     libnotify
     inotify-tools
     cava
-    awww
-    (python3.withPackages (ps: with ps; [ jinja2 ]))
 ]

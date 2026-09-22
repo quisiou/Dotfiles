@@ -9,5 +9,4 @@ pkgs: with pkgs; [
     fd
     file
     git
-    (python3.withPackages (ps: with ps; [ jinja2 ]))
 ]
