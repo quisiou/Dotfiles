@@ -33,6 +33,7 @@ opt.expandtab   = true
 opt.tabstop     = 4
 opt.softtabstop = 4
 opt.shiftwidth  = 4
+opt.shiftround  = true
 opt.smartindent = true
 
 -- Appearance

@@ -178,6 +178,21 @@ return {
 
             -- tpope's "yss" = act on the whole line, ignoring leading whitespace
             vim.keymap.set("n", "yss", "ys_", { remap = true })
+
+            -- Nix-only: '' '' surround, keyed to "q"
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = "nix",
+                callback = function()
+                    vim.b.minisurround_config = {
+                        custom_surroundings = {
+                            ["q"] = {
+                                input = { "''().-()''" },
+                                output = { left = "''", right = "''" },
+                            },
+                        },
+                    }
+                end,
+            })
         end,
     },
 }
