@@ -26,6 +26,30 @@ return {
             end,
         })
 
+        vim.lsp.config("texlab", {
+            settings = {
+                texlab = {
+                    build = {
+                        executable = "latexmk",
+                        args = {
+                            "-pdf",
+                            "-lualatex",
+                            "-output-directory=build",
+                            "-interaction=nonstopmode",
+                            "-synctex=1",
+                            "%f",
+                        },
+                        onSave = true,        -- rebuild automatically every time you save
+                        forwardSearchAfter = false,
+                    },
+                    chktex = {
+                        onOpenAndSave = false,
+                        onEdit = false,
+                    },
+                },
+            },
+        })
+
         vim.lsp.enable({
             "lua_ls",
             "vimls",
@@ -36,6 +60,7 @@ return {
             "ruff",
             "clangd",
             "qmlls",
+            "texlab",
         })
 
         -- lua_ls needs to know about the `vim` global
