@@ -13,7 +13,7 @@
     settings = lib.mkOption {
         description = ''
             Wallpaper image settings (check awww-img man page for documentation).
-            These can be changed later using the provided script.
+            These can be changed later using the provided script or by manually editing the files.
         '';
         type = lib.types.submodule {
             options = {
@@ -35,12 +35,12 @@
                     default = "000000";
                 };
                 filter = {
-                    description = "Filter to use when scaling images";
+                    description = "Filter to use when scaling images.";
                     type = lib.types.enum [ "Nearest" "Bilinear" "CatmullRom" "Mitchell" "Lanczos3" ];
                     default = "Lanczos3";
                 };
                 invertY = {
-                    description = "Inverts the y position set in `transition.pos` option";
+                    description = "Inverts the y position set in `transition.pos` option.";
                     type = lib.types.bool;
                     default = false;
                 };
@@ -53,13 +53,13 @@
                     default = "";
                 };
                 resize = {
-                    description = "Whether to resize the image and the method by which to resize it";
+                    description = "Whether to resize the image and the method by which to resize it.";
                     type = lib.types.enum [ "no" "crop" "fit" "stretch" ];
                     default = "crop";
                 };
                 transition = lib.mkOption {
                     description = "Wallpaper transition settings.";
-                    type = lib.types.submodule ({ config, ... }: {
+                    type = lib.types.submodule (submoduleArgs: {
                         options = {
                             angle = lib.mkOption {
                                 description = ''
@@ -106,7 +106,7 @@
                             step = lib.mkOption {
                                 description = "How fast the transition approaches the new image.";
                                 type = lib.types.ints.between 0 255;
-                                default = if config.type == "simple" then 2 else 90;
+                                default = if submoduleArgs.config.type == "simple" then 2 else 90;
                             };
                             type = lib.mkOption {
                                 description = "Transition style when changing wallpaper.";
@@ -128,10 +128,10 @@
                             };
                         };
                     });
-                    default = {};
+                    default = { };
                 };
             };
         };
-        default = {};
+        default = { };
     };
 }

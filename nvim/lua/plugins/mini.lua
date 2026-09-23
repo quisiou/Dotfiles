@@ -113,7 +113,7 @@ return {
             local statusline = require("mini.statusline")
 
             -- match your old lualine diagnostic symbols exactly
-            local diagnostic_icons = { ERROR = " ", WARN = " ", INFO = " ", HINT = " " }
+            local diagnostic_icons = { ERROR = "E", WARN = "W", INFO = "I", HINT = "H" }
             local function diagnostics()
                 if vim.bo.buftype ~= "" then return "" end
                 local out = {}

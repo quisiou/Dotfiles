@@ -11,7 +11,7 @@
 
     outputs = { self, nixpkgs, flake-utils }:
         let
-            mkDotfilesLib = { pkgs, lib }:
+            mkDotfilesLib = { pkgs, config, lib }:
                 let
                     moduleNames = builtins.attrNames (
                         lib.filterAttrs
@@ -42,7 +42,7 @@
                         let
                             optsFile = self + "/${name}/options.nix";
                         in
-                            if builtins.pathExists optsFile then import optsFile { inherit lib pkgs; } else {};
+                            if builtins.pathExists optsFile then import optsFile { inherit lib config pkgs; } else {};
                 in {
                     inherit moduleNames getTools getDepsDirect getDeps getExtraOptions;
                 };
@@ -108,7 +108,7 @@
             )) // {
                 homeManagerModules.default = { config, lib, pkgs, ... }:
                     let
-                        dl = mkDotfilesLib { inherit pkgs lib; };
+                        dl = mkDotfilesLib { inherit pkgs lib config; };
                         inherit (dl) moduleNames getTools getDeps getExtraOptions;
 
                         cfg = config.programs.dotfiles;
