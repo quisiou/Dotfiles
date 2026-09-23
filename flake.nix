@@ -42,7 +42,7 @@
                         let
                             optsFile = self + "/${name}/options.nix";
                         in
-                            if builtins.pathExists optsFile then import optsFile { inherit lib; } else {};
+                            if builtins.pathExists optsFile then import optsFile { inherit lib pkgs; } else {};
                 in {
                     inherit moduleNames getTools getDepsDirect getDeps getExtraOptions;
                 };
