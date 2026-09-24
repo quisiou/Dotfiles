@@ -216,8 +216,8 @@ PanelWindow {
             target: VolumeService
 
             function onOsdRequested() {
-                if (root.pillWidget === "launcher" || root.pillWidget === "lock" || root.pillWidget === "auth"
-                || root.pillWidget === "control" || (root.pillWidget === "default" && defaultMenu.expanded)) return
+                if ((root.pillWidget === "default" && defaultMenu.expanded)
+                    || !["default", "volume", "brightness", "workspace"].includes(root.pillWidget)) return
 
                 root.pillWidget = "volume"
                 if (pillHoverHandler.hovered) volumeOsdTimer.stop()
@@ -229,8 +229,8 @@ PanelWindow {
             target: BrightnessService
 
             function onBrightnessChanged() {
-                if (root.pillWidget === "launcher" || root.pillWidget === "lock" || root.pillWidget === "auth"
-                || root.pillWidget === "control" || (root.pillWidget === "default" && defaultMenu.expanded)) return
+                if ((root.pillWidget === "default" && defaultMenu.expanded)
+                    || !["default", "volume", "brightness", "workspace"].includes(root.pillWidget)) return
 
                 root.pillWidget = "brightness"
                 if (pillHoverHandler.hovered) brightnessOsdTimer.stop()
@@ -242,8 +242,8 @@ PanelWindow {
             target: WorkspaceService
 
             function onSwitched() {
-                if (root.pillWidget === "launcher" || root.pillWidget === "lock" || root.pillWidget === "auth"
-                || root.pillWidget === "control" || (root.pillWidget === "default" && defaultMenu.expanded)) return
+                if ((root.pillWidget === "default" && defaultMenu.expanded)
+                    || !["default", "volume", "brightness", "workspace"].includes(root.pillWidget)) return
 
                 root.pillWidget = "workspace"
                 if (pillHoverHandler.hovered) workspaceTimer.stop()
