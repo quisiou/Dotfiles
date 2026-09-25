@@ -34,6 +34,7 @@ return {
         popup_border_style = "rounded",
         filesystem = {
             bind_to_cwd = false,
+            use_libuv_file_watcher = true,
             filtered_items = {
                 visible = true,
                 hide_dotfiles = false,
