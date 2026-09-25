@@ -48,7 +48,6 @@ map("t",    "<C-h>",        "<C-\\><C-n><C-w>h",    { desc = "Focus left (termin
 map({ "i", "n", "v" },  "<C-s>",    "<cmd>w<CR>",   { desc = "Save file" })
 map({ "n", "v" },       "<C-q>",    "<cmd>q<CR>",   { desc = "Quit window" })
 map({ "n", "v" },       "<C-x>",    "<cmd>x<CR>",   { desc = "Save file and quit window" })
-map("t",                "<C-q>",    "<C-\\><C-n><cmd>q<CR>",    { desc = "Close terminal" })
 
 --- Terminal ------------------------------------------------------------------
 map("n",    "<leader>t",    "<cmd>split | resize 10 | term<CR>i",            { desc = "Open terminal" })
