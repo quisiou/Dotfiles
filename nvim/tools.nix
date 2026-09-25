@@ -8,6 +8,7 @@ pkgs: with pkgs; [
     fd
     git
     lazygit
+    gh gh-dash
     texliveMedium
     gcc clang-tools
     tree-sitter
