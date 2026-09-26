@@ -43,5 +43,81 @@ return {
             end,
             desc = "Open gh-dash",
         },
+        {
+            "<leader>gb",
+            function()
+                vim.fn.jobstart({ "gh", "repo", "view", "--json", "owner", "-q", ".owner.login" }, {
+                    stdout_buffered = true,
+                    on_stdout = function(_, data)
+                        local owner = data and data[1]
+                        if not owner or owner == "" then
+                            open_floating_terminal("gh board")
+                            return
+                        end
+
+                        local query = [[
+                            query($login: String!) {
+                                repositoryOwner(login: $login) {
+                                    ... on ProjectV2Owner {
+                                        projectsV2(first: 20) {
+                                            nodes {
+                                                number
+                                                title
+                                                items(first: 1, query: "assignee:@me") {
+                                                    totalCount
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]]
+
+                        vim.fn.jobstart({
+                            "gh", "api", "graphql",
+                            "-f", "query=" .. query,
+                            "-f", "login=" .. owner,
+                            "--jq", ".data.repositoryOwner.projectsV2.nodes[]? | select(.items.totalCount > 0) | \"\\(.number)\\t\\(.title)\"",
+                        }, {
+                            stdout_buffered = true,
+                            on_stdout = function(_, lines)
+                                lines = vim.tbl_filter(function(l) return l ~= "" end, lines or {})
+
+                                -- keep only lines that actually match "<number>\t<title>" — drop anything malformed
+                                local parsed = {}
+                                for _, line in ipairs(lines) do
+                                    local number, title = line:match("^(%d+)\t(.*)$")
+                                    if number then
+                                        table.insert(parsed, { number = number, title = title })
+                                    end
+                                end
+
+                                if #parsed == 0 then
+                                    vim.notify("No projects with items assigned to you under " .. owner, vim.log.levels.WARN)
+                                    open_floating_terminal("gh board --owner " .. owner)
+                                elseif #parsed == 1 then
+                                    open_floating_terminal("gh board " .. parsed[1].number .. " --owner " .. owner)
+                                else
+                                    local choices, numbers = {}, {}
+                                    for _, p in ipairs(parsed) do
+                                        local label = p.number .. " — " .. p.title
+                                        table.insert(choices, label)
+                                        numbers[label] = p.number
+                                    end
+                                    vim.ui.select(choices, { prompt = "Select a project" }, function(choice)
+                                        if choice then
+                                            open_floating_terminal("gh board " .. numbers[choice] .. " --owner " .. owner)
+                                        end
+                                    end)
+                                end
+                            end,
+                            on_stderr = function() end,
+                        })
+                    end,
+                    on_stderr = function() end,
+                })
+            end,
+            desc = "Open project board with gh-board",
+        },
     },
 }
