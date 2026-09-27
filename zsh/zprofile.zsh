@@ -3,7 +3,7 @@
 
 
 # Source default profile config
-[ -f "$HOME/.config/zsh/default/profile.zsh" ] && . "$HOME/.config/zsh/default/profile.zsh"
+[ -f "$HOME/.config/zsh/profile.zsh" ] && . "$HOME/.config/zsh/profile.zsh"
 
 # Source user profile config
 [ -f "$HOME/.config/zsh/user/profile.zsh" ] && . "$HOME/.config/zsh/user/profile.zsh"

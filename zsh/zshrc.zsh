@@ -3,7 +3,7 @@
 
 
 # Source default main config
-[ -f "$HOME/.config/zsh/default/main.zsh" ] && . "$HOME/.config/zsh/default/main.zsh"
+[ -f "$HOME/.config/zsh/main.zsh" ] && . "$HOME/.config/zsh/main.zsh"
 
 # Source user main config
 [ -f "$HOME/.config/zsh/user/main.zsh" ] && . "$HOME/.config/zsh/user/main.zsh"

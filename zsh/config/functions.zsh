@@ -24,7 +24,7 @@ _ask_yes_or_no() {
         printf "%s [Y/n] " "$_yn_msg"
         read _yn_key
         echo
-        
+
         case "$_yn_key" in
             [Yy]*|"") return 0 ;;  # 0 = Success (Yes). Also allows Enter for default Yes.
             [Nn]*)    return 1 ;;  # 1 = Failure (No)
@@ -447,7 +447,7 @@ EOF
             --format="$_sd_format" \
             > "$_sd_name.$_sd_format"
     fi
-    
+
     echo "Done! Saved as $_sd_name.$_sd_format"
 }
 
@@ -571,7 +571,7 @@ EOF
 
         echo "[+] Starting SOCKS5 proxy on localhost:$_htb_socks_port..."
         echo "[!] Proxy will run in foreground. Keep this terminal open to maintain it."
-        
+
         touch /tmp/qemu-htb-proxy.running
         trap 'rm -f /tmp/qemu-htb-proxy.running; exit' INT TERM EXIT
 
@@ -613,7 +613,7 @@ EOF
                 -daemonize \
                 -display none \
                 -pidfile /tmp/qemu-htb.pid
-            
+
             echo "[+] VM booted up correctly"
         fi
 
@@ -702,7 +702,7 @@ EOF
     esac
 
     _bc_connected=$(bluetoothctl info "$_bc_mac_address" | awk -F': ' '/Connected/ {print $2}')
-    
+
     if [ "$_bc_connected" = "yes" ]; then
         if _ask_yes_or_no "Disconnect device $_bc_mac_address?"; then
             bluetoothctl disconnect "$_bc_mac_address"

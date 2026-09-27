@@ -7,11 +7,13 @@ name=$(basename "$ROOT_DIR")
 
 flag_force=false
 flag_no_link=false
+flag_overwrite=false
 
 for arg in "$@"; do
     case "$arg" in
         --"$name"-f) flag_force=true ;;
         --"$name"-n) flag_no_link=true ;;
+        --"$name"-o) flag_overwrite=true ;;
         --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
         *) ;;            # not my flag, ignore
     esac
@@ -23,23 +25,36 @@ echo "╚═══════════════════════�
 echo ""
 
 CONFIG_DIR="$HOME/.config"
+DEST="$CONFIG_DIR/zsh"
 
-echo "Creating symlink in $CONFIG_DIR..."
-
-symlink_src="${ROOT_DIR%/}"
-symlink_dst="$CONFIG_DIR/$(basename "$symlink_src")"
-
-if [ "$flag_force" = true ]; then
-    rm -f "$symlink_dst"
-fi
-
-if [ -L "$symlink_dst" ]; then
-    echo "    skipped    $symlink_dst: file already exists (symlink)"
-elif [ -e "$symlink_dst" ]; then
-    echo "    skipped    $symlink_dst: file already exists (not symlink)"
+if [ "$flag_force" = false ] && [ -e "$DEST" ]; then
+    echo "    skipped    $DEST: file already exists (not symlink)"
 else
-    ln -s "$symlink_src" "$symlink_dst"
-    echo "    linked     $symlink_src -> $symlink_dst"
+    echo "Setting up $DEST..."
+
+    rm -rf "$DEST"
+
+    mkdir -p "$DEST"
+
+    for file in "$ROOT_DIR"/config/*.zsh; do
+        [ -e "$file" ] || continue
+        target="$DEST/$(basename "$file")"
+
+        if [ "$flag_overwrite" = true ]; then
+            rm -rf "$target"
+        fi
+
+        if [ -L "$target" ]; then
+            echo "    skipped    $target: file already exists (symlink)"
+        elif [ -e "$target" ]; then
+            echo "    skipped    $target: file already exists (not symlink)"
+        else
+            ln -s "$file" "$target"
+            echo "    linked     $file -> $target"
+        fi
+    done
+
+    echo "    ready      $DEST"
 fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
@@ -47,8 +62,8 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 echo "Creating user scripts directory structure..."
 
 if [ -w "$ROOT_DIR" ]; then
-    mkdir -p "$ROOT_DIR/user"
-    private_script="$ROOT_DIR/user/env.zsh"
+    mkdir -p "$DEST/user"
+    private_script="$DEST/user/env.zsh"
 
     if [ -L "$private_script" ]; then
         echo "    skipped    $private_script: file already exists (symlink)"
