@@ -92,10 +92,27 @@ hl.bind(Config.mainMod .. " + Print",          hl.dsp.exec_cmd("hyprshot -m regi
 hl.bind(Config.mainMod .. " + SHIFT + Print",  hl.dsp.exec_cmd("hyprshot -m window"))
 
 
--- Eww topbar binds
-hl.bind(Config.mainMod .. " + Space",      hl.dsp.exec_cmd("~/.config/eww/scripts/usrctl.sh"))
-hl.bind(Config.mainMod .. " + mouse_up",   hl.dsp.exec_cmd("~/.config/eww/scripts/workspace_scroll.sh up"))
-hl.bind(Config.mainMod .. " + mouse_down", hl.dsp.exec_cmd("~/.config/eww/scripts/workspace_scroll.sh down"))
+local function scroll_workspace(direction)
+    return function()
+        local current = hl.get_active_workspace()
+        if not current then return end
+
+        -- find max workspace id, minimum 5
+        local max_ws = 5
+        for _, ws in ipairs(hl.get_workspaces()) do
+            if ws.id > max_ws then max_ws = ws.id end
+        end
+
+        if direction == "up" and current.id < max_ws then
+            hl.dispatch(hl.dsp.focus({ workspace = tostring(current.id + 1) }))
+        elseif direction == "down" and current.id > 1 then
+            hl.dispatch(hl.dsp.focus({ workspace = tostring(current.id - 1) }))
+        end
+    end
+end
+
+hl.bind(Config.mainMod .. " + mouse_up", scroll_workspace("up"))
+hl.bind(Config.mainMod .. " + mouse_down", scroll_workspace("down"))
 
 
 -- Quickshell binds

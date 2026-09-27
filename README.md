@@ -1,7 +1,6 @@
 ## TODO
 ### Dotfiles
 - Make connections and system topbar part.
-- Replace EWW's user menu with hardware usage (by adding stuff to main pill in topbar).
 - Make changing between launcher and carousel not move the searchbar.
 - Make MainPill size consistent vertically between modes.
 - Try to make workspace indicators when more than 5 not clip too much.
