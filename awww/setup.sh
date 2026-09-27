@@ -5,12 +5,10 @@
 ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 name=$(basename "$ROOT_DIR")
 
-flag_force=false
 flag_overwrite=false
 
 for arg in "$@"; do
     case "$arg" in
-        --"$name"-f) flag_force=true ;;
         --"$name"-o) flag_overwrite=true ;;
         --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
         *) ;;            # not my flag, ignore
@@ -23,43 +21,16 @@ echo "╚═══════════════════════�
 echo ""
 
 CONFIG_DIR="$HOME/.config"
+DEST="$CONFIG_DIR/awww"
 
-echo "Creating symlink in $CONFIG_DIR..."
+echo "Setting up $DEST..."
 
-symlink_src="${ROOT_DIR%/}"
-symlink_dst="$CONFIG_DIR/$(basename "$symlink_src")"
+mkdir -p "$DEST"
+ln -sf "$ROOT_DIR/default" "$DEST/default"
+echo "    linked     default/"
 
-if [ "$flag_force" = true ]; then
-    rm -f "$symlink_dst"
-fi
-
-if [ -L "$symlink_dst" ]; then
-    echo "    skipped    $symlink_dst: file already exists (symlink)"
-elif [ -e "$symlink_dst" ]; then
-    echo "    skipped    $symlink_dst: file already exists (not symlink)"
-else
-    ln -s "$symlink_src" "$symlink_dst"
-    echo "    linked     $symlink_src -> $symlink_dst"
-fi
-
-echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
-
-echo "Creating user directory..."
-
-USER_DIR="$ROOT_DIR/user"
-
-if [ -w "$ROOT_DIR" ]; then
-    if [ -L "$USER_DIR" ]; then
-        echo "    skipped    $USER_DIR: directory already exists (symlink)"
-    elif [ -e "$USER_DIR" ]; then
-        echo "    skipped    $USER_DIR: directory already exists (not symlink)"
-    else
-        mkdir -p "$USER_DIR"
-        echo "    created    $USER_DIR"
-    fi
-else
-    echo "    skipped    $USER_DIR: source is read-only, user directory not created"
-fi
+mkdir -p "$DEST/user"
+echo "    ready      user/ (writable)"
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
@@ -79,7 +50,7 @@ CACHE_FILE="$HOME/.cache/awww/$AWWW_VERSION/eDP-1"
 if [ -f "$CACHE_FILE" ] && [ "$flag_overwrite" = false ]; then
     echo "    skipped    $CACHE_FILE:  cached wallpaper already exists"
 else
-    awww img "$ROOT_DIR/default/Leshy.jpg" --transition-type center
+    awww img "$DEST/default/Leshy.jpg" --transition-type center
     echo "    created    $CACHE_FILE"
 fi
 

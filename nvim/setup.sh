@@ -27,7 +27,7 @@ echo ""
 CONFIG_DIR="$HOME/.config"
 DEST="$CONFIG_DIR/nvim"
 
-mkdir -p "$DEST" "$DEST/lua"
+mkdir -p "$DEST/lua/themes"
 
 if [ "$flag_no_link" = true ]; then
     echo "Skipping static links in $CONFIG_DIR (-n set)..."
@@ -43,7 +43,9 @@ else
     ln -sf "$ROOT_DIR/lua/options.lua"     "$DEST/lua/options.lua"
     ln -sf "$ROOT_DIR/lua/plugins"         "$DEST/lua/plugins"
 
-    echo "    linked     init.lua, lazy-lock.json, colors/, lua/*.lua, lua/plugins/"
+    ln -sf "$ROOT_DIR/lua/themes/init.lua" "$DEST/lua/themes/init.lua"
+
+    echo "    linked     init.lua, lazy-lock.json, colors/, lua/*.lua, lua/plugins/, lua/themes/init.lua"
 fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
