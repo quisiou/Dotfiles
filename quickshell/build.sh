@@ -14,23 +14,21 @@ done
 ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 cd "$ROOT_DIR"
 
-BUILD_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/quickshell/build"
-
 echo "Building resources and dependencies..."
 
 if [ "$flag_f" = true ]; then
-    rm -rf "$BUILD_DIR"
+    rm -rf .build
 fi
 
-mkdir -p "$BUILD_DIR"
+mkdir -p .build
 
-cmake -B "$BUILD_DIR" -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+cmake -B .build -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 if [ $? -ne 0 ]; then
     echo "cmake configure failed, aborting..."
     exit 1
 fi
 
-cmake --build "$BUILD_DIR" --parallel
+cmake --build .build --parallel
 if [ $? -ne 0 ]; then
     echo "cmake build failed, aborting..."
     exit 1
