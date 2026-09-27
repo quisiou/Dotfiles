@@ -5,10 +5,12 @@
 ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 name=$(basename "$ROOT_DIR")
 
+flag_force=false
 flag_overwrite=false
 
 for arg in "$@"; do
     case "$arg" in
+        --"$name"-f) flag_force=true ;;
         --"$name"-o) flag_overwrite=true ;;
         --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
         *) ;;            # not my flag, ignore
@@ -23,14 +25,20 @@ echo ""
 CONFIG_DIR="$HOME/.config"
 DEST="$CONFIG_DIR/awww"
 
-echo "Setting up $DEST..."
+if [ "$flag_force" = false ] && [ -e "$DEST" ]; then
+    echo "    skipped    $DEST: file already exists (not symlink)"
+else
+    echo "Setting up $DEST..."
 
-mkdir -p "$DEST"
-ln -sf "$ROOT_DIR/default" "$DEST/default"
-echo "    linked     default/"
+    rm -rf "$DEST"
 
-mkdir -p "$DEST/user"
-echo "    ready      user/ (writable)"
+    mkdir -p "$DEST"
+    ln -sf "$ROOT_DIR/default" "$DEST/default"
+    echo "    linked     default/"
+
+    mkdir -p "$DEST/user"
+    echo "    ready      user/ (writable)"
+fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
