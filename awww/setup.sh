@@ -30,14 +30,31 @@ if [ "$flag_force" = false ] && [ -e "$DEST" ]; then
 else
     echo "Setting up $DEST..."
 
+    WP_DIR="$DEST/wallpapers"
+
     rm -rf "$DEST"
 
-    mkdir -p "$DEST"
-    ln -sf "$ROOT_DIR/default" "$DEST/default"
-    echo "    linked     default/"
+    mkdir -p "$WP_DIR"
 
-    mkdir -p "$DEST/user"
-    echo "    ready      user/ (writable)"
+    for file in "$ROOT_DIR"/wallpapers/*; do
+        [ -e "$file" ] || continue
+        target="$WP_DIR/$(basename "$file")"
+
+        if [ "$flag_overwrite" = true ]; then
+            rm -rf "$target"
+        fi
+
+        if [ -L "$target" ]; then
+            echo "    skipped    $target: file already exists (symlink)"
+        elif [ -e "$target" ]; then
+            echo "    skipped    $target: file already exists (not symlink)"
+        else
+            ln -s "$file" "$target"
+            echo "    linked     $file -> $target"
+        fi
+    done
+
+    echo "    ready      wallpapers/"
 fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"

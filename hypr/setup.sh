@@ -23,7 +23,7 @@ echo ""
 
 CONFIG_DIR="$HOME/.config"
 DEST="$CONFIG_DIR/hypr"
-USER_DIR="$ROOT_DIR/user"
+USER_DIR="$DEST/user"
 
 create_file() {
     if [ -f "$USER_DIR/$1" ]; then
@@ -54,9 +54,6 @@ else
 
     ln -sf "$ROOT_DIR/default"      "$DEST/default"
     echo "    linked     default/"
-
-    ln -sf "$ROOT_DIR/user"         "$DEST/user"
-    echo "    linked     user/"
 fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
@@ -79,9 +76,9 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 
 echo "Creating override files in hypr/user/ directory..."
 
-if [ -w "$ROOT_DIR" ]; then
-    mkdir -p "$USER_DIR"
+mkdir -p "$USER_DIR"
 
+if [ -w "$USER_DIR" ]; then
     create_file "env.lua"              "ENVIRONMENT VARIABLES CONFIGURATION"
     create_file "variables.lua"        "GENERAL SETTINGS"
     create_file "monitors.lua"         "MONITORS CONFIGURATION"

@@ -12,7 +12,7 @@ def print_usage():
     print("Usage:")
     print("\tpython3 set_theme.py <toml-theme-file>\n")
     print("Example:")
-    print("\tpython3 set_theme.py ~/.config/elysian_themes/themes/default/TokyoCarbon.toml")
+    print("\tpython3 set_theme.py ~/.config/elysian_themes/themes/TokyoCarbon.toml")
 
 
 def parse_toml(toml_path: Path) -> dict[str, dict[str, str]]:
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     selected_theme: dict[str, dict[str, str]] = parse_toml(Path(argv[1]).resolve())
     fallback_theme: dict[str, dict[str, str]] = parse_toml(
-        (Path.home() / ".config" / "elysian_themes" / "themes" / "default" / "TokyoCarbon.toml").resolve()
+        (Path.home() / ".config" / "elysian_themes" / "themes" / "TokyoCarbon.toml").resolve()
     )
 
     theme: dict[str, dict[str, str]] = {
