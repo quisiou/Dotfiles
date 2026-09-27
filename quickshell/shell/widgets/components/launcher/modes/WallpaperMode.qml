@@ -58,7 +58,7 @@ Item {
         id: scanner
         command: [
             "bash", "-c",
-            "find " + Quickshell.env("HOME") + "/.config/awww/ -type f " +
+            "find -L " + Quickshell.env("HOME") + "/.config/awww/ -type f " +
             "\\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \\) " +
             "-exec realpath {} \\;"
         ]

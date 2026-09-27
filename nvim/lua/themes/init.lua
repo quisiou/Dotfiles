@@ -27,9 +27,10 @@ function M.load()
     vim.o.termguicolors = true
     vim.g.colors_name = "elysian"
 
-    local ok, palette = pcall(require, "themes.active")
+    local active_path = vim.fn.expand("~/.config/elysian_themes/active_theme/colors.lua")
+    local ok, palette = pcall(dofile, active_path)
     if not ok then
-        vim.notify("themes: could not load lua/themes/active.lua palette", vim.log.levels.ERROR)
+        vim.notify("themes: could not load " .. active_path .. " palette", vim.log.levels.ERROR)
         return
     end
     local c = palette.colors

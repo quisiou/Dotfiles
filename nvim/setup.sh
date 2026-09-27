@@ -27,48 +27,20 @@ echo ""
 CONFIG_DIR="$HOME/.config"
 DEST="$CONFIG_DIR/nvim"
 
-mkdir -p "$DEST/lua/themes"
+mkdir -p "$DEST"
 
-if [ "$flag_no_link" = true ]; then
-    echo "Skipping static links in $CONFIG_DIR (-n set)..."
-else
-    echo "Linking static files into $DEST..."
-
+if [ "$flag_no_link" = false ]; then
     ln -sf "$ROOT_DIR/init.lua"        "$DEST/init.lua"
-    ln -sf "$ROOT_DIR/lazy-lock.json"  "$DEST/lazy-lock.json"
-    ln -sf "$ROOT_DIR/colors"          "$DEST/colors"
-
-    ln -sf "$ROOT_DIR/lua/keymaps.lua"     "$DEST/lua/keymaps.lua"
-    ln -sf "$ROOT_DIR/lua/lazy-config.lua" "$DEST/lua/lazy-config.lua"
-    ln -sf "$ROOT_DIR/lua/options.lua"     "$DEST/lua/options.lua"
-    ln -sf "$ROOT_DIR/lua/plugins"         "$DEST/lua/plugins"
-
-    ln -sf "$ROOT_DIR/lua/themes/init.lua" "$DEST/lua/themes/init.lua"
-
-    echo "    linked     init.lua, lazy-lock.json, colors/, lua/*.lua, lua/plugins/, lua/themes/init.lua"
+    echo "    linked     init.lua"
 fi
 
-echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+echo "Linking static files into $DEST..."
 
-echo "Creating symlink for theme file..."
+ln -sf "$ROOT_DIR/lazy-lock.json"  "$DEST/lazy-lock.json"
+ln -sf "$ROOT_DIR/colors"          "$DEST/colors"
+ln -sf "$ROOT_DIR/lua/"            "$DEST/lua"
 
-theme_file_src="$CONFIG_DIR/elysian_themes/active_theme/colors.lua"
-theme_file_dst="$DEST/lua/themes/active.lua"
-
-mkdir -p "$(dirname "$theme_file_dst")"
-
-if [ "$flag_overwrite" = true ]; then
-    rm -f "$theme_file_dst"
-fi
-
-if [ -L "$theme_file_dst" ]; then
-    echo "    skipped    $theme_file_dst: file already exists (symlink)"
-elif [ -e "$theme_file_dst" ]; then
-    echo "    skipped    $theme_file_dst: file already exists (not symlink)"
-else
-    ln -s "$theme_file_src" "$theme_file_dst"
-    echo "    linked     $theme_file_src -> $theme_file_dst"
-fi
+echo "    linked     init.lua, lazy-lock.json, colors/, lua/"
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
