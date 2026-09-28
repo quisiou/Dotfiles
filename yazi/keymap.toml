@@ -1,9 +1,9 @@
 # yazi/keymap.toml
- 
- 
+
+
 [mgr]
 prepend_keymap = [
-	{ on = [ "g", "D" ], run = 'shell -- ya emit cd "$(readlink -f ~/.config/yazi)"/..', desc = "Go to Dotfiles" },
+	{ on = [ "g", "D" ], run = 'shell -- ya emit cd "$(readlink -f ~/.config/yazi/yazi.toml)"/../..', desc = "Go to Dotfiles" },
 	{ on = [ "g", "l" ], run = "cd ~/.local", desc = "Go to ~/.local" },
 	{ on = [ "g", "t" ], run = "cd ~/.local/share/Trash/files", desc = "Go to trash bin" }
 ]
