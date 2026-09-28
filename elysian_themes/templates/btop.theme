@@ -1,0 +1,84 @@
+# elysian_themes/templates/btop.theme
+
+
+# Main background, empty for terminal default, need to be empty if you want transparent background
+theme[main_bg]="{{ colors.BG }}"
+
+# Main text color
+theme[main_fg]="{{ colors.FG }}"
+
+# Title color for boxes
+theme[title]="{{ colors.SECONDARY_MUTED }}"
+
+# Highlight color for keyboard shortcuts
+theme[hi_fg]="{{ colors.ACCENT_MUTED }}"
+
+# Background color of selected items
+theme[selected_bg]="{{ colors.BG_ACTIVE }}"
+
+# Foreground color of selected items
+theme[selected_fg]="{{ colors.SECONDARY_MUTED }}"
+
+# Color of inactive/disabled text
+theme[inactive_fg]="{{ colors.DARK6 }}"
+
+# Color of text appearing on top of graphs, i.e uptime and current network graph scaling
+theme[graph_text]="{{ colors.DARK4 }}"
+
+# Misc colors for processes box including mini cpu graphs, details memory graph and details status text
+theme[proc_misc]="{{ colors.SUCCESS_MUTED }}"
+
+# Cpu box outline color
+theme[cpu_box]="{{ colors.FG_DARK }}"
+
+# Memory/disks box outline color
+theme[mem_box]="{{ colors.FG_DARK }}"
+
+# Net up/down box outline color
+theme[net_box]="{{ colors.FG_DARK }}"
+
+# Processes box outline color
+theme[proc_box]="{{ colors.FG_DARK }}"
+
+# Box divider line and small boxes line color
+theme[div_line]="{{ colors.DARK4 }}"
+
+# Temperature graph colors
+theme[temp_start]="{{ colors.SECONDARY_MUTED }}"
+theme[temp_mid]="{{ colors.INFO_ALT }}"
+theme[temp_end]="{{ colors.ACCENT_MUTED }}"
+
+# CPU graph colors
+theme[cpu_start]="{{ colors.SUCCESS_MUTED }}"
+theme[cpu_mid]="{{ colors.TERTIARY }}"
+theme[cpu_end]="{{ colors.TERTIARY_LOW }}"
+
+# Mem/Disk free meter
+theme[free_start]="{{ colors.SECONDARY_MUTED }}"
+theme[free_mid]=""
+theme[free_end]="{{ colors.INFO_ALT }}"
+
+# Mem/Disk cached meter
+theme[cached_start]="{{ colors.ACCENT_MUTED }}"
+theme[cached_mid]=""
+theme[cached_end]="{{ colors.SECONDARY }}"
+
+# Mem/Disk available meter
+theme[available_start]="{{ colors.SUCCESS_MUTED }}"
+theme[available_mid]=""
+theme[available_end]="{{ colors.TERTIARY }}"
+
+# Mem/Disk used meter
+theme[used_start]="{{ colors.TERTIARY_LOW }}"
+theme[used_mid]=""
+theme[used_end]="{{ colors.ERROR_LOW }}"
+
+# Download graph colors
+theme[download_start]="{{ colors.SECONDARY_MUTED }}"
+theme[download_mid]="{{ colors.INFO_ALT }}"
+theme[download_end]="{{ colors.ACCENT_MUTED }}"
+
+# Upload graph colors
+theme[upload_start]="{{ colors.TERTIARY_LOW }}"
+theme[upload_mid]="{{ colors.ERROR_LOW }}"
+theme[upload_end]="{{ colors.TERTIARY }}"

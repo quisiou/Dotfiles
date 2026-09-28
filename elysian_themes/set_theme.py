@@ -81,7 +81,8 @@ if __name__ == "__main__":
     env = Environment(loader=FileSystemLoader(root_dir / "templates/"))
     env.filters["rgba"] = lambda color, a: f"{color}{a}"
 
-    template_replace(config_dir, "kitty.conf",      theme, env)
-    template_replace(config_dir, "yazi.toml",       theme, env)
-    template_replace(config_dir, "starship.toml",   theme, env)
+    template_replace(config_dir, "btop.theme",  theme, env)
     template_replace(config_dir, "fastfetch.json",  theme, env)
+    template_replace(config_dir, "kitty.conf",      theme, env)
+    template_replace(config_dir, "starship.toml",   theme, env)
+    template_replace(config_dir, "yazi.toml",       theme, env)
