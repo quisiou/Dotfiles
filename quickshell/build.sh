@@ -1,5 +1,5 @@
 #!/bin/sh
-# quickshell/shell/build.sh
+# quickshell/build.sh
 
 
 flag_f=false
@@ -11,25 +11,24 @@ while getopts "fn" opt; do
     esac
 done
 
+BUILD_DIR="$HOME/.config/quickshell/.build"
 ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 cd "$ROOT_DIR"
 
 echo "Building resources and dependencies..."
 
 if [ "$flag_f" = true ]; then
-    rm -rf .build
+    rm -rf "$BUILD_DIR"
 fi
 
-mkdir -p .build
+mkdir -p "$BUILD_DIR"
 
-cmake -B .build -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-if [ $? -ne 0 ]; then
+if ! cmake -B "$BUILD_DIR" -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON; then
     echo "cmake configure failed, aborting..."
     exit 1
 fi
 
-cmake --build .build --parallel
-if [ $? -ne 0 ]; then
+if ! cmake --build "$BUILD_DIR" --parallel; then
     echo "cmake build failed, aborting..."
     exit 1
 fi

@@ -88,7 +88,7 @@ else
     link_file "$ROOT_DIR/hyprland.lua" "$DEST/hyprland.lua"
 fi
 
-link_file "$ROOT_DIR/default" "$DEST/default"
+link_file "$ROOT_DIR/config" "$DEST/default"
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 

@@ -21,7 +21,7 @@ Singleton {
 
     FileView {
         id: ignoreFile
-        path: Quickshell.shellDir + "/ignoreNotifications.json"
+        path: Quickshell.env("XDG_CONFIG_HOME") + "/quickshell/ignoreNotifications.json"
         watchChanges: true
         onFileChanged: reload()
         onTextChanged: {
@@ -71,7 +71,7 @@ Singleton {
         };
 
         let arr = [];
-        
+
         try { arr = JSON.parse(logFile.text()); }
         catch(e) {}
 
