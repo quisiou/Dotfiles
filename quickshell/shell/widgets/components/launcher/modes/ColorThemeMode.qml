@@ -37,11 +37,11 @@ Item {
                 return () => {
                     vscPackageProcess.command = [
                         "python3",
-                        Quickshell.env("HOME") + "/.config/vscodium/build_package.py"
+                        Quickshell.env("HOME") + "/.local/share/elysian-dots/vscodium/build_package.py"
                     ]
                     vscProcess.command = [
                         "python3",
-                        Quickshell.env("HOME") + "/.config/vscodium/build_theme.py",
+                        Quickshell.env("HOME") + "/.local/share/elysian-dots/vscodium/build_theme.py",
                         path
                     ]
                     ctProcess.command = [

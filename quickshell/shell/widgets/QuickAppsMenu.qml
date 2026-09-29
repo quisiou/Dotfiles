@@ -39,7 +39,7 @@ PanelWindow {
 
     FileView {
         id: appsFile
-        path: Quickshell.env("XDG_CONFIG_HOME") + "/quickshell/quickapps.json"
+        path: Quickshell.env("HOME") + "/.config/quickshell/quickapps.json"
         watchChanges: true
         onFileChanged: reload()
         onTextChanged: root.rebuildSets()

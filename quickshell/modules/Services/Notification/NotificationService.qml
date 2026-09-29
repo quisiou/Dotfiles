@@ -21,7 +21,7 @@ Singleton {
 
     FileView {
         id: ignoreFile
-        path: Quickshell.env("XDG_CONFIG_HOME") + "/quickshell/ignoreNotifications.json"
+        path: Quickshell.env("HOME") + "/.config/quickshell/ignoreNotifications.json"
         watchChanges: true
         onFileChanged: reload()
         onTextChanged: {

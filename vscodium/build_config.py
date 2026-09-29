@@ -1,4 +1,4 @@
-# VSCodium/build_config.py
+# vscodium/build_config.py
 
 
 from os import mkdir
@@ -9,7 +9,7 @@ import json
 
 def print_usage():
     print("Usage:")
-    print("\tpython3 build_config.py")
+    print("\tpython3 build_config.py [--overwrite]")
 
 
 def build_settings(config_dir: Path):
@@ -75,20 +75,27 @@ def build_snippets(config_dir: Path):
 
 
 if __name__ == "__main__":
-    argc: int = len(argv)
-    if argc < 1 or argc > 2:
+    overwrite: bool = "--overwrite" in argv[1:]
+    if len(argv) > 2 or (len(argv) == 2 and not overwrite):
         print_usage()
         exit(1)
 
-    config_dir: Path = Path.home() / ".config" / "vscodium" / "config"
+    config_dir: Path = Path.home() / ".config" / "VSCodium" / "User"
     config_dir.mkdir(exist_ok=True, parents=True)
 
-    if not Path(config_dir, "settings.json").exists():
-        build_settings(config_dir)
-
-    if not Path(config_dir, "keybindings.json").exists():
-        build_keybindings(config_dir)
+    for name, build in (("settings.json", build_settings), ("keybindings.json", build_keybindings)):
+        # is_symlink(): a leftover dangling symlink from the old layout counts as existing
+        if overwrite or not (config_dir / name).exists():
+            if (config_dir / name).is_symlink():
+                (config_dir / name).unlink()
+            build(config_dir)
+            print(f"    created    {config_dir / name}")
+        else:
+            print(f"    skipped    {config_dir / name}: file already exists")
 
     if not Path(config_dir, "snippets").exists():
         Path(config_dir, "snippets").mkdir()
         build_snippets(config_dir)
+        print(f"    created    {config_dir / 'snippets'}/")
+    else:
+        print(f"    skipped    {config_dir / 'snippets'}/: file already exists")
