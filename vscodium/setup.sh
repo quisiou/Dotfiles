@@ -138,4 +138,25 @@ link_file "$DOTS_DIR" "$EXTENSION_LINK" "$flag_overwrite_theme"
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
+echo "Registering extension in extensions.json..."
+
+python3 - "$EXTENSIONS_DIR" "$(basename "$EXTENSION_LINK")" "$EXT_VERSION" <<'EOF'
+import json, sys
+from pathlib import Path
+d, rel, ver = Path(sys.argv[1]), sys.argv[2], sys.argv[3]
+f = d / "extensions.json"
+ext_id = "quisiou.elysian-color-themes"
+if not f.exists():
+    print("    skipped    extensions.json missing (VSCodium will discover the extension itself)")
+    sys.exit(0)
+entries = [e for e in json.loads(f.read_text()) if e["identifier"]["id"].lower() != ext_id]
+entries.append({"identifier": {"id": ext_id}, "version": ver,
+                "location": {"$mid": 1, "path": str(d / rel), "scheme": "file"},
+                "relativeLocation": rel})
+f.write_text(json.dumps(entries))
+print("    registered " + ext_id)
+EOF
+
+echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+
 echo "VSCodium configured successfully!"
