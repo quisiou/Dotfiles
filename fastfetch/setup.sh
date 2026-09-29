@@ -5,11 +5,12 @@
 ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 name=$(basename "$ROOT_DIR")
 
+flag_force=false
 flag_overwrite=false
 
 for arg in "$@"; do
     case "$arg" in
-        --"$name"-f) ;;
+        --"$name"-f) flag_force=true ;;
         --"$name"-o) flag_overwrite=true ;;
         --"$name"-*) echo "Warning: unrecognized flag '$arg' for $name" >&2 ;;
         *) ;;            # not my flag, ignore
@@ -24,19 +25,27 @@ echo ""
 CONFIG_DIR="$HOME/.config"
 DEST="$CONFIG_DIR/fastfetch"
 
-echo "Setting up $DEST..."
+echo "Setting up $DEST/..."
 
-mkdir -p "$DEST"
+if [ "$flag_force" = true ] || [ ! -e "$DEST" ]; then
+    rm -rf "$DEST"
+    mkdir -p "$DEST"
+    echo "    created    $DEST/"
+else
+    echo "    skipped    $DEST/: file already exists"
+fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
 target="$DEST/config.jsonc"
 dir="$CONFIG_DIR/elysian_themes/active_theme/fastfetch.json"
 
-echo "Setting up main configuration file..."
+echo "Linking main configuration file..."
 
 if [ "$flag_overwrite" = true ]; then
-    rm -f "$target"
+    rm -rf "$target"
+elif [ -L "$target" ] && [ ! -e "$target" ]; then
+    rm "$target"    # dangling symlink, replace it
 fi
 
 if [ -L "$target" ]; then
@@ -50,4 +59,4 @@ fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
-echo "FastFetch configured successfully!"
+echo "Fastfetch configured successfully!"

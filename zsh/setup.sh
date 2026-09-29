@@ -19,6 +19,26 @@ for arg in "$@"; do
     esac
 done
 
+link_file() {
+    src=$1
+    target=$2
+
+    if [ "$flag_overwrite" = true ]; then
+        rm -rf "$target"
+    elif [ -L "$target" ] && [ ! -e "$target" ]; then
+        rm "$target"    # dangling symlink, replace it
+    fi
+
+    if [ -L "$target" ]; then
+        echo "    skipped    $target: file already exists (symlink)"
+    elif [ -e "$target" ]; then
+        echo "    skipped    $target: file already exists (not symlink)"
+    else
+        ln -s "$src" "$target"
+        echo "    linked     $src -> $target"
+    fi
+}
+
 echo "╔══════════════════════════════╗"
 echo "║ Setting up zsh configuration ║"
 echo "╚══════════════════════════════╝"
@@ -27,50 +47,39 @@ echo ""
 CONFIG_DIR="$HOME/.config"
 DEST="$CONFIG_DIR/zsh"
 
-if [ "$flag_force" = false ] && [ -e "$DEST" ]; then
-    echo "    skipped    $DEST: file already exists (not symlink)"
-else
-    echo "Setting up $DEST..."
+echo "Setting up $DEST/..."
 
+if [ "$flag_force" = true ] || [ ! -e "$DEST" ]; then
     rm -rf "$DEST"
-
     mkdir -p "$DEST"
-
-    for file in "$ROOT_DIR"/config/*.zsh; do
-        [ -e "$file" ] || continue
-        target="$DEST/$(basename "$file")"
-
-        if [ "$flag_overwrite" = true ]; then
-            rm -rf "$target"
-        fi
-
-        if [ -L "$target" ]; then
-            echo "    skipped    $target: file already exists (symlink)"
-        elif [ -e "$target" ]; then
-            echo "    skipped    $target: file already exists (not symlink)"
-        else
-            ln -s "$file" "$target"
-            echo "    linked     $file -> $target"
-        fi
-    done
-
-    echo "    ready      $DEST"
+    echo "    created    $DEST/"
+else
+    echo "    skipped    $DEST/: file already exists"
 fi
+
+echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+
+echo "Linking main configuration files..."
+
+for file in "$ROOT_DIR"/config/*.zsh; do
+    [ -e "$file" ] || continue
+    target="$DEST/$(basename "$file")"
+    link_file "$file" "$target"
+done
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
 echo "Creating user scripts directory structure..."
 
-if [ -w "$ROOT_DIR" ]; then
-    mkdir -p "$DEST/user"
-    private_script="$DEST/user/env.zsh"
+mkdir -p "$DEST/user"
+private_script="$DEST/user/env.zsh"
 
-    if [ -L "$private_script" ]; then
-        echo "    skipped    $private_script: file already exists (symlink)"
-    elif [ -e "$private_script" ]; then
-        echo "    skipped    $private_script: file already exists (not symlink)"
-    else
-        cat > "$private_script" <<EOF
+if [ -L "$private_script" ]; then
+    echo "    skipped    $private_script: file already exists (symlink)"
+elif [ -e "$private_script" ]; then
+    echo "    skipped    $private_script: file already exists (not symlink)"
+else
+    cat > "$private_script" <<EOF
 #!/usr/bin/env zsh
 # zsh/user/env.zsh
 
@@ -78,10 +87,7 @@ if [ -w "$ROOT_DIR" ]; then
 # Place your personal environment variables here...
 
 EOF
-        echo "    created    $private_script"
-    fi
-else
-    echo "    skipped    $ROOT_DIR/user: source is read-only, user script not created"
+    echo "    created    $private_script"
 fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
@@ -89,22 +95,14 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 if [ "$flag_no_link" = true ]; then
     echo "Skipping main scripts symlinks (make do on your own)"
 else
-    echo "Linking main scripts..."
+    echo "Linking main zsh files..."
 
     for zsh_file in "$ROOT_DIR"/*.zsh; do
         [ -e "$zsh_file" ] || continue
 
         filename=$(basename "$zsh_file")
         target="$HOME/.${filename%.zsh}"
-
-        if [ -L "$target" ]; then
-            echo "    skipped    $target: file already exists (symlink)"
-        elif [ -e "$target" ]; then
-            echo "    skipped    $target: file already exists (not symlink)"
-        else
-            ln -s "$zsh_file" "$target"
-            echo "    linked     $zsh_file -> $target"
-        fi
+        link_file "$zsh_file" "$target"
     done
 fi
 

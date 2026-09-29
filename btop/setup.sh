@@ -17,6 +17,26 @@ for arg in "$@"; do
     esac
 done
 
+link_file() {
+    src=$1
+    target=$2
+
+    if [ "$flag_overwrite" = true ]; then
+        rm -rf "$target"
+    elif [ -L "$target" ] && [ ! -e "$target" ]; then
+        rm "$target"    # dangling symlink, replace it
+    fi
+
+    if [ -L "$target" ]; then
+        echo "    skipped    $target: file already exists (symlink)"
+    elif [ -e "$target" ]; then
+        echo "    skipped    $target: file already exists (not symlink)"
+    else
+        ln -s "$src" "$target"
+        echo "    linked     $src -> $target"
+    fi
+}
+
 echo "╔═══════════════════════════════╗"
 echo "║ Setting up btop configuration ║"
 echo "╚═══════════════════════════════╝"
@@ -25,32 +45,25 @@ echo ""
 CONFIG_DIR="$HOME/.config"
 DEST="$CONFIG_DIR/btop"
 
-echo "Setting up $DEST..."
+echo "Setting up $DEST/..."
 
-mkdir -p "$DEST"
-ln -sf "$ROOT_DIR/btop.conf" "$DEST/btop.conf"
-
-echo "    linked     btop.conf"
+if [ "$flag_force" = true ] || [ ! -e "$DEST" ]; then
+    rm -rf "$DEST"
+    mkdir -p "$DEST"
+    echo "    created    $DEST/"
+else
+    echo "    skipped    $DEST/: file already exists"
+fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
-target="$DEST/active.theme"
-dir="$CONFIG_DIR/elysian_themes/active_theme/btop.theme"
+echo "Linking main configuration file..."
+link_file "$ROOT_DIR/btop.conf" "$DEST/btop.conf"
 
-echo "Setting up color theme configuration file..."
+echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
-if [ "$flag_overwrite" = true ]; then
-    rm -f "$target"
-fi
-
-if [ -L "$target" ]; then
-    echo "    skipped    $target: file already exists (symlink)"
-elif [ -e "$target" ]; then
-    echo "    skipped    $target: file already exists (not symlink)"
-else
-    ln -s "$dir" "$target"
-    echo "    linked     $dir -> $target"
-fi
+echo "Linking color theme configuration file..."
+link_file "$CONFIG_DIR/elysian_themes/active_theme/btop.theme" "$DEST/active.theme"
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
