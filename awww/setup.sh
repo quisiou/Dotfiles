@@ -22,8 +22,7 @@ echo "║ Setting up awww configuration ║"
 echo "╚═══════════════════════════════╝"
 echo ""
 
-CONFIG_DIR="$HOME/.config"
-DEST="$CONFIG_DIR/awww"
+DEST="$HOME/.local/share/elysian-dots/wallpapers"
 
 echo "Setting up $DEST/..."
 

@@ -38,7 +38,7 @@ fi
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
 target="$DEST/config.jsonc"
-dir="$CONFIG_DIR/elysian_themes/active_theme/fastfetch.json"
+dir="$HOME/.local/share/elysian-dots/active-theme/fastfetch.json"
 
 echo "Linking main configuration file..."
 

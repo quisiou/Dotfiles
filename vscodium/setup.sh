@@ -51,6 +51,7 @@ echo ""
 
 CONFIG_DIR="$HOME/.config"
 DEST="$CONFIG_DIR/vscodium"
+DOTS_DIR="$HOME/.local/share/elysian-dots/vscodium"
 
 echo "Setting up $DEST/..."
 
@@ -66,10 +67,11 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 
 echo "Linking main build scripts and resources..."
 
-link_file "$ROOT_DIR/build_theme.py"   "$DEST/build_theme.py" "$flag_overwrite_files"
-link_file "$ROOT_DIR/build_config.py"  "$DEST/build_config.py" "$flag_overwrite_files"
-link_file "$ROOT_DIR/build_package.py" "$DEST/build_package.py" "$flag_overwrite_files"
-link_file "$ROOT_DIR/template.json"    "$DEST/template.json" "$flag_overwrite_files"
+mkdir -p "$DOTS_DIR"
+
+link_file "$ROOT_DIR/build_theme.py"   "$DOTS_DIR/build_theme.py" "$flag_overwrite_files"
+link_file "$ROOT_DIR/build_config.py"  "$DOTS_DIR/build_config.py" "$flag_overwrite_files"
+link_file "$ROOT_DIR/build_package.py" "$DOTS_DIR/build_package.py" "$flag_overwrite_files"
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
@@ -81,7 +83,7 @@ mkdir -p "$CODIUM_USER_DIR"
 CONFIG_GEN_DIR="$DEST/config"
 mkdir -p "$CONFIG_GEN_DIR"
 
-python3 "$DEST/build_config.py"
+python3 "$DOTS_DIR/build_config.py"
 
 for file in "$CONFIG_GEN_DIR"/*; do
     [ -e "$file" ] || continue
@@ -93,14 +95,14 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 
 echo "Setting up color themes..."
 
-COLOR_THEMES_DIR="$DEST/themes/"
+COLOR_THEMES_DIR="$DOTS_DIR/themes"
 mkdir -p "$COLOR_THEMES_DIR"
 
 THEME_SRC_DIR="$CONFIG_DIR/elysian_themes/themes/default"
 if [ -d "$THEME_SRC_DIR" ]; then
     for file in "$THEME_SRC_DIR"/*; do
         [ -e "$file" ] || continue
-        python3 "$DEST/build_theme.py" "$file" "$COLOR_THEMES_DIR"
+        python3 "$DOTS_DIR/build_theme.py" "$file" "$COLOR_THEMES_DIR"
         echo "    completed  $file"
     done
 else
@@ -111,35 +113,43 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 
 echo "Creating color theme extension package file..."
 
-PACKAGE_FILE="$DEST/package.json"
+PACKAGE_FILE="$DOTS_DIR/package.json"
 
 if [ "$flag_overwrite_package" = true ]; then
     rm -f "$PACKAGE_FILE"
 elif [ -L "$PACKAGE_FILE" ] && [ ! -e "$PACKAGE_FILE" ]; then
-    rm "$PACKAGE_FILE"    # dangling symlink, replace it
+    rm "$PACKAGE_FILE"
 fi
 
 if [ -L "$PACKAGE_FILE" ]; then
     echo "    skipped    $PACKAGE_FILE: file already exists (symlink)"
 elif [ -e "$PACKAGE_FILE" ]; then
     echo "    skipped    $PACKAGE_FILE: file already exists (not symlink)"
-else
-    python3 "$DEST/build_package.py"
+elif python3 "$DOTS_DIR/build_package.py" "$DOTS_DIR"; then
     echo "    created    $PACKAGE_FILE"
+else
+    echo "    failed     $PACKAGE_FILE: build_package.py returned an error" >&2
 fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
 echo "Setting up vscodium global color theme extension directory..."
 
-EXTENSION_DIR="$HOME/.vscode-oss/extensions/quisiou.elysian-color-themes-universal"
-mkdir -p "$EXTENSION_DIR"
+# Must match "version" in package.json; VSCodium expects <publisher>.<name>-<version>
+EXT_VERSION="0.1.0"
+EXTENSIONS_DIR="$HOME/.vscode-oss/extensions"
+EXTENSION_LINK="$EXTENSIONS_DIR/quisiou.elysian-color-themes-$EXT_VERSION"
+OLD_EXTENSION_DIR="$EXTENSIONS_DIR/quisiou.elysian-color-themes-universal"
 
-for file in "$COLOR_THEMES_DIR" "$PACKAGE_FILE"; do
-    file="${file%/}"
-    target="$EXTENSION_DIR/$(basename "$file")"
-    link_file "$file" "$target" "$flag_overwrite_theme"
-done
+mkdir -p "$EXTENSIONS_DIR"
+
+# Clean up the old (unversioned) layout from earlier runs
+if [ -e "$OLD_EXTENSION_DIR" ] || [ -L "$OLD_EXTENSION_DIR" ]; then
+    rm -rf "$OLD_EXTENSION_DIR"
+    echo "    removed    $OLD_EXTENSION_DIR (old layout)"
+fi
+
+link_file "$DOTS_DIR" "$EXTENSION_LINK" "$flag_overwrite_theme"
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 

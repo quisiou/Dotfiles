@@ -39,7 +39,7 @@ Singleton {
 
     // ── JSON log ───────────────────────────────────────────────────────────
 
-    readonly property string _logPath: Quickshell.env("HOME") + "/.local/share/quickshell/shell/notifications.json"
+    readonly property string _logPath: Quickshell.cacheDir + "/notifications.json"
 
     FileView {
         id: logFile

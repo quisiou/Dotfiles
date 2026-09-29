@@ -11,8 +11,8 @@ def print_usage():
     print("Usage:")
     print("\tpython3 build_theme.py <toml-theme-file> [<destination-directory>]\n")
     print("Example:")
-    print("\tpython3 build_theme.py ~/.config/elysian_themes/themes/default/TokyoCarbon.toml ~/MyVSCodiumThemes/\n")
-    print("Default value for <destination-directory> is ~/.config/vscodium/themes/")
+    print("\tpython3 build_theme.py ~/.local/share/elysian-dots/color-themes/Elysian.toml ~/MyVSCodiumThemes/\n")
+    print("Default value for <destination-directory> is ~/.local/share/elysian-dots/vscodium/themes")
 
 
 def parse_toml(toml_path: Path) -> dict[str, dict[str, str]]:
@@ -32,11 +32,13 @@ if __name__ == "__main__":
         exit(1)
 
     script_dir: Path = Path(__file__).resolve().parent
-    dest_dir: Path = (Path.home() / ".config" / "vscodium" / "themes") if argc == 2 else Path(argv[2]).resolve()
+    dest_dir: Path = (Path.home() / ".local" / "share" / "elysian-dots" / "vscodium" / "themes") if argc == 2 else Path(argv[2]).resolve()
+
+    dest_dir.mkdir(parents=True, exist_ok=True)
 
     selected_theme: dict[str, dict[str, str]] = parse_toml(Path(argv[1]).resolve())
     fallback_theme: dict[str, dict[str, str]] = parse_toml(
-        Path.home() / ".config" / "elysian_themes" / "themes" / "default" / "TokyoCarbon.toml"
+        Path.home() / ".local" / "share" / "elysian-dots" / "color-themes" / "Elysian.toml"
     )
 
     theme: dict[str, dict[str, str]] = {

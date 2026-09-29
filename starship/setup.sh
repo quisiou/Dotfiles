@@ -39,7 +39,7 @@ fi
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
 target="$DEST/starship.toml"
-dir="$CONFIG_DIR/elysian_themes/active_theme/starship.toml"
+dir="$HOME/.local/share/elysian-dots/active-theme/starship.toml"
 
 echo "Linking main configuration file..."
 

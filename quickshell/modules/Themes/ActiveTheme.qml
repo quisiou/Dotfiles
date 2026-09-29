@@ -100,7 +100,7 @@ Singleton {
     })
 
 	property var _file: FileView {
-        path: Quickshell.env("HOME") + "/.config/elysian_themes/active_theme/colors.lua"
+        path: Quickshell.env("HOME") + "/.local/share/elysian-dots/active-theme/colors.lua"
         watchChanges: true
 
         onFileChanged: reload()

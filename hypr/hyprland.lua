@@ -1,6 +1,11 @@
 -- hypr/hyprland.lua
 
 
+------ SET CORRECT PACKAGE PATH -------------------------
+local hypr_config_dir = os.getenv("HOME") .. "/.config/hypr"
+package.path = hypr_config_dir .. "/?.lua;" .. hypr_config_dir .. "/?/init.lua;" .. package.path
+
+
 ------ LOAD ACTIVE ELYSIAN THEME ------------------------
 theme = require("theme")
 

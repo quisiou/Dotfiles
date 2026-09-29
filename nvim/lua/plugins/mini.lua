@@ -93,7 +93,7 @@ return {
         config = function()
             vim.o.laststatus = 3 -- one statusline for the whole window (lualine's globalstatus)
 
-            local active_path = vim.fn.expand("~/.config/elysian_themes/active_theme/colors.lua")
+            local active_path = vim.fn.expand("~/.local/share/elysian-dots/active-theme/colors.lua")
             local ok, palette = pcall(dofile, active_path)
             local c = ok and palette.colors or nil
 

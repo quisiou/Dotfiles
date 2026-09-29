@@ -46,7 +46,7 @@ Item {
                     ]
                     ctProcess.command = [
                         "python3",
-                        Quickshell.env("HOME") + "/.config/elysian_themes/set_theme.py",
+                        Quickshell.env("HOME") + "/.local/share/elysian-dots/set_theme.py",
                         path
                     ]
                     ctProcess.running = true
@@ -60,7 +60,7 @@ Item {
         id: scanner
         command: [
             Quickshell.shellDir + "/scripts/parse_color_themes.sh",
-            Quickshell.env("HOME") + "/.config/elysian_themes/themes"
+            Quickshell.env("HOME") + "/.local/share/elysian-dots/color-themes"
         ]
         stdout: SplitParser {
             onRead: function(line) {

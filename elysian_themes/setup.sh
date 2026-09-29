@@ -44,28 +44,25 @@ echo "║ Setting up elysian themes configuration ║"
 echo "╚═════════════════════════════════════════╝"
 echo ""
 
-CONFIG_DIR="$HOME/.config"
-DEST="$CONFIG_DIR/elysian_themes"
-THEMES_DIR="$DEST/themes"
-ACTIVE_TH_DIR="$DEST/active_theme"
+DOTS_DIR="$HOME/.local/share/elysian-dots"
+THEMES_DIR="$DOTS_DIR/color-themes"
+ACTIVE_TH_DIR="$DOTS_DIR/active-theme"
 
-echo "Setting up $DEST/..."
+echo "Setting up $THEMES_DIR/..."
 
-if [ "$flag_force" = true ] || [ ! -e "$DEST" ]; then
-    rm -rf "$DEST"
-    mkdir -p "$DEST"
-    echo "    created    $DEST/"
+if [ "$flag_force" = true ] || [ ! -e "$THEMES_DIR" ]; then
+    rm -rf "$THEMES_DIR"
+    mkdir -p "$THEMES_DIR"
+    echo "    created    $THEMES_DIR/"
 else
-    echo "    skipped    $DEST/: file already exists"
+    echo "    skipped    $THEMES_DIR/: file already exists"
 fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
-echo "Setting up $THEMES_DIR/..."
+echo "Linking color theme files..."
 
-mkdir -p "$THEMES_DIR"
-
-for file in "$ROOT_DIR"/themes/*; do
+for file in "$ROOT_DIR"/color-themes/*; do
     [ -e "$file" ] || continue
     target="$THEMES_DIR/$(basename "$file")"
     link_file "$file" "$target"
@@ -73,8 +70,8 @@ done
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
-echo "Linking theme setter script $DEST/set_theme.py..."
-link_file "$ROOT_DIR/set_theme.py" "$DEST/set_theme.py"
+echo "Linking theme setter script..."
+link_file "$ROOT_DIR/set_theme.py" "$DOTS_DIR/set_theme.py"
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
@@ -88,7 +85,7 @@ else
     fi
 
     mkdir -p "$ACTIVE_TH_DIR"
-    python3 "$DEST/set_theme.py" "$DEST/themes/default/TokyoCarbon.toml"
+    python3 "$DOTS_DIR/set_theme.py" "$THEMES_DIR/Elysian.toml"
 
     echo "    created    $ACTIVE_TH_DIR/"
 fi

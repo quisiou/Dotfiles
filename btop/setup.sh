@@ -21,20 +21,6 @@ link_file() {
     src=$1
     target=$2
 
-    if [ "$flag_overwrite" = true ]; then
-        rm -rf "$target"
-    elif [ -L "$target" ] && [ ! -e "$target" ]; then
-        rm "$target"    # dangling symlink, replace it
-    fi
-
-    if [ -L "$target" ]; then
-        echo "    skipped    $target: file already exists (symlink)"
-    elif [ -e "$target" ]; then
-        echo "    skipped    $target: file already exists (not symlink)"
-    else
-        ln -s "$src" "$target"
-        echo "    linked     $src -> $target"
-    fi
 }
 
 echo "╔═══════════════════════════════╗"
@@ -58,12 +44,24 @@ fi
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
 echo "Linking main configuration file..."
-link_file "$ROOT_DIR/btop.conf" "$DEST/btop.conf"
 
-echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+src="$ROOT_DIR/btop.conf"
+target="$DEST/btop.conf"
 
-echo "Linking color theme configuration file..."
-link_file "$CONFIG_DIR/elysian_themes/active_theme/btop.theme" "$DEST/active.theme"
+if [ "$flag_overwrite" = true ]; then
+    rm -rf "$target"
+elif [ -L "$target" ] && [ ! -e "$target" ]; then
+    rm "$target"    # dangling symlink, replace it
+fi
+
+if [ -L "$target" ]; then
+    echo "    skipped    $target: file already exists (symlink)"
+elif [ -e "$target" ]; then
+    echo "    skipped    $target: file already exists (not symlink)"
+else
+    ln -s "$src" "$target"
+    echo "    linked     $src -> $target"
+fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
