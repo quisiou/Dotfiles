@@ -49,6 +49,8 @@ echo "║ Setting up VSCodium configuration ║"
 echo "╚═══════════════════════════════════╝"
 echo ""
 
+. "$ROOT_DIR/../lib.sh" && require_dotfiles_home
+
 CONFIG_DIR="$HOME/.config"
 DOTS_DIR="$HOME/.local/share/elysian-dots/vscodium"
 

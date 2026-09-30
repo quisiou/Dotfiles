@@ -22,6 +22,8 @@ echo "║ Setting up awww configuration ║"
 echo "╚═══════════════════════════════╝"
 echo ""
 
+. "$ROOT_DIR/../lib.sh" && require_dotfiles_home
+
 DEST="$HOME/.local/share/elysian-dots/wallpapers"
 
 echo "Setting up $DEST/..."

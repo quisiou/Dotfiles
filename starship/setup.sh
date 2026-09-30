@@ -22,6 +22,7 @@ echo "║ Setting up starship configuration ║"
 echo "╚═══════════════════════════════════╝"
 echo ""
 
+. "$ROOT_DIR/../lib.sh" && require_dotfiles_home
 
 CONFIG_DIR="$HOME/.config"
 DEST="$CONFIG_DIR/starship"

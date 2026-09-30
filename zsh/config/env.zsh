@@ -2,6 +2,10 @@
 # zsh/default/env.zsh
 
 
+# Set dotfiles home dir
+export ELYSIAN_DOTS_HOME="${ELYSIAN_DOTS_HOME:-$HOME/.local/share/elysian-dots}"
+
+
 # LESS command formatting
 export GROFF_NO_SGR=1
 export LESS_TERMCAP_mb=$'\e[5;38;2;190;149;255m'                # blink start (text that flashes)
@@ -22,3 +26,7 @@ export LESS_TERMCAP_ZW=$'\e[75m'                                # superscript en
 export SUDO_ASKPASS="$HOME/.config/quickshell/shell/scripts/askpass.sh"
 export SSH_ASKPASS="$HOME/.config/quickshell/shell/scripts/askpass.sh"
 export SSH_ASKPASS_REQUIRE=force
+
+
+# Source user environment variables
+[ -f "$HOME/.config/zsh/user/env.zsh" ] && . "$HOME/.config/zsh/user/env.zsh"

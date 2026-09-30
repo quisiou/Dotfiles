@@ -70,25 +70,7 @@ done
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
 echo "Creating user scripts directory structure..."
-
 mkdir -p "$DEST/user"
-private_script="$DEST/user/env.zsh"
-
-if [ -L "$private_script" ]; then
-    echo "    skipped    $private_script: file already exists (symlink)"
-elif [ -e "$private_script" ]; then
-    echo "    skipped    $private_script: file already exists (not symlink)"
-else
-    cat > "$private_script" <<EOF
-#!/usr/bin/env zsh
-# zsh/user/env.zsh
-
-
-# Place your personal environment variables here...
-
-EOF
-    echo "    created    $private_script"
-fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
@@ -104,6 +86,17 @@ else
         target="$HOME/.${filename%.zsh}"
         link_file "$zsh_file" "$target"
     done
+fi
+
+echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+
+if grep -qs 'ELYSIAN_DOTS_HOME' "$HOME/.zshenv" "$HOME/.config/zsh/env.zsh"; then
+    echo "ELYSIAN_DOTS_HOME is exported by zsh's env file."
+    echo "Log out and back in (or run 'source ~/.zshenv') before running other setups on their own."
+else
+    echo "Warning: zsh's env file does not export ELYSIAN_DOTS_HOME." >&2
+    echo "         Add this line to it, or other modules' setups will refuse to run:" >&2
+    echo '         export ELYSIAN_DOTS_HOME="${ELYSIAN_DOTS_HOME:-$HOME/.local/share/elysian-dots}"' >&2
 fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"

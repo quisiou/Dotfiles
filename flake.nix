@@ -62,6 +62,8 @@
                             name = "setup-${name}";
                             runtimeInputs = getTools name;
                             text = ''
+                                export ELYSIAN_DOTS_HOME="''${ELYSIAN_DOTS_HOME:-$HOME/.local/share/elysian-dots}"
+
                                 ${builtins.concatStringsSep "\n" (map (dep: ''
                                     if [ -e "$HOME/.config/${dep}" ]; then
                                         echo "── Skipping dependency '${dep}': already set up ──"
@@ -94,7 +96,10 @@
                             program = "${pkgs.writeShellApplication {
                                 name = "dotfiles-setup-all";
                                 runtimeInputs = builtins.concatMap getTools moduleNames;
-                                text = ''cd "${self}" && ./setup.sh'';
+                                text = ''
+                                    export ELYSIAN_DOTS_HOME="''${ELYSIAN_DOTS_HOME:-$HOME/.local/share/elysian-dots}"
+                                    cd "${self}" && ./setup.sh
+                                '';
                             }}/bin/dotfiles-setup-all";
                         };
                     };
@@ -126,6 +131,15 @@
                                 description = "If true, every discovered module is activated, ignoring modules.<name>.enable.";
                             };
 
+                            dotsHome = lib.mkOption {
+                                type = lib.types.str;
+                                default = "${config.xdg.dataHome}/elysian-dots";
+                                description = ''
+                                    Directory holding the shared dots data (active-theme, color-themes, wallpapers...).
+                                    Exported as ELYSIAN_DOTS_HOME.
+                                '';
+                            };
+
                             modules = lib.mkOption {
                                 type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
                                     options = {
@@ -138,10 +152,15 @@
                         };
 
                         config = lib.mkIf cfg.enable {
+                            home.sessionVariables.ELYSIAN_DOTS_HOME = cfg.dotsHome;
+                            systemd.user.sessionVariables.ELYSIAN_DOTS_HOME = cfg.dotsHome;
+
                             home.packages = builtins.concatMap getTools selected;
 
                             home.activation.dotfilesSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] (
-                                builtins.concatStringsSep "\n" (map (m: ''
+                                ''
+                                    export ELYSIAN_DOTS_HOME="${cfg.dotsHome}"
+                                '' + builtins.concatStringsSep "\n" (map (m: ''
                                     if [ -e "$HOME/.config/${m}" ]; then
                                         echo "dotfiles: skipping ${m} (already set up)"
                                     else

@@ -16,10 +16,15 @@ fi
 # Source custom zsh files
 [ -f "$HOME/.config/zsh/alias.zsh" ] && . "$HOME/.config/zsh/alias.zsh"
 [ -f "$HOME/.config/zsh/functions.zsh" ] && . "$HOME/.config/zsh/functions.zsh"
+
+# Source user config files
 CONFIG_DIR="$HOME/.config/zsh/user"
 if [ -d "$CONFIG_DIR" ]; then
     for script in "$CONFIG_DIR"/*.zsh; do
         [ -e "$script" ] || continue
+        case "${script##*/}" in
+            env.zsh|profile.zsh) continue ;;  # already sourced by zshenv / zprofile
+        esac
         [ -r "$script" ] && . "$script" # Source every readable file inside the user directory
     done
 fi

@@ -44,6 +44,8 @@ echo "║ Setting up elysian themes configuration ║"
 echo "╚═════════════════════════════════════════╝"
 echo ""
 
+. "$ROOT_DIR/../lib.sh" && require_dotfiles_home
+
 DOTS_DIR="$HOME/.local/share/elysian-dots"
 THEMES_DIR="$DOTS_DIR/color-themes"
 ACTIVE_TH_DIR="$DOTS_DIR/active-theme"
