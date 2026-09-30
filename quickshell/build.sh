@@ -11,7 +11,8 @@ while getopts "fn" opt; do
     esac
 done
 
-BUILD_DIR="$HOME/.config/quickshell/.build"
+CONFIG_DIR="$HOME/.config/quickshell"
+BUILD_DIR="$CONFIG_DIR/.build"
 ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 cd "$ROOT_DIR"
 
@@ -32,3 +33,14 @@ if ! cmake --build "$BUILD_DIR" --parallel; then
     echo "cmake build failed, aborting..."
     exit 1
 fi
+
+# Link binaries to shell/bin
+LINK="$CONFIG_DIR/shell/bin"
+TARGET="$BUILD_DIR/bin"
+
+if [ -d "$LINK" ] && [ ! -L "$LINK" ]; then
+    echo "$LINK is a real directory, remove or move it manually, aborting..."
+    exit 1
+fi
+
+ln -sfn "$TARGET" "$LINK"

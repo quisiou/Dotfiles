@@ -3,6 +3,6 @@
 
 .cache
 .clangd
-.build
+bin
 quickapps.json
 ignoreNotifications.json

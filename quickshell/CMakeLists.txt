@@ -35,13 +35,3 @@ endforeach()
 if(TARGET get_gpu_info)
     target_link_libraries(get_gpu_info PRIVATE dl)
 endif()
-
-# Symlink to shell
-set(SHELL_BIN_LINK "${CMAKE_SOURCE_DIR}/shell/bin")
-if(NOT IS_SYMLINK "${SHELL_BIN_LINK}")
-    file(RELATIVE_PATH SHELL_BIN_RELPATH
-        "${CMAKE_SOURCE_DIR}/shell"
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-    )
-    file(CREATE_LINK "${SHELL_BIN_RELPATH}" "${SHELL_BIN_LINK}" SYMBOLIC)
-endif()
