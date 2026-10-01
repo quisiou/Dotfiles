@@ -2,6 +2,7 @@
 
 
 from sys import argv
+import os
 from pathlib import Path
 import tomllib
 from jinja2 import Environment, FileSystemLoader
@@ -32,13 +33,13 @@ if __name__ == "__main__":
         exit(1)
 
     script_dir: Path = Path(__file__).resolve().parent
-    dest_dir: Path = (Path.home() / ".local" / "share" / "elysian-dots" / "vscodium" / "themes") if argc == 2 else Path(argv[2]).resolve()
+    dest_dir: Path = Path(os.getenv("ELYSIAN_DOTS_HOME"), "vscodium", "themes") if argc == 2 else Path(argv[2]).resolve()
 
     dest_dir.mkdir(parents=True, exist_ok=True)
 
     selected_theme: dict[str, dict[str, str]] = parse_toml(Path(argv[1]).resolve())
     fallback_theme: dict[str, dict[str, str]] = parse_toml(
-        Path.home() / ".local" / "share" / "elysian-dots" / "color-themes" / "Elysian.toml"
+        Path(os.getenv("ELYSIAN_DOTS_HOME"), "color-themes", "Elysian.toml")
     )
 
     theme: dict[str, dict[str, str]] = {

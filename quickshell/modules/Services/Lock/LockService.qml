@@ -9,7 +9,7 @@ import Quickshell.Io
 
 Singleton {
     id: service
-    property string currentWallpaper: Quickshell.env("HOME") + "/.local/share/elysian-dots/wallpapers/Leshy.jpg"
+    property string currentWallpaper: Quickshell.env("ELYSAIN_DOTS_HOME") + "/wallpapers/Leshy.jpg"
 
     property Process _queryProcess: Process {
         running: false

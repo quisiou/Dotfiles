@@ -46,9 +46,8 @@ echo ""
 
 . "$ROOT_DIR/../lib.sh" && require_dotfiles_home
 
-DOTS_DIR="$HOME/.local/share/elysian-dots"
-THEMES_DIR="$DOTS_DIR/color-themes"
-ACTIVE_TH_DIR="$DOTS_DIR/active-theme"
+THEMES_DIR="$ELYSIAN_DOTS_HOME/color-themes"
+ACTIVE_TH_DIR="$ELYSIAN_DOTS_HOME/active-theme"
 
 echo "Setting up $THEMES_DIR/..."
 
@@ -73,7 +72,7 @@ done
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
 echo "Linking theme setter script..."
-link_file "$ROOT_DIR/set_theme.py" "$DOTS_DIR/set_theme.py"
+link_file "$ROOT_DIR/set_theme.py" "$ELYSIAN_DOTS_HOME/set_theme.py"
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
@@ -87,7 +86,7 @@ else
     fi
 
     mkdir -p "$ACTIVE_TH_DIR"
-    python3 "$DOTS_DIR/set_theme.py" "$THEMES_DIR/Elysian.toml"
+    python3 "$ELYSIAN_DOTS_HOME/set_theme.py" "$THEMES_DIR/Elysian.toml"
 
     echo "    created    $ACTIVE_TH_DIR/"
 fi

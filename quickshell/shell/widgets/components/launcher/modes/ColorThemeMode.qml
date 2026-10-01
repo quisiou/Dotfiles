@@ -37,16 +37,16 @@ Item {
                 return () => {
                     vscPackageProcess.command = [
                         "python3",
-                        Quickshell.env("HOME") + "/.local/share/elysian-dots/vscodium/build_package.py"
+                        Quickshell.env("ELYSIAN_DOTS_HOME") + "/vscodium/build_package.py"
                     ]
                     vscProcess.command = [
                         "python3",
-                        Quickshell.env("HOME") + "/.local/share/elysian-dots/vscodium/build_theme.py",
+                        Quickshell.env("ELYSIAN_DOTS_HOME") + "/vscodium/build_theme.py",
                         path
                     ]
                     ctProcess.command = [
                         "python3",
-                        Quickshell.env("HOME") + "/.local/share/elysian-dots/set_theme.py",
+                        Quickshell.env("ELYSIAN_DOTS_HOME") + "/set_theme.py",
                         path
                     ]
                     ctProcess.running = true
@@ -60,7 +60,7 @@ Item {
         id: scanner
         command: [
             Quickshell.shellDir + "/scripts/parse_color_themes.sh",
-            Quickshell.env("HOME") + "/.local/share/elysian-dots/color-themes"
+            Quickshell.env("ELYSIAN_DOTS_HOME") + "/color-themes"
         ]
         stdout: SplitParser {
             onRead: function(line) {

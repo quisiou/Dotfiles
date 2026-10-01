@@ -4,7 +4,7 @@
 from sys import argv
 from pathlib import Path
 import tomllib
-import subprocess
+import os
 from jinja2 import Environment, FileSystemLoader
 
 
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     selected_theme: dict[str, dict[str, str]] = parse_toml(Path(argv[1]).resolve())
     fallback_theme: dict[str, dict[str, str]] = parse_toml(
-        (Path.home() / ".local" / "share" / "elysian-dots" / "color-themes" / "Elysian.toml").resolve()
+        Path(os.getenv("ELYSIAN_DOTS_HOME"), "color-themes", "Elysian.toml").resolve()
     )
 
     theme: dict[str, dict[str, str]] = {
@@ -71,7 +71,7 @@ if __name__ == "__main__":
         for k in fallback_theme
     }
 
-    config_dir: Path = (Path.home() / ".local" / "share" / "elysian-dots" / "active-theme").resolve()
+    config_dir: Path = Path(os.getenv("ELYSIAN_DOTS_HOME"), "active-theme").resolve()
     config_dir.mkdir(exist_ok=True)
 
     # Create the template files for all utilities

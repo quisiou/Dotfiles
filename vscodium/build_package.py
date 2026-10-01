@@ -2,10 +2,11 @@
 
 
 from pathlib import Path
+import os
 from sys import argv
 import json
 
-DEFAULT_DIR = Path.home() / ".local" / "share" / "elysian-dots" / "vscodium"
+DEFAULT_DIR = Path(os.getenv("ELYSIAN_DOTS_HOME"), "vscodium")
 THEMES_SUBDIR = "themes"
 
 

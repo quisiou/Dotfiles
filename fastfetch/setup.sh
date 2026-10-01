@@ -40,7 +40,7 @@ fi
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
 target="$DEST/config.jsonc"
-dir="$HOME/.local/share/elysian-dots/active-theme/fastfetch.json"
+dir="$ELYSIAN_DOTS_HOME/active-theme/fastfetch.json"
 
 echo "Linking main configuration file..."
 

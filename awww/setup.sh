@@ -24,7 +24,7 @@ echo ""
 
 . "$ROOT_DIR/../lib.sh" && require_dotfiles_home
 
-DEST="$HOME/.local/share/elysian-dots/wallpapers"
+DEST="$ELYSIAN_DOTS_HOME/wallpapers"
 
 echo "Setting up $DEST/..."
 

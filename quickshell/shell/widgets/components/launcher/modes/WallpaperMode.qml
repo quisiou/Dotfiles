@@ -58,7 +58,7 @@ Item {
         id: scanner
         command: [
             "bash", "-c",
-            "find -L " + Quickshell.env("HOME") + "/.local/share/elysian-dots/wallpapers -type f " +
+            "find -L " + Quickshell.env("ELYSIAN_DOTS_HOME") + "/wallpapers -type f " +
             "\\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \\) " +
             "-exec realpath {} \\;"
         ]

@@ -52,7 +52,7 @@ echo ""
 . "$ROOT_DIR/../lib.sh" && require_dotfiles_home
 
 CONFIG_DIR="$HOME/.config"
-DOTS_DIR="$HOME/.local/share/elysian-dots/vscodium"
+DOTS_DIR="$ELYSIAN_DOTS_HOME/vscodium"
 
 echo "Linking main build scripts and resources..."
 
@@ -85,7 +85,7 @@ echo "Setting up color themes..."
 COLOR_THEMES_DIR="$DOTS_DIR/themes"
 mkdir -p "$COLOR_THEMES_DIR"
 
-THEME_SRC_DIR="$HOME/.local/share/elysian-dots/color-themes"
+THEME_SRC_DIR="$ELYSIAN_DOTS_HOME/color-themes"
 if [ -d "$THEME_SRC_DIR" ]; then
     for file in "$THEME_SRC_DIR"/*; do
         [ -e "$file" ] || continue
