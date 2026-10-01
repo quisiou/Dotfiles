@@ -16,7 +16,8 @@ Item {
 
     Calendar {
         id: calendar
-        anchors.centerIn: parent
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
         width: 300
         height: 250
         color: ActiveTheme.colors["BG_HIGHLIGHT"]

@@ -23,36 +23,51 @@ Rectangle {
 
     radius: 12
 
-    property int currentMonth: 0
-    property int currentYear: 1970
+    // Single source of truth: year * 12 + month
+    property int monthIndex: new Date().getFullYear() * 12 + new Date().getMonth()
+    readonly property int currentMonth: ((monthIndex % 12) + 12) % 12
+    readonly property int currentYear: Math.floor(monthIndex / 12)
     property var locale: Qt.locale("")
+
+    property bool _aActive: true
+    property int _lastIndex: monthIndex   // binding is broken in onCompleted
 
     readonly property real _scale: Math.max(0.6, Math.min(1.3, width / 320))
 
     function refreshLocale() {
-        currentMonth = (new Date()).getMonth()
-        currentYear  = (new Date()).getFullYear()
+        const d = new Date()
+        monthIndex = d.getFullYear() * 12 + d.getMonth()
     }
 
-    function goToPreviousMonth() {
-        if (currentMonth === 0) {
-            currentMonth = 11
-            currentYear -= 1
-        } else {
-            currentMonth -= 1
-        }
+    function goToPreviousMonth() { monthIndex -= 1 }
+    function goToNextMonth()     { monthIndex += 1 }
+
+    onMonthIndexChanged: {
+        const dir = monthIndex > _lastIndex ? 1 : -1
+        _lastIndex = monthIndex
+        slideTo(dir)
     }
 
-    function goToNextMonth() {
-        if (currentMonth === 11) {
-            currentMonth = 0
-            currentYear += 1
-        } else {
-            currentMonth += 1
-        }
+    function slideTo(dir) {
+        const outgoing = _aActive ? gridA : gridB
+        const incoming = _aActive ? gridB : gridA
+        const h = gridSlot.height
+
+        slideAnim.stop()
+
+        incoming.idx = monthIndex
+        incoming.y = dir * h          // next month: enters from below; prev: from above
+
+        outOut.target = outgoing
+        outOut.to = -dir * h
+        inIn.target = incoming
+        inIn.to = 0
+        slideAnim.restart()
+
+        _aActive = !_aActive
     }
 
-    Component.onCompleted: refreshLocale()
+    Component.onCompleted: _lastIndex = monthIndex
 
     ColumnLayout {
         id: contentColumn
@@ -181,6 +196,52 @@ Rectangle {
             }
         }
 
+        // Shared month grid (used by both gridA and gridB)
+        component DayGrid: MonthGrid {
+            id: dg
+            // Which month this grid shows (year * 12 + month); starts at the current one
+            property int idx: root.monthIndex
+            month: ((idx % 12) + 12) % 12
+            year: Math.floor(idx / 12)
+            width: parent ? parent.width : implicitWidth
+            height: parent ? parent.height : implicitHeight
+            topPadding: 4
+            bottomPadding: 4
+            locale: root.locale
+
+            delegate: Item {
+                id: dayCell
+                required property var model
+
+                implicitWidth: Math.round(30 * root._scale)
+                implicitHeight: Math.round(30 * root._scale)
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: Math.round(28 * root._scale)
+                    height: width
+                    radius: width / 2
+                    color: dayCell.model.today ? ActiveTheme.colors["ACCENT_LOW"] : "transparent"
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: dayCell.model.day
+                    font.pixelSize: Math.round(14 * root._scale)
+                    color: {
+                        const dow = dayCell.model.date.getDay()
+                        if (dayCell.model.today)
+                            return ActiveTheme.colors["BG"]
+                        if ((dow === 0 || dow === 6) && dayCell.model.month === dg.month)
+                            return ActiveTheme.colors["ANSI_RED"]
+                        if (dayCell.model.month === dg.month)
+                            return ActiveTheme.colors["FG_LIGHT"]
+                        return ActiveTheme.colors["FG_GHOST"]
+                    }
+                }
+            }
+        }
+
         RowLayout {
             id: headerRow
             Layout.fillWidth: false
@@ -198,15 +259,15 @@ Rectangle {
 
             NavLabel {
                 text: root.currentYear
-                prev: () => { root.currentYear -= 1 }
-                next: () => { root.currentYear += 1 }
+                prev: () => { root.monthIndex -= 12 }
+                next: () => { root.monthIndex += 12 }
             }
         }
 
         DayOfWeekRow {
             id: daysRow
             Layout.fillWidth: true
-            locale: grid.locale
+            locale: root.locale
 
             delegate: Text {
                 required property var model
@@ -218,45 +279,32 @@ Rectangle {
             }
         }
 
-        MonthGrid {
-            id: grid
+        Item {
+            id: gridSlot
             Layout.fillWidth: true
             Layout.fillHeight: true
-            month: root.currentMonth
-            year: root.currentYear
-            locale: root.locale
+            Layout.preferredWidth: gridA.implicitWidth
+            Layout.preferredHeight: gridA.implicitHeight
+            implicitWidth: gridA.implicitWidth
+            implicitHeight: gridA.implicitHeight
+            clip: true
 
-            delegate: Item {
-                id: dayCell
-                required property var model
+            DayGrid { id: gridA; y: 0 }
+            DayGrid { id: gridB; y: height }   // parked off-screen until needed
 
-                implicitWidth: Math.round(30 * root._scale)
-                implicitHeight: Math.round(30 * root._scale)
-
-                Rectangle {
-                    id: todayBubble
-                    anchors.centerIn: parent
-                    width: Math.round(28 * root._scale)
-                    height: Math.round(28 * root._scale)
-                    radius: width / 2
-                    color: dayCell.model.today ? ActiveTheme.colors["ACCENT_LOW"] : "transparent"
+            ParallelAnimation {
+                id: slideAnim
+                NumberAnimation {
+                    id: outOut
+                    property: "y"
+                    duration: 260
+                    easing.type: Easing.InOutCubic
                 }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: dayCell.model.day
-                    font.pixelSize: Math.round(14 * root._scale)
-                    color: {
-                        let dayOfWeek = dayCell.model.date.getDay()
-
-                        if (dayCell.model.today)
-                            return ActiveTheme.colors["BG"];
-                        if ((dayOfWeek === 0 || dayOfWeek === 6) && dayCell.model.month === grid.month)
-                            return ActiveTheme.colors["ANSI_RED"]
-                        if (dayCell.model.month === grid.month)
-                            return ActiveTheme.colors["FG_LIGHT"];
-                        return ActiveTheme.colors["FG_GHOST"];
-                    }
+                NumberAnimation {
+                    id: inIn
+                    property: "y"
+                    duration: 260
+                    easing.type: Easing.InOutCubic
                 }
             }
         }
