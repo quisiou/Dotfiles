@@ -27,14 +27,14 @@ Item {
             Layout.preferredWidth: 300
             Layout.preferredHeight: 250
             Layout.alignment: Qt.AlignVCenter
-            color: ActiveTheme.colors["BG_HIGHLIGHT"]
+            color: ActiveTheme.colors["BG_FOCUSED"]
         }
 
         NotificationLog {
             Layout.fillWidth: true
             Layout.preferredHeight: calendar.height
             Layout.alignment: Qt.AlignVCenter
-            color: ActiveTheme.colors["BG_HIGHLIGHT"]
+            color: ActiveTheme.colors["BG_FOCUSED"]
             entries: NotificationService.history
             onDismissed: (time) => NotificationService.removeHistory(time)
         }

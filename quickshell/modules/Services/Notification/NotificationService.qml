@@ -71,12 +71,13 @@ Singleton {
         // qmllint enable signal-handler-parameters
     }
 
-    function _appendLog(appName, summary, body) {
+    function _appendLog(appName, summary, body, icon) {
         const entry = {
             time:    new Date().toISOString(),
             app:     appName || "unknown",
             summary: summary || "",
-            body:    body    || ""
+            body:    body    || "",
+            icon:    icon    || ""
         };
         root.history = [entry, ...root.history];
         logFile.setText(JSON.stringify(root.history.slice().reverse(), null, 2));
@@ -91,13 +92,10 @@ Singleton {
 
     readonly property string _fallbackIcon: Quickshell.shellDir + "/assets/icons/notification-bell.svg"
 
-    function resolveIcon(notif) {
-        if (notif.image && notif.image !== "")
-            return notif.image;
+    function resolveLogIcon(notif) {
         if (notif.appIcon && notif.appIcon !== "") {
-            const resolved = Quickshell.iconPath(notif.appIcon, 32);
-            if (resolved && resolved !== "")
-                return resolved;
+            const p = Quickshell.iconPath(notif.appIcon, 32);
+            if (p && p !== "") return p;
         }
         return root._fallbackIcon;
     }
@@ -133,7 +131,7 @@ Singleton {
                 appName: notif.appName || "",
                 summary: notif.summary || "",
                 body:    notif.body    || "",
-                icon:   root.resolveIcon(notif),
+                icon:   root.resolveLogIcon(notif),
                 urgency: notif.urgency ?? 1,
                 category: notif.hints["category"] ?? "",
                 _notif:  notif
@@ -145,7 +143,7 @@ Singleton {
             }
 
             // Always log to file
-            root._appendLog(notif.appName, notif.summary, notif.body);
+            root._appendLog(notif.appName, notif.summary, notif.body, root.resolveLogIcon(notif));
         }
     }
 

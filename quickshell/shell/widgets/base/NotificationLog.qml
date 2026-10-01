@@ -37,7 +37,8 @@ Rectangle {
                 time:    e.time    ?? "",
                 app:     e.app     ?? "",
                 summary: e.summary ?? "",
-                body:    e.body    ?? ""
+                body:    e.body    ?? "",
+                icon:    e.icon    ?? ""
             })
         }
     }
@@ -136,11 +137,12 @@ Rectangle {
                     required property string app
                     required property string summary
                     required property string body
+                    required property string icon
 
                     width: list.width
                     height: cardRow.implicitHeight + 16
                     radius: 8
-                    color: ActiveTheme.colors["BG"]
+                    color: ActiveTheme.colors["BG_ACTIVE"]
 
                     RowLayout {
                         id: cardRow
@@ -155,10 +157,25 @@ Rectangle {
                             Layout.preferredWidth: Math.round(28 * root._scale)
                             Layout.preferredHeight: Math.round(28 * root._scale)
                             radius: width / 2
-                            color: ActiveTheme.colors["ACCENT_LOW"]
+                            color: card.icon !== "" && iconImg.status === Image.Ready
+                                ? "transparent"
+                                : ActiveTheme.colors["ACCENT_LOW"]
+
+                            Image {
+                                id: iconImg
+                                anchors.centerIn: parent
+                                width: parent.width - 6
+                                height: parent.height - 6
+                                source: card.icon
+                                fillMode: Image.PreserveAspectFit
+                                smooth: true
+                                asynchronous: true
+                                visible: card.icon !== "" && status === Image.Ready
+                            }
 
                             Text {
                                 anchors.centerIn: parent
+                                visible: !iconImg.visible
                                 text: (card.app || "?").charAt(0).toUpperCase()
                                 font.pixelSize: Math.round(13 * root._scale)
                                 font.bold: true
@@ -243,8 +260,8 @@ Rectangle {
             Text {
                 anchors.centerIn: parent
                 visible: root.entries.length === 0
-                text: "No notifications"
-                font.pixelSize: Math.round(13 * root._scale)
+                text: "\udb82\ude91"
+                font.pixelSize: Math.round(100 * root._scale)
                 color: ActiveTheme.colors["FG_GHOST"]
             }
         }
