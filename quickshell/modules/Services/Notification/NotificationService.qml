@@ -16,6 +16,7 @@ Singleton {
     property int _seq:                  0
     property bool showNotifications:    true
     property list<string> _ignoredApps: []
+    property list<var> history:         []
 
     // ── Apps to ignore ─────────────────────────────────────────────────────
 
@@ -44,6 +45,14 @@ Singleton {
     FileView {
         id: logFile
         path: ""
+        onLoaded: {
+            try {
+                const arr = JSON.parse(logFile.text());
+                root.history = Array.isArray(arr) ? arr.slice().reverse() : [];
+            } catch (e) {
+                root.history = [];
+            }
+        }
     }
 
     // Ensure log file exists
@@ -69,14 +78,13 @@ Singleton {
             summary: summary || "",
             body:    body    || ""
         };
+        root.history = [entry, ...root.history];
+        logFile.setText(JSON.stringify(root.history.slice().reverse(), null, 2));
+    }
 
-        let arr = [];
-
-        try { arr = JSON.parse(logFile.text()); }
-        catch(e) {}
-
-        arr.push(entry);
-        logFile.setText(JSON.stringify(arr, null, 2));
+    function removeHistory(time) {
+        root.history = root.history.filter(e => e.time !== time);
+        logFile.setText(JSON.stringify(root.history.slice().reverse(), null, 2));
     }
 
     // ── App icon retrieval ─────────────────────────────────────────────────

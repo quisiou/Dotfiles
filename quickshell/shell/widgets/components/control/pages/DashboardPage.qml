@@ -2,24 +2,41 @@
 
 
 import QtQuick
+import QtQuick.Layouts
 import ElysianShell.Themes
+import ElysianShell.Services
 import "../../../base"
 
 Item {
     id: root
-    implicitWidth: calendar.implicitWidth
-    implicitHeight: calendar.implicitHeight
+
+    implicitWidth: layout.implicitWidth
+    implicitHeight: layout.implicitHeight
 
     function refresh() {
         calendar.refreshLocale()
     }
 
-    Calendar {
-        id: calendar
-        anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        width: 300
-        height: 250
-        color: ActiveTheme.colors["BG_HIGHLIGHT"]
+    RowLayout {
+        id: layout
+        anchors.fill: parent
+        spacing: 12
+
+        Calendar {
+            id: calendar
+            Layout.preferredWidth: 300
+            Layout.preferredHeight: 250
+            Layout.alignment: Qt.AlignVCenter
+            color: ActiveTheme.colors["BG_HIGHLIGHT"]
+        }
+
+        NotificationLog {
+            Layout.fillWidth: true
+            Layout.preferredHeight: calendar.height
+            Layout.alignment: Qt.AlignVCenter
+            color: ActiveTheme.colors["BG_HIGHLIGHT"]
+            entries: NotificationService.history
+            onDismissed: (time) => NotificationService.removeHistory(time)
+        }
     }
 }
