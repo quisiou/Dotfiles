@@ -11,7 +11,12 @@ import ElysianShell.Themes
 Rectangle {
     id: root
 
-    property real padding: 12
+    // Global UI size factor: 1 = default size, 0.8 = 80%, etc.
+    // Scales fonts, icons, paddings, spacings and radii. Independent of the item's size.
+    property real uiScale: 1
+    function s(v) { return Math.round(v * uiScale) }
+
+    property real padding: s(12)
     property var entries: []   // newest first: { time, app, summary, body }
 
     signal dismissed(string time)
@@ -48,9 +53,7 @@ Rectangle {
 
     clip: true
     color: "transparent"
-    radius: 12
-
-    readonly property real _scale: Math.max(0.6, Math.min(1.3, height / 250))
+    radius: s(12)
 
     function formatTime(iso) {
         const d = new Date(iso)
@@ -65,21 +68,21 @@ Rectangle {
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: root.padding
-        spacing: 8
+        spacing: root.s(8)
 
         RowLayout {
             Layout.fillWidth: true
 
             Text {
                 text: "Notifications"
-                font.pixelSize: Math.round(14 * root._scale)
+                font.pixelSize: root.s(14)
                 font.bold: true
                 color: ActiveTheme.colors["FG"]
             }
             Item { Layout.fillWidth: true }
             Text {
                 text: root.entries.length
-                font.pixelSize: Math.round(12 * root._scale)
+                font.pixelSize: root.s(12)
                 color: ActiveTheme.colors["FG_GHOST"]
             }
         }
@@ -92,7 +95,7 @@ Rectangle {
                 id: list
                 anchors.fill: parent
                 clip: true
-                spacing: 6
+                spacing: root.s(6)
                 boundsBehavior: Flickable.StopAtBounds
 
                 readonly property int _animDuration: 200
@@ -140,8 +143,8 @@ Rectangle {
                     required property string icon
 
                     width: list.width
-                    height: cardRow.implicitHeight + 16
-                    radius: 8
+                    height: cardRow.implicitHeight + root.s(16)
+                    radius: root.s(8)
                     color: ActiveTheme.colors["BG_ACTIVE"]
 
                     RowLayout {
@@ -149,13 +152,13 @@ Rectangle {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        anchors.margins: 8
-                        spacing: 8
+                        anchors.margins: root.s(8)
+                        spacing: root.s(8)
 
                         Rectangle {
                             Layout.alignment: Qt.AlignTop
-                            Layout.preferredWidth: Math.round(28 * root._scale)
-                            Layout.preferredHeight: Math.round(28 * root._scale)
+                            Layout.preferredWidth: root.s(28)
+                            Layout.preferredHeight: root.s(28)
                             radius: width / 2
                             color: card.icon !== "" && iconImg.status === Image.Ready
                                 ? "transparent"
@@ -164,8 +167,8 @@ Rectangle {
                             Image {
                                 id: iconImg
                                 anchors.centerIn: parent
-                                width: parent.width - 6
-                                height: parent.height - 6
+                                width: parent.width - root.s(6)
+                                height: parent.height - root.s(6)
                                 source: card.icon
                                 fillMode: Image.PreserveAspectFit
                                 smooth: true
@@ -177,7 +180,7 @@ Rectangle {
                                 anchors.centerIn: parent
                                 visible: !iconImg.visible
                                 text: (card.app || "?").charAt(0).toUpperCase()
-                                font.pixelSize: Math.round(13 * root._scale)
+                                font.pixelSize: root.s(13)
                                 font.bold: true
                                 color: ActiveTheme.colors["BG"]
                             }
@@ -189,26 +192,26 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                spacing: 6
+                                spacing: root.s(6)
 
                                 Text {
                                     Layout.fillWidth: true
                                     text: card.app
                                     elide: Text.ElideRight
-                                    font.pixelSize: Math.round(11 * root._scale)
+                                    font.pixelSize: root.s(11)
                                     color: ActiveTheme.colors["FG_GHOST"]
                                 }
 
                                 Text {
                                     text: root.formatTime(card.time)
-                                    font.pixelSize: Math.round(11 * root._scale)
+                                    font.pixelSize: root.s(11)
                                     color: ActiveTheme.colors["FG_GHOST"]
                                 }
 
                                 Rectangle {
-                                    Layout.preferredWidth: 18
-                                    Layout.preferredHeight: 18
-                                    radius: 4
+                                    Layout.preferredWidth: root.s(18)
+                                    Layout.preferredHeight: root.s(18)
+                                    radius: root.s(4)
                                     color: closeArea.containsMouse ? ActiveTheme.colors["ACCENT_LOW"] : "transparent"
 
                                     Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
@@ -216,7 +219,7 @@ Rectangle {
                                     Text {
                                         anchors.centerIn: parent
                                         text: "\u2715"
-                                        font.pixelSize: Math.round(11 * root._scale)
+                                        font.pixelSize: root.s(11)
                                         color: closeArea.containsMouse ? ActiveTheme.colors["BG"] : ActiveTheme.colors["FG_GHOST"]
 
                                         Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
@@ -237,7 +240,7 @@ Rectangle {
                                 visible: text !== ""
                                 text: card.summary
                                 elide: Text.ElideRight
-                                font.pixelSize: Math.round(13 * root._scale)
+                                font.pixelSize: root.s(13)
                                 font.bold: true
                                 color: ActiveTheme.colors["FG"]
                             }
@@ -249,7 +252,7 @@ Rectangle {
                                 wrapMode: Text.WordWrap
                                 maximumLineCount: 2
                                 elide: Text.ElideRight
-                                font.pixelSize: Math.round(12 * root._scale)
+                                font.pixelSize: root.s(12)
                                 color: ActiveTheme.colors["FG_LIGHT"]
                             }
                         }
@@ -262,7 +265,7 @@ Rectangle {
                 opacity: root.entries.length === 0
                 visible: opacity > 0
                 text: "\udb82\ude91"
-                font.pixelSize: Math.round(100 * root._scale)
+                font.pixelSize: root.s(100)
                 color: ActiveTheme.colors["FG_GHOST"]
 
                 Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.InOutCubic } }
