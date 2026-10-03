@@ -111,13 +111,13 @@ Rectangle {
                         NumberAnimation {
                             property: "x"
                             to: list.width
-                            duration: 220
+                            duration: 200
                             easing.type: Easing.InCubic
                         }
                         NumberAnimation {
                             property: "opacity"
                             to: 0
-                            duration: 220
+                            duration: 200
                         }
                     }
                 }
@@ -125,7 +125,7 @@ Rectangle {
                 displaced: Transition {
                     NumberAnimation {
                         properties: "y"
-                        duration: 220
+                        duration: 200
                         easing.type: Easing.OutCubic
                     }
                 }
@@ -259,10 +259,13 @@ Rectangle {
 
             Text {
                 anchors.centerIn: parent
-                visible: root.entries.length === 0
+                opacity: root.entries.length === 0
+                visible: opacity > 0
                 text: "\udb82\ude91"
                 font.pixelSize: Math.round(100 * root._scale)
                 color: ActiveTheme.colors["FG_GHOST"]
+
+                Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.InOutCubic } }
             }
         }
     }

@@ -153,3 +153,7 @@ hl.bind(
     Config.mainMod .. " + P",
     hl.dsp.exec_cmd("qs -c shell ipc call controlMenu openControlTab Performance")
 )
+hl.bind(
+    Config.mainMod .. " + S",
+    hl.dsp.exec_cmd("qs -c shell ipc call controlMenu openControlTab System")
+)

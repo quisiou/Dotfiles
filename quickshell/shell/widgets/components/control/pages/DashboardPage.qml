@@ -24,8 +24,6 @@ Item {
 
         Calendar {
             id: calendar
-            Layout.preferredWidth: 300
-            Layout.preferredHeight: 250
             Layout.alignment: Qt.AlignVCenter
             color: ActiveTheme.colors["BG_FOCUSED"]
         }

@@ -9,7 +9,7 @@ Item {
     property int currentIndex: 0
     property bool settled: true
 
-    implicitWidth: 700
+    implicitWidth: 800
     implicitHeight: tabView.implicitHeight + 32
     width: root.implicitWidth
     height: root.implicitHeight

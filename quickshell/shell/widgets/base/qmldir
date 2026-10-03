@@ -4,6 +4,8 @@
 Calendar 1.0 Calendar.qml
 ClockText 1.0 ClockText.qml
 FillMeter 1.0 FillMeter.qml
+Grid 1.0 Grid.qml
+GridBlock 1.0 GridBlock.qml
 MorphingContainer 1.0 MorphingContainer.qml
 NotificationCard 1.0 NotificationCard.qml
 NotificationLog 1.0 NotificationLog.qml

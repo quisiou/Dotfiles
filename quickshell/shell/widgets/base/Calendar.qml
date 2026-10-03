@@ -11,7 +11,14 @@ import ElysianShell.Themes
 Rectangle {
     id: root
 
-    property real padding: 12
+    // Global UI size factor: 1 = default size, 0.8 = 80%, etc.
+    // Scales fonts, cell sizes, paddings, spacings and radii.
+    // The constants below are tuned so that uiScale: 1 (natural size ~300 x 260)
+    // fits the 8x7 block of the dashboard grid (~299 x 261).
+    property real uiScale: 1
+    function s(v) { return Math.round(v * uiScale) }
+
+    property real padding: s(10)
 
     implicitWidth: contentColumn.implicitWidth + padding * 2
     implicitHeight: contentColumn.implicitHeight + padding * 2
@@ -21,7 +28,7 @@ Rectangle {
     clip: true
     color: "transparent"
 
-    radius: 12
+    radius: s(12)
 
     // Single source of truth: year * 12 + month
     property int monthIndex: new Date().getFullYear() * 12 + new Date().getMonth()
@@ -31,8 +38,6 @@ Rectangle {
 
     property bool _aActive: true
     property int _lastIndex: monthIndex   // binding is broken in onCompleted
-
-    readonly property real _scale: Math.max(0.6, Math.min(1.3, width / 320))
 
     function refreshLocale() {
         const d = new Date()
@@ -73,15 +78,18 @@ Rectangle {
         id: contentColumn
         anchors.fill: parent
         anchors.margins: root.padding
-        spacing: 4
+        // header sits a bit closer to the edge visually, so move 2px from the bottom to the top
+        anchors.topMargin: root.padding + root.s(2)
+        anchors.bottomMargin: root.padding - root.s(2)
+        spacing: root.s(4)
 
         component NavButton: Rectangle {
             id: navBtn
             property alias text: navText.text
             signal clicked()
-            Layout.preferredWidth: 20
-            Layout.preferredHeight: 20
-            radius: 4
+            Layout.preferredWidth: root.s(16)
+            Layout.preferredHeight: root.s(16)
+            radius: root.s(4)
             color: navMouseArea.containsMouse ? ActiveTheme.colors["ACCENT_LOW"] : "transparent"
 
             Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
@@ -89,7 +97,7 @@ Rectangle {
             Text {
                 id: navText
                 anchors.centerIn: parent
-                font.pixelSize: Math.round(16 * root._scale)
+                font.pixelSize: root.s(15)
                 font.bold: true
                 color: navMouseArea.containsMouse ? ActiveTheme.colors["BG"] : ActiveTheme.colors["FG"]
 
@@ -133,7 +141,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     width: textSlot.width
                     horizontalAlignment: Text.AlignHCenter
-                    font.pixelSize: Math.round(14 * root._scale)
+                    font.pixelSize: root.s(14)
                     font.bold: true
                     color: ActiveTheme.colors["FG"]
                 }
@@ -143,7 +151,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     width: textSlot.width
                     horizontalAlignment: Text.AlignHCenter
-                    font.pixelSize: Math.round(14 * root._scale)
+                    font.pixelSize: root.s(14)
                     font.bold: true
                     color: ActiveTheme.colors["FG"]
                     visible: false
@@ -205,20 +213,23 @@ Rectangle {
             year: Math.floor(idx / 12)
             width: parent ? parent.width : implicitWidth
             height: parent ? parent.height : implicitHeight
-            topPadding: 4
-            bottomPadding: 4
+            topPadding: root.s(4)
+            bottomPadding: root.s(4)
+            // Explicit: Qt's default spacing is a fixed value that is NOT multiplied by uiScale
+            spacing: 0
             locale: root.locale
 
             delegate: Item {
                 id: dayCell
                 required property var model
 
-                implicitWidth: Math.round(30 * root._scale)
-                implicitHeight: Math.round(30 * root._scale)
+                // wider than tall, to match the wide dashboard block
+                implicitWidth: root.s(40)
+                implicitHeight: root.s(32)
 
                 Rectangle {
                     anchors.centerIn: parent
-                    width: Math.round(28 * root._scale)
+                    width: root.s(26)
                     height: width
                     radius: width / 2
                     color: dayCell.model.today ? ActiveTheme.colors["ACCENT_LOW"] : "transparent"
@@ -227,7 +238,7 @@ Rectangle {
                 Text {
                     anchors.centerIn: parent
                     text: dayCell.model.day
-                    font.pixelSize: Math.round(14 * root._scale)
+                    font.pixelSize: root.s(14)
                     color: {
                         const dow = dayCell.model.date.getDay()
                         if (dayCell.model.today)
@@ -267,13 +278,15 @@ Rectangle {
         DayOfWeekRow {
             id: daysRow
             Layout.fillWidth: true
+            // Same spacing as the month grid, so the columns stay aligned
+            spacing: 0
             locale: root.locale
 
             delegate: Text {
                 required property var model
                 horizontalAlignment: Text.AlignHCenter
                 text: model.narrowName
-                font.pixelSize: Math.round(15 * root._scale)
+                font.pixelSize: root.s(14)
                 font.bold: true
                 color: ActiveTheme.colors["FG"]
             }
