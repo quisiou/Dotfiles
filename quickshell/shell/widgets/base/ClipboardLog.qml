@@ -40,7 +40,8 @@ Rectangle {
                 entryId: e.id,
                 kind:    e.kind ?? "text",
                 text:    e.text ?? "",
-                meta:    e.meta ?? ""
+                meta:    e.meta ?? "",
+                thumb:   e.thumb ?? ""
             })
         }
     }
@@ -164,6 +165,7 @@ Rectangle {
                     required property string kind
                     required property string text
                     required property string meta
+                    required property string thumb
 
                     width: list.width
                     height: cardCol.implicitHeight + root.s(16)
@@ -246,6 +248,25 @@ Rectangle {
                             elide: Text.ElideRight
                             font.pixelSize: root.s(12)
                             color: ActiveTheme.colors["FG"]
+                        }
+
+                        ClippingRectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: root.s(110)
+                            Layout.topMargin: root.s(4)
+                            visible: card.kind === "image"
+                            radius: root.s(6)
+                            color: ActiveTheme.colors["BG"]
+
+                            Image {
+                                anchors.fill: parent
+                                anchors.margins: root.s(2)
+                                source: card.kind === "image" ? card.thumb : ""
+                                fillMode: Image.PreserveAspectFit
+                                sourceSize: Qt.size(root.s(480), root.s(240))
+                                smooth: true
+                                asynchronous: true
+                            }
                         }
                     }
                 }

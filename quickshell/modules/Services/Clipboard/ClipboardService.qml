@@ -10,8 +10,13 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    // newest first: { id, kind: "text"|"image", text, meta }
+    // newest first: { id, kind: "text"|"image", text, meta, ext, thumb }
     property var history: []
+
+    readonly property string cacheDir: Quickshell.env("HOME") + "/.cache/elysian-clipboard"
+
+    property var _next: []        // parsed entries waiting for their thumbnails
+    property bool _queued: false  // a refresh arrived while decoding
 
     function refresh() { if (!listProc.running) listProc.running = true }
 
@@ -19,10 +24,14 @@ Singleton {
         copyProc.command = ["sh", "-c", "cliphist decode \"$1\" | wl-copy", "sh", String(id)]
         copyProc.running = true
     }
+
     function remove(id) {
-        delProc.command = ["sh", "-c", "printf '%s\\t\\n' \"$1\" | cliphist delete", "sh", String(id)]
+        delProc.command = ["sh", "-c",
+            "printf '%s\\t\\n' \"$1\" | cliphist delete; rm -f \"$2\"/\"$1\".*",
+            "sh", String(id), root.cacheDir]
         delProc.running = true
     }
+
     function clearHistory() { wipeProc.running = true }
 
     function _parse(raw) {
@@ -37,24 +46,74 @@ Singleton {
             const m = preview.match(/^\[\[ binary data (.+?) (\w+)(?: (\d+x\d+))? \]\]$/)
             if (m) {
                 out.push({ id, kind: "image", text: "Image",
+                           ext: m[2],
+                           thumb: "file://" + root.cacheDir + "/" + id + "." + m[2],
                            meta: [m[3], m[2], m[1]].filter(x => x).join(" · ") })
             } else {
-                out.push({ id, kind: "text", text: preview, meta: "" })
+                out.push({ id, kind: "text", text: preview, ext: "", thumb: "", meta: "" })
             }
         }
         return out
+    }
+
+    // Decode any image entries not yet cached, then publish the history.
+    function _startThumbs() {
+        const imgs = root._next
+            .filter(e => e.kind === "image")
+            .map(e => e.id + ":" + e.ext)
+
+        if (imgs.length === 0) {
+            root.history = root._next
+            return
+        }
+
+        thumbProc.command = ["sh", "-c",
+            'dir=$1; shift; mkdir -p "$dir"; ' +
+            'for p in "$@"; do id=${p%%:*}; ext=${p#*:}; f="$dir/$id.$ext"; ' +
+            '[ -s "$f" ] || cliphist decode "$id" > "$f"; done',
+            "sh", root.cacheDir, ...imgs]
+        thumbProc.running = true
+    }
+
+    function _publish(entries) {
+        root._next = entries
+        if (thumbProc.running) { root._queued = true; return }
+        root._startThumbs()
     }
 
     Process {
         id: listProc
         command: ["cliphist", "list"]
         stdout: StdioCollector {
-            onStreamFinished: root.history = root._parse(text)
+            onStreamFinished: root._publish(root._parse(text))
         }
     }
+
+    Process {
+        id: thumbProc
+        onExited: (code, status) => {
+            root.history = root._next
+            if (root._queued) {
+                root._queued = false
+                root._startThumbs()
+            }
+        }
+    }
+
     Process { id: copyProc }
     Process { id: delProc;  onRunningChanged: if (!running) root.refresh() }
-    Process { id: wipeProc; command: ["cliphist", "wipe"]; onRunningChanged: if (!running) root.refresh() }
+
+    Process {
+        id: wipeProc
+        command: ["sh", "-c", "cliphist wipe; rm -rf \"$1\"", "sh", root.cacheDir]
+        onRunningChanged: if (!running) root.refresh()
+    }
+
+    // optional: drop cached thumbnails older than a week
+    Process {
+        id: pruneProc
+        command: ["sh", "-c", "find \"$1\" -type f -mtime +7 -delete 2>/dev/null", "sh", root.cacheDir]
+    }
 
     // refresh whenever the clipboard changes
     Process {
@@ -64,5 +123,8 @@ Singleton {
     }
     Timer { id: debounce; interval: 200; onTriggered: root.refresh() }
 
-    Component.onCompleted: refresh()
+    Component.onCompleted: {
+        refresh()
+        pruneProc.running = true
+    }
 }
