@@ -76,6 +76,7 @@ Rectangle {
 
         RowLayout {
             Layout.fillWidth: true
+            spacing: 10
 
             Text {
                 text: "Notifications"
@@ -83,14 +84,13 @@ Rectangle {
                 font.bold: true
                 color: ActiveTheme.colors["FG"]
             }
-            Item { Layout.fillWidth: true }
             Text {
                 text: root.entries.length
                 font.pixelSize: root.s(12)
                 color: ActiveTheme.colors["FG_GHOST"]
             }
+            Item { Layout.fillWidth: true }
             Rectangle {
-                visible: root.entries.length > 0
                 Layout.leftMargin: root.s(6)
                 Layout.preferredWidth: root.s(18)
                 Layout.preferredHeight: root.s(18)

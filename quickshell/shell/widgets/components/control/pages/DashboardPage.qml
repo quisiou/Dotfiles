@@ -21,6 +21,7 @@ Item {
 
     function refresh() {
         calendar.refreshLocale()
+        ClipboardService.refresh()
     }
 
     Grid {
@@ -41,13 +42,19 @@ Item {
         // Left top
         GridBlock {
             column: 0; row: 0
-            columnSpan: 6; rowSpan: 6
+            columnSpan: 6; rowSpan: 7
+
+            ClipboardLog {
+                anchors.fill: parent
+                color: ActiveTheme.colors["BG_FOCUSED"]
+                entries: ClipboardService.history
+            }
         }
 
         // Left bottom
         GridBlock {
-            column: 0; row: 6
-            columnSpan: 6; rowSpan: 4
+            column: 0; row: 7
+            columnSpan: 6; rowSpan: 3
         }
 
         // Center top

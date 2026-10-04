@@ -2,6 +2,7 @@
 
 
 Calendar 1.0 Calendar.qml
+ClipboardLog 1.0 ClipboardLog.qml
 ClockText 1.0 ClockText.qml
 FillMeter 1.0 FillMeter.qml
 Grid 1.0 Grid.qml
