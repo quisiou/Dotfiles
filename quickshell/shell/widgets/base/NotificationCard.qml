@@ -1,7 +1,9 @@
 /* quickshell/shell/widgets/base/NotificationCard.qml */
 
 import QtQuick
+import Quickshell.Widgets
 import ElysianShell.Themes
+import ElysianShell.Services
 
 Item {
     id: card
@@ -25,7 +27,20 @@ Item {
         }
     }
 
-    // ── Accent colour ──────────────────────────────────────────────────────
+    function saveAvatar(img) {
+        const avatar = card.entry?.avatar ?? ""
+        const time = card.entry?.logTime ?? ""
+        if (img.status !== Image.Ready || avatar === "" || time === "") return
+
+        const path = NotificationService.avatarDir + "/" + Date.parse(time) + ".png"
+        img.grabToImage(function(result) {
+            const ok = result.saveToFile(path)
+            console.log("AVATAR save", ok, path)
+            if (ok) NotificationService.setHistoryIcon(time, "file://" + path)
+        })
+    }
+
+    // ── Accent color ───────────────────────────────────────────────────────
     property color accentColor: {
         const cat = entry?.category ?? ""
         if (cat.includes("error"))    return ActiveTheme.colors["ERROR_LOW"]
@@ -46,7 +61,7 @@ Item {
         x: circle.x + (card.d / 2)  // Every part of the rectangle that is left of the circle will NOT be visible
         anchors.verticalCenter: parent.verticalCenter
         clip: true
-    
+
         Item {
             id: infoRect
             width:  card.panelWidth
@@ -91,13 +106,13 @@ Item {
                             font.pixelSize:   15
                             font.bold:        true
                             font.family:      "JetBrainsMono Nerd Font"
-                            
+
                             anchors {
                                 left:           parent.left
                                 right:          parent.right
                                 verticalCenter: parent.verticalCenter
                             }
-                            
+
                             wrapMode:               Text.Wrap            // Enables text wrapping to the next line
                             maximumLineCount:       2                    // Caps the rendering at exactly 2 lines
                             elide:                  Text.ElideRight      // Adds "..." at the end of the second line if it overflows
@@ -123,20 +138,20 @@ Item {
                             color:            ActiveTheme.colors["FG_DARK"]
                             font.pixelSize:   13
                             font.family:      "JetBrainsMono Nerd Font"
-                            
+
                             anchors {
                                 left:           parent.left
                                 right:          parent.right
                                 verticalCenter: parent.verticalCenter
                             }
-                            
+
                             wrapMode:               Text.Wrap            // Enables text wrapping to the next line
                             maximumLineCount:       2                    // Caps the rendering at exactly 2 lines
                             elide:                  Text.ElideRight      // Adds "..." at the end of the second line if it overflows
                             horizontalAlignment:    Text.AlignLeft
                         }
                     }
-                }   
+                }
             }
         }
     }
@@ -158,19 +173,21 @@ Item {
         }
 
         // Inner face
-        Rectangle {
+        ClippingRectangle {
             anchors { fill: parent; margins: card.bw }
             radius: width / 2
             color:  ActiveTheme.colors["ANSI_BLACK"]
 
             Image {
-                anchors.centerIn: parent
-                width:  parent.width  - 12
-                height: parent.height - 12
-                source:   card.entry?.icon ?? ""
-                fillMode: Image.PreserveAspectFit
-                smooth:   true
-                visible:  status !== Image.Error && source !== ""
+                id: faceImg
+                anchors.fill: parent
+                source:     card.entry?.icon ?? ""
+                fillMode:   Image.PreserveAspectCrop
+                sourceSize: Qt.size(width * 1.5, height * 1.5)
+                smooth:     true
+                visible:    status !== Image.Error && source !== ""
+
+                onStatusChanged: card.saveAvatar(faceImg)
             }
 
             Text {

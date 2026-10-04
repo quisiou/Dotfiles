@@ -41,6 +41,17 @@ Singleton {
     // ── JSON log ───────────────────────────────────────────────────────────
 
     readonly property string _logPath: Quickshell.cacheDir + "/notifications.json"
+    readonly property string avatarDir: Quickshell.cacheDir + "/notification-avatars"
+
+    Process {
+        command: ["mkdir", "-p", root.avatarDir]
+        running: true
+    }
+
+    Process {
+        id: clearAvatars
+        command: ["sh", "-c", "rm -f \"$1\"/*", "sh", root.avatarDir]
+    }
 
     FileView {
         id: logFile
@@ -81,11 +92,23 @@ Singleton {
         };
         root.history = [entry, ...root.history];
         logFile.setText(JSON.stringify(root.history.slice().reverse(), null, 2));
+        return entry.time;
     }
 
     function removeHistory(time) {
         root.history = root.history.filter(e => e.time !== time);
         logFile.setText(JSON.stringify(root.history.slice().reverse(), null, 2));
+    }
+
+    function setHistoryIcon(time, icon) {
+        root.history = root.history.map(e => e.time === time ? Object.assign({}, e, { icon: icon }) : e);
+        logFile.setText(JSON.stringify(root.history.slice().reverse(), null, 2));
+    }
+
+    function clearHistory() {
+        root.history = [];
+        logFile.setText("[]");
+        clearAvatars.running = true;
     }
 
     // ── App icon retrieval ─────────────────────────────────────────────────
@@ -115,6 +138,9 @@ Singleton {
 
             notif.tracked = true;
 
+            const avatar  = notif.image || "";
+            const appIcon = root.resolveLogIcon(notif);
+
             // Replace if same protocol id (app is updating an existing notif)
             const idStr = String(notif.id || "");
             if (idStr !== "") {
@@ -131,7 +157,9 @@ Singleton {
                 appName: notif.appName || "",
                 summary: notif.summary || "",
                 body:    notif.body    || "",
-                icon:   root.resolveLogIcon(notif),
+                icon:    avatar !== "" ? avatar : appIcon,
+                avatar:  avatar,
+                logTime: "",
                 urgency: notif.urgency ?? 1,
                 category: notif.hints["category"] ?? "",
                 _notif:  notif
@@ -143,7 +171,7 @@ Singleton {
             }
 
             // Always log to file
-            root._appendLog(notif.appName, notif.summary, notif.body, root.resolveLogIcon(notif));
+            entry.logTime = root._appendLog(notif.appName, notif.summary, notif.body, appIcon);
         }
     }
 
@@ -159,6 +187,8 @@ Singleton {
             property string summary:    ""
             property string body:       ""
             property string icon:       ""
+            property string avatar:     ""
+            property string logTime:    ""
             property int    urgency:    1
             property string category:   ""
             property var    _notif:     null

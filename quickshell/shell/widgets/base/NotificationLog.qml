@@ -6,7 +6,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Quickshell.Widgets
 import ElysianShell.Themes
+import ElysianShell.Services
 
 Rectangle {
     id: root
@@ -18,8 +20,6 @@ Rectangle {
 
     property real padding: s(12)
     property var entries: []   // newest first: { time, app, summary, body }
-
-    signal dismissed(string time)
 
     ListModel { id: listModel }
 
@@ -36,8 +36,12 @@ Rectangle {
         // insert rows that are new, keeping the incoming order
         for (let i = 0; i < incoming.length; i++) {
             const e = incoming[i]
-            if (i < listModel.count && listModel.get(i).time === e.time)
+            if (i < listModel.count && listModel.get(i).time === e.time) {
+                // row exists: pick up a changed icon (e.g. the saved avatar)
+                if (listModel.get(i).icon !== (e.icon ?? ""))
+                    listModel.setProperty(i, "icon", e.icon ?? "")
                 continue
+            }
             listModel.insert(i, {
                 time:    e.time    ?? "",
                 app:     e.app     ?? "",
@@ -84,6 +88,33 @@ Rectangle {
                 text: root.entries.length
                 font.pixelSize: root.s(12)
                 color: ActiveTheme.colors["FG_GHOST"]
+            }
+            Rectangle {
+                visible: root.entries.length > 0
+                Layout.leftMargin: root.s(6)
+                Layout.preferredWidth: root.s(18)
+                Layout.preferredHeight: root.s(18)
+                radius: root.s(4)
+                color: clearArea.containsMouse ? ActiveTheme.colors["ACCENT_LOW"] : "transparent"
+
+                Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "\udb82\ude7a"
+                    font.pixelSize: root.s(13)
+                    color: clearArea.containsMouse ? ActiveTheme.colors["BG"] : ActiveTheme.colors["FG_GHOST"]
+
+                    Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
+                }
+
+                MouseArea {
+                    id: clearArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: NotificationService.clearHistory()
+                }
             }
         }
 
@@ -155,7 +186,7 @@ Rectangle {
                         anchors.margins: root.s(8)
                         spacing: root.s(8)
 
-                        Rectangle {
+                        ClippingRectangle {
                             Layout.alignment: Qt.AlignTop
                             Layout.preferredWidth: root.s(28)
                             Layout.preferredHeight: root.s(28)
@@ -166,11 +197,10 @@ Rectangle {
 
                             Image {
                                 id: iconImg
-                                anchors.centerIn: parent
-                                width: parent.width - root.s(6)
-                                height: parent.height - root.s(6)
+                                anchors.fill: parent
                                 source: card.icon
-                                fillMode: Image.PreserveAspectFit
+                                fillMode: Image.PreserveAspectCrop
+                                sourceSize: Qt.size(width * 1.5, height * 1.5)
                                 smooth: true
                                 asynchronous: true
                                 visible: card.icon !== "" && status === Image.Ready
@@ -230,7 +260,7 @@ Rectangle {
                                         anchors.fill: parent
                                         hoverEnabled: true
                                         cursorShape: Qt.PointingHandCursor
-                                        onClicked: root.dismissed(card.time)
+                                        onClicked: NotificationService.removeHistory(card.time)
                                     }
                                 }
                             }
