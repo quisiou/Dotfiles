@@ -2,6 +2,10 @@
 # zsh/default/main.zsh
 
 
+setopt HIST_REDUCE_BLANKS   # strip superfluous whitespace from entries
+setopt HIST_VERIFY          # after !! or !$ expansion, show the line before running it
+setopt HIST_NO_STORE        # don't store the `history` command itself
+
 # Save and set last visited directory when closing terminal
 trap "pwd > $HOME/.last_dir" EXIT
 if [ -f "$HOME/.last_dir" ]; then

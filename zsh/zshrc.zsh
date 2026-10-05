@@ -4,12 +4,17 @@
 
 # Set command history
 export HISTFILE="$HOME/.zsh_history"
-export HISTSIZE=10000
+export HISTSIZE=12000
 export SAVEHIST=10000
-setopt HIST_IGNORE_DUPS     # don't store a line identical to the immediately preceding one
-setopt HIST_FIND_NO_DUPS    # when searching history, skip consecutive duplicates while scrolling
-setopt EXTENDED_HISTORY     # record a timestamp (and duration) for each history entry
-setopt INC_APPEND_HISTORY   # write each command to HISTFILE immediately, not just on shell exit
+
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt SHARE_HISTORY
+setopt AUTO_CD
+
+bindkey -e
 
 # Source main config
 [ -f "$HOME/.config/zsh/main.zsh" ] && . "$HOME/.config/zsh/main.zsh"
