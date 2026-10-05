@@ -69,51 +69,84 @@ Rectangle {
         return Qt.formatDate(d, "dd MMM") + " " + time
     }
 
+    signal toggleRequested()
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: root.padding
         spacing: root.s(8)
 
-        RowLayout {
+        Rectangle {
+            id: header
             Layout.fillWidth: true
-            spacing: 10
+            implicitHeight: headerRow.implicitHeight + root.s(12)
+            radius: root.s(8)
 
-            Text {
-                text: "Notifications"
-                font.pixelSize: root.s(14)
-                font.bold: true
-                color: ActiveTheme.colors["FG"]
-            }
-            Text {
-                text: root.entries.length
-                font.pixelSize: root.s(12)
-                color: ActiveTheme.colors["FG_GHOST"]
-            }
-            Item { Layout.fillWidth: true }
-            Rectangle {
-                Layout.leftMargin: root.s(6)
-                Layout.preferredWidth: root.s(18)
-                Layout.preferredHeight: root.s(18)
-                radius: root.s(4)
-                color: clearArea.containsMouse ? ActiveTheme.colors["ACCENT_LOW"] : "transparent"
+            // Fade to/from the same color with alpha 0. Animating from plain
+            // "transparent" (black, alpha 0) makes the fade pass through a dark tint.
+            color: headerHover.hovered
+                ? ActiveTheme.colors["BG_ACTIVE"]
+                : Qt.alpha(ActiveTheme.colors["BG_ACTIVE"], 0)
 
-                Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
+            Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
+
+            HoverHandler { id: headerHover }
+
+            // Declared before the content so the clear button's MouseArea stays on top.
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.toggleRequested()
+            }
+
+            RowLayout {
+                id: headerRow
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.leftMargin: root.s(8)
+                anchors.rightMargin: root.s(8)
+                spacing: 10
 
                 Text {
-                    anchors.centerIn: parent
-                    text: "\udb82\ude7a"
-                    font.pixelSize: root.s(13)
-                    color: clearArea.containsMouse ? ActiveTheme.colors["BG"] : ActiveTheme.colors["FG_GHOST"]
+                    text: "Notifications"
+                    font.pixelSize: root.s(14)
+                    font.bold: true
+                    color: ActiveTheme.colors["FG"]
+                }
+                Text {
+                    text: root.entries.length
+                    font.pixelSize: root.s(12)
+                    color: ActiveTheme.colors["FG_GHOST"]
+                }
+                Item { Layout.fillWidth: true }
+
+                // Clear button: unchanged
+                Rectangle {
+                    Layout.leftMargin: root.s(6)
+                    Layout.preferredWidth: root.s(18)
+                    Layout.preferredHeight: root.s(18)
+                    radius: root.s(4)
+                    color: clearArea.containsMouse ? ActiveTheme.colors["ACCENT_LOW"] : "transparent"
 
                     Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
-                }
 
-                MouseArea {
-                    id: clearArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: NotificationService.clearHistory()
+                    Text {
+                        anchors.centerIn: parent
+                        text: "\udb82\ude7a"
+                        font.pixelSize: root.s(13)
+                        color: clearArea.containsMouse ? ActiveTheme.colors["BG"] : ActiveTheme.colors["FG_GHOST"]
+
+                        Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
+                    }
+
+                    MouseArea {
+                        id: clearArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: NotificationService.clearHistory()
+                    }
                 }
             }
         }
@@ -177,6 +210,11 @@ Rectangle {
                     height: cardRow.implicitHeight + root.s(16)
                     radius: root.s(8)
                     color: ActiveTheme.colors["BG_ACTIVE"]
+
+                    MouseArea {
+                        anchors.fill: parent
+                        // Reserved for future card actions.
+                    }
 
                     RowLayout {
                         id: cardRow

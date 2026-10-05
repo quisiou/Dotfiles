@@ -32,6 +32,13 @@ Item {
     Keys.onRightPressed:    root.tabRequested(Math.min(root.currentIndex + 1, root.tabs.length - 1))
     Keys.onLeftPressed:     root.tabRequested(Math.max(root.currentIndex - 1, 0))
 
+    Component.onDestruction: {
+        for (const tab of root.tabs) {
+            const page = tab.item
+            if (page && typeof page.leave === "function")
+                page.leave()
+        }
+    }
 
     Item {
         id: tabBarContainer
@@ -165,7 +172,18 @@ Item {
 
                 Behavior on x {
                     enabled: root.settled
-                    NumberAnimation { duration: root._animDuration; easing.type: Easing.InOutCubic }
+                    NumberAnimation {
+                        duration: root._animDuration
+                        easing.type: Easing.InOutCubic
+
+                        onRunningChanged: {
+                            if (running || pageSlot.index === root.currentIndex)
+                                return
+                            const page = pageSlot.modelData.item
+                            if (page && typeof page.leave === "function")
+                                page.leave()
+                        }
+                    }
                 }
 
                 Component.onCompleted: {

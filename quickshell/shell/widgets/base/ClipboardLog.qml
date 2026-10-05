@@ -23,26 +23,57 @@ Rectangle {
 
     ListModel { id: listModel }
 
+    function _sig(e) { return (e.kind ?? "text") + "\u0000" + (e.text ?? "") + "\u0000" + (e.meta ?? "") }
+
     function _sync() {
         const incoming = root.entries
         const keys = new Set(incoming.map(e => e.id))
 
+        const existing = new Set()
+        for (let i = 0; i < listModel.count; i++)
+            existing.add(listModel.get(i).entryId)
+        // entries that aren't in the model yet
+        const fresh = incoming.filter(e => !existing.has(e.id))
+
+        // Rows whose id is gone. If a new entry has the same content, the service
+        // re-created it (id changed on copy), so reuse the row instead of removing it.
         for (let i = listModel.count - 1; i >= 0; i--) {
-            if (!keys.has(listModel.get(i).entryId))
+            const row = listModel.get(i)
+            if (keys.has(row.entryId))
+                continue
+            const f = fresh.findIndex(e => root._sig(e) === root._sig({
+                kind: row.kind, text: row.text, meta: row.meta }))
+            if (f >= 0) {
+                listModel.setProperty(i, "entryId", fresh[f].id)
+                listModel.setProperty(i, "thumb", fresh[f].thumb ?? "")
+                fresh.splice(f, 1)
+            } else {
                 listModel.remove(i)
+            }
         }
 
+        // Put every row in the incoming order: move existing rows, insert new ones
         for (let i = 0; i < incoming.length; i++) {
             const e = incoming[i]
             if (i < listModel.count && listModel.get(i).entryId === e.id)
                 continue
-            listModel.insert(i, {
-                entryId: e.id,
-                kind:    e.kind ?? "text",
-                text:    e.text ?? "",
-                meta:    e.meta ?? "",
-                thumb:   e.thumb ?? ""
-            })
+
+            let j = -1
+            for (let k = i + 1; k < listModel.count; k++) {
+                if (listModel.get(k).entryId === e.id) { j = k; break }
+            }
+
+            if (j >= 0) {
+                listModel.move(j, i, 1)
+            } else {
+                listModel.insert(i, {
+                    entryId: e.id,
+                    kind:    e.kind ?? "text",
+                    text:    e.text ?? "",
+                    meta:    e.meta ?? "",
+                    thumb:   e.thumb ?? ""
+                })
+            }
         }
     }
 
@@ -63,51 +94,81 @@ Rectangle {
         return Qt.formatDate(d, "dd MMM") + " " + time
     }
 
+    signal toggleRequested()
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: root.padding
         spacing: root.s(8)
 
-        RowLayout {
+        Rectangle {
+            id: header
             Layout.fillWidth: true
-            spacing: 10
+            implicitHeight: headerRow.implicitHeight + root.s(12)
+            radius: root.s(8)
 
-            Text {
-                text: "Clipboard"
-                font.pixelSize: root.s(14)
-                font.bold: true
-                color: ActiveTheme.colors["FG"]
-            }
-            Text {
-                text: root.entries.length
-                font.pixelSize: root.s(12)
-                color: ActiveTheme.colors["FG_GHOST"]
-            }
-            Item { Layout.fillWidth: true }
-            Rectangle {
-                Layout.leftMargin: root.s(6)
-                Layout.preferredWidth: root.s(18)
-                Layout.preferredHeight: root.s(18)
-                radius: root.s(4)
-                color: clearArea.containsMouse ? ActiveTheme.colors["ACCENT_LOW"] : "transparent"
+            color: headerHover.hovered
+                ? ActiveTheme.colors["BG_ACTIVE"]
+                : Qt.alpha(ActiveTheme.colors["BG_ACTIVE"], 0)
 
-                Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
+            Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
+
+            HoverHandler { id: headerHover }
+
+            // Declared before the content so the clear button's MouseArea stays on top.
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.toggleRequested()
+            }
+
+            RowLayout {
+                id: headerRow
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.leftMargin: root.s(8)
+                anchors.rightMargin: root.s(8)
+                spacing: 10
 
                 Text {
-                    anchors.centerIn: parent
-                    text: "\udb82\ude7a"
-                    font.pixelSize: root.s(13)
-                    color: clearArea.containsMouse ? ActiveTheme.colors["BG"] : ActiveTheme.colors["FG_GHOST"]
+                    text: "Clipboard"
+                    font.pixelSize: root.s(14)
+                    font.bold: true
+                    color: ActiveTheme.colors["FG"]
+                }
+                Text {
+                    text: root.entries.length
+                    font.pixelSize: root.s(12)
+                    color: ActiveTheme.colors["FG_GHOST"]
+                }
+                Item { Layout.fillWidth: true }
+
+                Rectangle {
+                    Layout.leftMargin: root.s(6)
+                    Layout.preferredWidth: root.s(18)
+                    Layout.preferredHeight: root.s(18)
+                    radius: root.s(4)
+                    color: clearArea.containsMouse ? ActiveTheme.colors["ACCENT_LOW"] : "transparent"
 
                     Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
-                }
 
-                MouseArea {
-                    id: clearArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: ClipboardService.clearHistory()
+                    Text {
+                        anchors.centerIn: parent
+                        text: "\udb82\ude7a"
+                        font.pixelSize: root.s(13)
+                        color: clearArea.containsMouse ? ActiveTheme.colors["BG"] : ActiveTheme.colors["FG_GHOST"]
+
+                        Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
+                    }
+
+                    MouseArea {
+                        id: clearArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: ClipboardService.clearHistory()
+                    }
                 }
             }
         }
@@ -158,6 +219,14 @@ Rectangle {
                     }
                 }
 
+                move: Transition {
+                    NumberAnimation {
+                        properties: "y"
+                        duration: list._animDuration
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
                 delegate: Rectangle {
                     id: card
 
@@ -171,6 +240,11 @@ Rectangle {
                     height: cardCol.implicitHeight + root.s(16)
                     radius: root.s(8)
                     color: ActiveTheme.colors["BG_ACTIVE"]
+
+                    MouseArea {
+                        anchors.fill: parent
+                        // Reserved for future card actions.
+                    }
 
                     ColumnLayout {
                         id: cardCol

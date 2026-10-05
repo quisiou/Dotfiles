@@ -22,7 +22,11 @@ Item {
 
     Keys.onSpacePressed: MediaService.toggle()
 
+    // Called when opening a page
     function refresh() {}
+
+    // Called after completely switching to another page (animation finished)
+    function leave() {}
 
     Row {
         id: contentRow

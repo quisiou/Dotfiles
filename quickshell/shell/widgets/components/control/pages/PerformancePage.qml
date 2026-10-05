@@ -24,7 +24,11 @@ Item {
     property real gpuPerc: 0
     property real gpuTemp: 0
 
+    // Called when opening a page
     function refresh() {}
+
+    // Called after completely switching to another page (animation finished)
+    function leave() {}
 
     Process {
         id: cpuProc

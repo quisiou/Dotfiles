@@ -19,9 +19,15 @@ Item {
     implicitWidth: _designWidth
     implicitHeight: _gridRows * _designBlock + (_gridRows - 1) * _gridSpacing
 
+    // Called when opening a page
     function refresh() {
         calendar.refreshLocale()
         ClipboardService.refresh()
+    }
+
+    // Called after completely switching to another page (animation finished)
+    function leave() {
+        notificationBlock.collapseImmediately()
     }
 
     Grid {
@@ -41,6 +47,7 @@ Item {
 
         // Left top
         GridBlock {
+            id: clipboardBlock
             column: 0; row: 0
             columnSpan: 6; rowSpan: 7
 
@@ -48,6 +55,8 @@ Item {
                 anchors.fill: parent
                 color: ActiveTheme.colors["BG_FOCUSED"]
                 entries: ClipboardService.history
+
+                onToggleRequested: clipboardBlock.toggle()
             }
         }
 
@@ -78,6 +87,7 @@ Item {
 
         // Right
         GridBlock {
+            id: notificationBlock
             column: 14; row: 0
             columnSpan: 6; rowSpan: 10
 
@@ -85,6 +95,8 @@ Item {
                 anchors.fill: parent
                 color: ActiveTheme.colors["BG_FOCUSED"]
                 entries: NotificationService.history
+
+                onToggleRequested: notificationBlock.toggle()
             }
         }
     }
