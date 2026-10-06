@@ -17,6 +17,9 @@ Singleton {
     property bool showNotifications:    true
     property list<string> _ignoredApps: []
     property list<var> history:         []
+    property var _live: ({})          // logTime -> Notification
+    property var _liveOrder: []       // logTimes, oldest first
+    readonly property int _maxLive: 30
 
     // ── Apps to ignore ─────────────────────────────────────────────────────
 
@@ -82,6 +85,32 @@ Singleton {
         // qmllint enable signal-handler-parameters
     }
 
+    function _dropLive(time, close) {
+        const n = root._live[time]
+        delete root._live[time]
+        root._liveOrder = root._liveOrder.filter(t => t !== time)
+        if (close && n) try { n.dismiss() } catch (e) {}
+    }
+
+    function _keepLive(time, notif) {
+        root._live[time] = notif
+        root._liveOrder.push(time)
+        notif.closed.connect(() => root._dropLive(time, false))
+
+        // Past the cap, close the oldest ones
+        while (root._liveOrder.length > root._maxLive)
+            root._dropLive(root._liveOrder[0], true)
+    }
+
+    function invokeDefault(time) {
+        const n = root._live[time]
+        if (!n) return false
+        const def = (n.actions ?? []).find(a => a.identifier === "default")
+        if (!def) return false
+        def.invoke()
+        return true
+    }
+
     function _appendLog(appName, summary, body, icon) {
         const entry = {
             time:    new Date().toISOString(),
@@ -96,6 +125,7 @@ Singleton {
     }
 
     function removeHistory(time) {
+        root._dropLive(time, true);
         root.history = root.history.filter(e => e.time !== time);
         logFile.setText(JSON.stringify(root.history.slice().reverse(), null, 2));
     }
@@ -106,6 +136,9 @@ Singleton {
     }
 
     function clearHistory() {
+        for (const t of root._liveOrder.slice())
+            root._dropLive(t, true);
+
         root.history = [];
         logFile.setText("[]");
         clearAvatars.running = true;
@@ -172,6 +205,9 @@ Singleton {
 
             // Always log to file
             entry.logTime = root._appendLog(notif.appName, notif.summary, notif.body, appIcon);
+
+            // Keep alive
+            root._keepLive(entry.logTime, notif);
         }
     }
 
@@ -195,7 +231,6 @@ Singleton {
 
             function dismiss() {
                 root.notifications = root.notifications.filter(n => n !== this);
-                if (_notif) try { _notif.dismiss(); } catch(e) {}
                 destroy();
             }
         }

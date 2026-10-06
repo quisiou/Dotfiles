@@ -207,7 +207,8 @@ Rectangle {
 
                     MouseArea {
                         anchors.fill: parent
-                        // Reserved for future card actions.
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: NotificationService.invokeDefault(card.time)
                     }
 
                     RowLayout {
