@@ -28,6 +28,7 @@ Item {
     // Called after completely switching to another page (animation finished)
     function leave() {
         notificationBlock.collapseImmediately()
+        clipboardBlock.collapseImmediately()
     }
 
     Grid {

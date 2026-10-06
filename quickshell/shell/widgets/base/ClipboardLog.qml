@@ -107,11 +107,7 @@ Rectangle {
             implicitHeight: headerRow.implicitHeight + root.s(12)
             radius: root.s(8)
 
-            color: headerHover.hovered
-                ? ActiveTheme.colors["BG_ACTIVE"]
-                : Qt.alpha(ActiveTheme.colors["BG_ACTIVE"], 0)
-
-            Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
+            color: "transparent"
 
             HoverHandler { id: headerHover }
 

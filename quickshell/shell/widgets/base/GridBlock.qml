@@ -17,6 +17,7 @@ Rectangle {
     // Expand state
     property bool expanded: false
     property int animationDuration: 220
+    property real scrimOpacity: 0.5   // how dark the backdrop gets
 
     readonly property var grid: parent
 
@@ -52,11 +53,11 @@ Rectangle {
         expanded ? collapse() : expand()
     }
 
-    x: expanded ? 0 : column * (grid.blockWidth + grid.spacing)
-    y: expanded ? 0 : row * (grid.blockHeight + grid.spacing)
-    width: expanded ? grid.width
+    x: expanded ? grid.blockWidth + grid.spacing : column * (grid.blockWidth + grid.spacing)
+    y: expanded ? grid.blockHeight + grid.spacing : row * (grid.blockHeight + grid.spacing)
+    width: expanded ? grid.width - 2 * (grid.blockWidth) - grid.spacing
                     : columnSpan * grid.blockWidth + (columnSpan - 1) * grid.spacing
-    height: expanded ? grid.height
+    height: expanded ? grid.height - 2 * (grid.blockHeight) - grid.spacing
                      : rowSpan * grid.blockHeight + (rowSpan - 1) * grid.spacing
 
     z: (expanded || _animating) ? 100 : 0
@@ -85,5 +86,33 @@ Rectangle {
     Behavior on height {
         enabled: root._animate
         NumberAnimation { id: hAnim; duration: root.animationDuration; easing.type: Easing.OutCubic }
+    }
+
+    // Backdrop dimming the rest of the grid while this block is expanded.
+    Rectangle {
+        id: scrim
+
+        parent: root.grid          // lives in the grid, not inside the clipped block
+        anchors.fill: parent
+        z: 99                      // above other blocks (0), below the expanded one (100)
+
+        color: "black"
+        opacity: root.expanded ? root.scrimOpacity : 0
+        visible: opacity > 0       // don't render when fully transparent
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: root._animate ? root.animationDuration : 0
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        // Swallow clicks on the dimmed blocks, and collapse on click outside
+        MouseArea {
+            anchors.fill: parent
+            enabled: root.expanded
+            hoverEnabled: true
+            onClicked: root.collapse()
+        }
     }
 }
