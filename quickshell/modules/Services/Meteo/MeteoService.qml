@@ -5,7 +5,6 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 
 Singleton {
     id: root
@@ -37,6 +36,48 @@ Singleton {
     property bool loaded: false
     property string error: ""
     property date lastUpdated
+
+    // ── Other ────────────────────────────────────────────────────
+    property string timezone: ""
+    property int utcOffsetSeconds: 0
+    property real elevation: 0
+
+    // ── WMO code → text ──────────────────────────────────────────
+    readonly property var weatherCodes: ({
+        0:  "Clear sky",
+        1:  "Mainly clear",
+        2:  "Partly cloudy",
+        3:  "Overcast",
+        45: "Fog",
+        48: "Depositing rime fog",
+        51: "Light drizzle",
+        53: "Moderate drizzle",
+        55: "Dense drizzle",
+        56: "Light freezing drizzle",
+        57: "Dense freezing drizzle",
+        61: "Slight rain",
+        63: "Moderate rain",
+        65: "Heavy rain",
+        66: "Light freezing rain",
+        67: "Heavy freezing rain",
+        71: "Slight snowfall",
+        73: "Moderate snowfall",
+        75: "Heavy snowfall",
+        77: "Snow grains",
+        80: "Slight rain showers",
+        81: "Moderate rain showers",
+        82: "Violent rain showers",
+        85: "Slight snow showers",
+        86: "Heavy snow showers",
+        95: "Thunderstorm",
+        96: "Thunderstorm with slight hail",
+        97: "Heavy thunderstorm",
+        99: "Thunderstorm with heavy hail"
+    })
+
+    function codeToText(code) {
+        return weatherCodes[code] ?? "Unknown";
+    }
 
     // ── Log out the stats ────────────────────────────────────────
     function logOut() {
@@ -153,9 +194,19 @@ Singleton {
     function fetchWeather() {
         const currentVars = [
             "temperature_2m", "apparent_temperature", "relative_humidity_2m",
-            "is_day", "precipitation", "rain", "showers", "snowfall",
-            "weather_code", "cloud_cover", "pressure_msl", "surface_pressure",
-            "wind_speed_10m", "wind_direction_10m", "wind_gusts_10m"
+            "dew_point_2m", "is_day", "precipitation", "rain", "showers", "snowfall",
+            "snow_depth", "weather_code", "cloud_cover", "cloud_cover_low",
+            "cloud_cover_mid", "cloud_cover_high", "pressure_msl", "surface_pressure",
+            "visibility", "cape", "freezing_level_height", "vapour_pressure_deficit",
+            "wind_speed_10m", "wind_speed_80m", "wind_speed_120m", "wind_speed_180m",
+            "wind_direction_10m", "wind_direction_80m", "wind_direction_120m",
+            "wind_direction_180m", "wind_gusts_10m",
+            "temperature_80m", "temperature_120m", "temperature_180m",
+            "shortwave_radiation", "direct_radiation", "direct_normal_irradiance",
+            "diffuse_radiation", "evapotranspiration", "et0_fao_evapotranspiration",
+            "soil_temperature_0cm", "soil_temperature_6cm", "soil_temperature_18cm",
+            "soil_temperature_54cm", "soil_moisture_0_to_1cm", "soil_moisture_1_to_3cm",
+            "soil_moisture_3_to_9cm", "soil_moisture_9_to_27cm", "soil_moisture_27_to_81cm"
         ];
 
         const hourlyVars = [
@@ -164,20 +215,32 @@ Singleton {
             "rain", "showers", "snowfall", "snow_depth", "weather_code",
             "pressure_msl", "surface_pressure", "cloud_cover", "cloud_cover_low",
             "cloud_cover_mid", "cloud_cover_high", "visibility",
-            "wind_speed_10m", "wind_direction_10m", "wind_gusts_10m",
-            "uv_index", "is_day", "sunshine_duration", "cape",
-            "freezing_level_height", "soil_temperature_0cm", "soil_moisture_0_to_1cm"
+            "evapotranspiration", "et0_fao_evapotranspiration", "vapour_pressure_deficit",
+            "wind_speed_10m", "wind_speed_80m", "wind_speed_120m", "wind_speed_180m",
+            "wind_direction_10m", "wind_direction_80m", "wind_direction_120m",
+            "wind_direction_180m", "wind_gusts_10m",
+            "temperature_80m", "temperature_120m", "temperature_180m",
+            "shortwave_radiation", "direct_radiation", "direct_normal_irradiance",
+            "diffuse_radiation", "uv_index", "uv_index_clear_sky", "is_day",
+            "sunshine_duration", "cape", "freezing_level_height",
+            "soil_temperature_0cm", "soil_temperature_6cm", "soil_temperature_18cm",
+            "soil_temperature_54cm", "soil_moisture_0_to_1cm", "soil_moisture_1_to_3cm",
+            "soil_moisture_3_to_9cm", "soil_moisture_9_to_27cm", "soil_moisture_27_to_81cm"
         ];
 
         const dailyVars = [
-            "weather_code", "temperature_2m_max", "temperature_2m_min",
-            "apparent_temperature_max", "apparent_temperature_min",
+            "weather_code",
+            "temperature_2m_max", "temperature_2m_mean", "temperature_2m_min",
+            "apparent_temperature_max", "apparent_temperature_mean", "apparent_temperature_min",
             "sunrise", "sunset", "daylight_duration", "sunshine_duration",
-            "uv_index_max", "precipitation_sum", "rain_sum", "showers_sum",
-            "snowfall_sum", "precipitation_hours", "precipitation_probability_max",
-            "wind_speed_10m_max", "wind_gusts_10m_max",
-            "wind_direction_10m_dominant", "shortwave_radiation_sum",
-            "et0_fao_evapotranspiration"
+            "moonrise", "moonset", "moon_phase",
+            "uv_index_max", "uv_index_clear_sky_max",
+            "precipitation_sum", "rain_sum", "showers_sum", "snowfall_sum",
+            "precipitation_hours",
+            "precipitation_probability_max", "precipitation_probability_mean",
+            "precipitation_probability_min",
+            "wind_speed_10m_max", "wind_gusts_10m_max", "wind_direction_10m_dominant",
+            "shortwave_radiation_sum", "et0_fao_evapotranspiration"
         ];
 
         const url = "https://api.open-meteo.com/v1/forecast"
@@ -210,26 +273,16 @@ Singleton {
             root.weatherCode = data.current.weather_code;
             root.isDay = data.current.is_day === 1;
 
+            root.timezone = data.timezone;
+            root.utcOffsetSeconds = data.utc_offset_seconds;
+            root.elevation = data.elevation;
+
             root.lastUpdated = new Date();
             root.error = "";
             root.loaded = true;
 
             root.logOut()
         });
-    }
-
-    // ── WMO code → text ──────────────────────────────────────────
-    function codeToText(code) {
-        if (code === 0) return "Clear sky";
-        if (code <= 3) return "Partly cloudy";
-        if (code <= 48) return "Fog";
-        if (code <= 57) return "Drizzle";
-        if (code <= 67) return "Rain";
-        if (code <= 77) return "Snow";
-        if (code <= 82) return "Rain showers";
-        if (code <= 86) return "Snow showers";
-        if (code >= 95) return "Thunderstorm";
-        return "Unknown";
     }
 
     // ── Refresh every 30 minutes (and once at startup) ──────────

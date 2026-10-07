@@ -31,7 +31,7 @@ Item {
         clipboardBlock.collapseImmediately()
     }
 
-    Component.onCompleted: MeteoService.refresh()
+    Component.onCompleted: if (!MeteoService.loaded) { MeteoService.refresh() }
 
     Grid {
         id: grid
