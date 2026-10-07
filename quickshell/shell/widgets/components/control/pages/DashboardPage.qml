@@ -31,6 +31,8 @@ Item {
         clipboardBlock.collapseImmediately()
     }
 
+    Component.onCompleted: MeteoService.refresh()
+
     Grid {
         id: grid
         anchors.fill: parent
