@@ -60,6 +60,7 @@ PanelWindow {
     function makeEntry(app) {
         var obj = Qt.createQmlObject(`import QtQuick; QtObject {
             property string name
+            property bool useImg
             property string id
             property string icon
             property string comment
@@ -68,6 +69,7 @@ PanelWindow {
             property var leftAction
         }`, root)
         obj.name    = app.name
+        obj.useImg  = true
         obj.id      = app.id ?? ""
         obj.icon    = app.icon ? "image://icon/" + app.icon : ""
         obj.comment = app.comment ?? ""

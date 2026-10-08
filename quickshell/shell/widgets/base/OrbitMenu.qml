@@ -130,7 +130,7 @@ Item {
         id: bubbleItem
 
         required property int index
-        
+
         property int count: bubbleRepeater.count
 
         readonly property var  activeEntries:   root.sets[root.activeSet]?.entries ?? []
@@ -265,24 +265,34 @@ Item {
                 source: bubbleItem.entry?.icon ?? ""
                 fillMode: Image.PreserveAspectFit
                 smooth: true
-                visible: status === Image.Ready
+                visible: bubbleItem.entry?.useImg && status === Image.Ready
                 opacity: bubbleItem.selected ? 1.0 : 0.75
             }
 
             Text {
                 anchors.centerIn: parent
                 text: (bubbleItem.entry?.name ?? "").charAt(0).toUpperCase()
-                color: bubbleItem.selected ? ActiveTheme.colors["FG"] : ActiveTheme.colors["DARK3"]
+                color: bubbleItem.selected ? ActiveTheme.colors["FG"] : ActiveTheme.colors["FG_GHOST"]
                 font.pixelSize: 16
                 font.weight: Font.Medium
-                visible: bubbleIcon.status !== Image.Ready
+                visible: bubbleItem.entry?.useImg && bubbleIcon.status !== Image.Ready
             }
+
+            Text {
+                anchors.centerIn: parent
+                text: (bubbleItem.entry?.icon ?? "")
+                color: bubbleItem.selected ? ActiveTheme.colors["FG"] : ActiveTheme.colors["FG_GHOST"]
+                font.pixelSize: 27
+                font.weight: Font.Medium
+                visible: !bubbleItem.entry?.useImg
+            }
+
 
             MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
-                
+
                 onEntered: bubbleItem.hovered = true
                 onExited: bubbleItem.hovered = false
 

@@ -68,6 +68,7 @@ PanelWindow {
                         readonly property int   pct:    Math.round(volume * 100)
 
                         property string name:     "Sound"
+                        property bool useImg:       true
                         property string icon:     muted                 ?   Qt.resolvedUrl("../assets/icons/audio-volume-muted.svg")
                                 : pct === 0             ?   Qt.resolvedUrl("../assets/icons/audio-volume-low.svg")
                                 : pct < 60              ?   Qt.resolvedUrl("../assets/icons/audio-volume-medium.svg")
@@ -83,6 +84,7 @@ PanelWindow {
                         readonly property var adapter: orbitMenu.bthAdapters[0] ?? null
 
                         property string name:     "Bluetooth"
+                        property bool useImg:       true
                         property string icon:     !(adapter?.enabled ?? false) ? Qt.resolvedUrl("../assets/icons/bluetooth-disabled.svg")
                             : BluetoothDeviceModel.connectedNames.length > 0 ? Qt.resolvedUrl("../assets/icons/bluetooth-paired.svg")
                             : Qt.resolvedUrl("../assets/icons/bluetooth-active.svg")
@@ -102,6 +104,7 @@ PanelWindow {
                         property bool prev_bluetooth: true
 
                         property string name:     "Airplane Mode"
+                        property bool useImg:       true
                         property string icon: !selected ?   Qt.resolvedUrl("../assets/icons/airplane-mode-disabled.svg")
                             :               Qt.resolvedUrl("../assets/icons/airplane-mode-active.svg")
 
@@ -132,6 +135,7 @@ PanelWindow {
                     // Network
                     QtObject {
                         property string name:     "Network"
+                        property bool useImg:       true
                         property string icon: NetworkService.connectionType === "ethernet" ?   Qt.resolvedUrl("../assets/icons/network-wired.svg")
                             : !NetworkService.enabled       ?   Qt.resolvedUrl("../assets/icons/network-wireless-offline.svg")
                             : NetworkService.strength === 0 ?   Qt.resolvedUrl("../assets/icons/network-wireless-acquiring.svg")
@@ -154,6 +158,7 @@ PanelWindow {
                     // Notifications
                     QtObject {
                         property string name:       "Notifications"
+                        property bool useImg:       true
                         property string icon:       (NotificationService.showNotifications)
                                         ? Qt.resolvedUrl("../assets/icons/notification-active.svg")
                                         : Qt.resolvedUrl("../assets/icons/notification-disabled.svg")

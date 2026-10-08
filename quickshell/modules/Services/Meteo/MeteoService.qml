@@ -280,8 +280,6 @@ Singleton {
             root.lastUpdated = new Date();
             root.error = "";
             root.loaded = true;
-
-            root.logOut()
         });
     }
 
