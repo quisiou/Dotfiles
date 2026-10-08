@@ -7,6 +7,7 @@ ClockText 1.0 ClockText.qml
 FillMeter 1.0 FillMeter.qml
 Grid 1.0 Grid.qml
 GridBlock 1.0 GridBlock.qml
+WeatherMenu 1.0 WeatherMenu.qml
 MorphingContainer 1.0 MorphingContainer.qml
 NotificationLog 1.0 NotificationLog.qml
 OrbitMenu 1.0 OrbitMenu.qml

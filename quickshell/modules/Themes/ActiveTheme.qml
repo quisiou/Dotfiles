@@ -125,8 +125,6 @@ Singleton {
                 const key = match[1]
                 const val = match[2]
 
-                console.log(JSON.stringify(key), "=", JSON.stringify(val))
-
                 if (val.match(/^#([a-fA-F0-9]{6})$/)) {
                     colors[key] = val
                     continue

@@ -29,9 +29,10 @@ Item {
     function leave() {
         notificationBlock.collapseImmediately()
         clipboardBlock.collapseImmediately()
+        meteoBlock.collapseImmediately()
     }
 
-    Component.onCompleted: if (!MeteoService.loaded) { MeteoService.refresh() }
+    Component.onCompleted: WeatherService.refresh()
 
     Grid {
         id: grid
@@ -65,8 +66,15 @@ Item {
 
         // Left bottom
         GridBlock {
+            id: meteoBlock
             column: 0; row: 7
             columnSpan: 6; rowSpan: 3
+
+            WeatherMenu {
+                anchors.fill: parent
+                expanded: meteoBlock.expanded
+                onToggleRequested: meteoBlock.toggle()
+            }
         }
 
         // Center top

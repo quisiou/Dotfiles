@@ -1,4 +1,4 @@
-/* quickshell/modules/Services/Meteo/MeteoService.qml */
+/* quickshell/modules/Services/Weather/WeatherService.qml */
 
 
 pragma Singleton

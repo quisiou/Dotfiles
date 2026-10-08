@@ -137,6 +137,7 @@ PanelWindow {
                 import QtQuick
                 QtObject {
                     property string name:     ""
+                    property bool useImg
                     property string comment:  ""
                     property string icon:     ""
                     property bool   selected: false
@@ -147,6 +148,7 @@ PanelWindow {
             `, root))
             let obj = allEntries[allEntries.length - 1]
             obj.name       = e.text
+            obj.useImg     = true
             obj.icon       = e.icon
             obj.leftAction = function() { e.triggered() }
             obj.rightAction = e.hasChildren ? function() { /* nested, later */ } : null
@@ -167,6 +169,7 @@ PanelWindow {
         delegate: QtObject {
             required property var   modelData
             property string         name:        modelData.tooltipTitle || modelData.id
+            property bool           useImg:     true
             property string         comment:     modelData.tooltipDescription
             property string         icon:        modelData.icon
             property bool           selected:    true
