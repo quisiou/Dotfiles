@@ -192,6 +192,7 @@ PanelWindow {
         for (let i = 0; i < instantiator.count; i++)
             allEntries.push(instantiator.objectAt(i))
         if (allEntries.length === 0) {
+            trayMenu.sets = []
             root.closeMenu()
             return
         }

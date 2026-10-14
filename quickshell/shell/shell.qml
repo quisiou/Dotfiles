@@ -32,7 +32,6 @@ ShellRoot {
 
     Loader {
         id: trayMenuLoader
-        active: false
         source: "widgets/TrayMenu.qml"
         visible: false
 
