@@ -505,6 +505,20 @@ Item {
     }
 
     // ═════════════════════════════════════════════════════════════
+    //  BACKGROUND SCENE
+    // ═════════════════════════════════════════════════════════════
+    WeatherScene {
+        anchors.fill: parent
+        code: root.ready ? WeatherService.weatherCode : 0
+        isDay: WeatherService.isDay
+        moonPhase: root.dly("moon_phase", 0, 0.5)
+        cloudCover: root.cur("cloud_cover", 0)
+        windSpeed: WeatherService.windSpeed
+        windDir: root.cur("wind_direction_10m", 270)
+        debugCycle: true     // set to false once you're done testing
+    }
+
+    // ═════════════════════════════════════════════════════════════
     //  COLLAPSED
     // ═════════════════════════════════════════════════════════════
     Item {
