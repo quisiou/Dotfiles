@@ -4,10 +4,14 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 
 // Animated weather background. Layers are added on top of the sky in later steps.
 Item {
     id: root
+
+    property bool active: true
+    readonly property bool live: active && visible
 
     // ── Inputs ───────────────────────────────────────────────────
     property int code: 0
@@ -17,6 +21,34 @@ Item {
     property real windSpeed: 10       // km/h
     property real windDir: 270        // degrees the wind comes FROM
     property real cornerRadius: 12
+    property bool expanded: false
+    property real bodyX: expanded ? 0.20 : 0.80     // where the sun / moon sits, as a ratio
+    property real bodyY: expanded ? 0.80 : 0.32
+
+    Behavior on bodyX { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
+    Behavior on bodyY { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
+
+        // Clip everything to the rounded rectangle
+    layer.enabled: true
+    layer.effect: MultiEffect {
+        maskEnabled: true
+        maskSource: cornerMask
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1.0
+    }
+
+    Item {
+        id: cornerMask
+        anchors.fill: parent
+        visible: false
+        layer.enabled: true
+
+        Rectangle {
+            anchors.fill: parent
+            radius: root.cornerRadius
+            color: "black"
+        }
+    }
 
     // ── Debug: cycles through test conditions every few seconds ──
     property bool debugCycle: false
@@ -39,7 +71,7 @@ Item {
     Timer {
         interval: 2500
         repeat: true
-        running: root.debugCycle && root.visible
+        running: root.debugCycle && root.live
         onTriggered: root._step = (root._step + 1) % root._tests.length
     }
 
@@ -141,7 +173,7 @@ Item {
 
                 SequentialAnimation on opacity {
                     loops: Animation.Infinite
-                    running: root.visible && stars.visible
+                    running: root.live && stars.visible
                     NumberAnimation { to: star.modelData.hi; duration: star.modelData.dur / 2; easing.type: Easing.InOutSine }
                     NumberAnimation { to: star.modelData.lo; duration: star.modelData.dur / 2; easing.type: Easing.InOutSine }
                 }
@@ -181,7 +213,7 @@ Item {
         Timer {
             interval: 9000
             repeat: true
-            running: root.visible && stars.visible && root.starAlpha > 0.6
+            running: root.live && stars.visible && root.starAlpha > 0.6
             onTriggered: {
                 shoot.sx = stars.width * (0.1 + Math.random() * 0.6)
                 shoot.sy = stars.height * (0.05 + Math.random() * 0.25)
@@ -195,8 +227,8 @@ Item {
     Item {
         id: body
         width: 160; height: 160
-        x: root.width * 0.80 - width / 2
-        y: root.height * 0.32 - height / 2
+        x: root.width * root.bodyX - width / 2
+        y: root.height * root.bodyY - height / 2
         scale: root.bodyScale
         transformOrigin: Item.Center
 
@@ -231,7 +263,7 @@ Item {
                 RotationAnimation on rotation {
                     from: 0; to: 360; duration: 90000
                     loops: Animation.Infinite
-                    running: root.visible && sun.visible
+                    running: root.live && sun.visible
                 }
             }
 
@@ -259,7 +291,7 @@ Item {
 
                 SequentialAnimation on scale {
                     loops: Animation.Infinite
-                    running: root.visible && sun.visible
+                    running: root.live && sun.visible
                     NumberAnimation { to: 1.08; duration: 3500; easing.type: Easing.InOutSine }
                     NumberAnimation { to: 1.0;  duration: 3500; easing.type: Easing.InOutSine }
                 }
@@ -483,7 +515,7 @@ Item {
                     to: root.driftSign > 0 ? 1 : 0
                     duration: root.traverseMs * cloud.modelData.speed
                     loops: Animation.Infinite
-                    running: root.visible && cloud.visible
+                    running: root.live && cloud.visible
                 }
             }
         }
@@ -531,7 +563,7 @@ Item {
                     to: band.modelData.shift + 1
                     duration: band.modelData.dur
                     loops: Animation.Infinite
-                    running: root.visible && fogLayer.visible
+                    running: root.live && fogLayer.visible
                 }
             }
         }
@@ -577,7 +609,7 @@ Item {
                     to: 1
                     duration: root.rainMs * drop.modelData.speed
                     loops: Animation.Infinite
-                    running: root.visible && drop.active
+                    running: root.live && drop.active
                 }
             }
         }
@@ -615,13 +647,25 @@ Item {
                     // big flakes fall faster than small ones
                     duration: (11000 - flake.modelData.size * 5000) * flake.modelData.speed
                     loops: Animation.Infinite
-                    running: root.visible && flake.active
+                    running: root.live && flake.active
                 }
             }
         }
     }
 
-        // ── Layer 6: lightning ───────────────────────────────────────
+    // ── Scrim: keeps text readable on bright skies ───────────────
+    Rectangle {
+        anchors.fill: parent
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            // collapsed: dark on the text side (left), clear on the sun side
+            // expanded: an even, light veil
+            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, root.expanded ? 0.22 : 0.42) }
+            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, root.expanded ? 0.22 : 0.06) }
+        }
+    }
+
+    // ── Layer 6: lightning ───────────────────────────────────────
     property real strikeX: 0.5        // horizontal position of the next bolt, 0..1
     property bool strikeBolt: true    // whether this strike also draws a bolt
 
@@ -730,7 +774,7 @@ Item {
         id: stormTimer
         interval: 900
         repeat: true
-        running: root.visible && root.condition === "storm"
+        running: root.live && root.condition === "storm"
 
         // the first strike comes shortly after the storm starts
         onRunningChanged: if (running) interval = 900

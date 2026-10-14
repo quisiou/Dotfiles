@@ -14,7 +14,9 @@ import ElysianShell.Services
 Item {
     id: root
 
+    property bool active: true
     property bool expanded: false
+
     signal toggleRequested()
 
     // 1.0 at the expanded block size (702 wide), everything in the full view scales from it
@@ -132,7 +134,7 @@ Item {
     component T: Text {
         property real s: 1
         property real fs: 10
-        color: ActiveTheme.colors["FG"]
+        color: "#f2f5fa"
         font.pixelSize: Math.max(1, Math.round(fs * s))
     }
 
@@ -140,7 +142,7 @@ Item {
     component Cap: Text {
         property real s: 1
         property real fs: 9
-        color: ActiveTheme.colors["FG_MUTED"]
+        color: "#b8c2cf"
         font.pixelSize: Math.max(1, Math.round(fs * s))
         font.letterSpacing: 0.8 * s
     }
@@ -154,7 +156,7 @@ Item {
         property string unit: ""
         property string sub: ""
 
-        color: ActiveTheme.colors["BG_ACTIVE"]
+        color: "#73111823"
         radius: 10 * s
 
         Cap { x: 9 * tile.s; y: 8 * tile.s; s: tile.s; text: tile.label }
@@ -175,7 +177,7 @@ Item {
             anchors.baseline: val.baseline
             s: tile.s
             fs: 9
-            color: ActiveTheme.colors["FG_MUTED"]
+            color: "#b8c2cf"
             text: tile.unit
         }
 
@@ -187,7 +189,7 @@ Item {
             s: tile.s
             fs: 9
             elide: Text.ElideRight
-            color: ActiveTheme.colors["FG_MUTED"]
+            color: "#b8c2cf"
             text: tile.sub
         }
     }
@@ -206,7 +208,7 @@ Item {
         anchors.bottomMargin: 20 * s
         height: Math.max(2, 4 * s)
         radius: height / 2
-        color: ActiveTheme.colors["DARK6"]
+        color: "#33ffffff"
 
         Rectangle {
             width: parent.width * Math.max(0, Math.min(1, parent.ratio))
@@ -246,14 +248,14 @@ Item {
             width: Math.max(2, 3 * parent.s)
             height: parent.height + 4 * parent.s
             radius: width / 2
-            color: ActiveTheme.colors["FG"]
+            color: "#f2f5fa"
         }
     }
 
     // Wind compass; `degrees` is where the wind comes FROM, the arrow points where it blows to
     component Compass: Canvas {
         property real degrees: 0
-        property color ring: ActiveTheme.colors["DARK6"]
+        property color ring: "#33ffffff"
         property color arrow: ActiveTheme.colors["WARNING"]
 
         onDegreesChanged: requestPaint()
@@ -294,7 +296,7 @@ Item {
         property string title: ""
         default property alias rows: list.data
 
-        color: ActiveTheme.colors["BG_ACTIVE"]
+        color: "#73111823"
         radius: 10 * s
 
         readonly property real naturalHeight: list.y + list.height + 12 * s
@@ -320,7 +322,7 @@ Item {
         width: parent.width
         height: 14 * s
 
-        T { s: parent.s; fs: 10; color: ActiveTheme.colors["FG_MUTED"]; anchors.verticalCenter: parent.verticalCenter; text: parent.k }
+        T { s: parent.s; fs: 10; color: "#b8c2cf"; anchors.verticalCenter: parent.verticalCenter; text: parent.k }
         T { s: parent.s; fs: 10; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; text: parent.v }
     }
 
@@ -335,7 +337,7 @@ Item {
         width: parent.width
         height: 14 * s
 
-        T { s: parent.s; fs: 10; color: ActiveTheme.colors["FG_MUTED"]; anchors.verticalCenter: parent.verticalCenter; text: parent.k }
+        T { s: parent.s; fs: 10; color: "#b8c2cf"; anchors.verticalCenter: parent.verticalCenter; text: parent.k }
 
         Rectangle {
             x: 38 * parent.s
@@ -343,7 +345,7 @@ Item {
             height: Math.max(2, 4 * parent.s)
             radius: height / 2
             anchors.verticalCenter: parent.verticalCenter
-            color: ActiveTheme.colors["DARK6"]
+            color: "#33ffffff"
 
             Rectangle {
                 width: parent.width * Math.max(0, Math.min(1, parent.parent.ratio))
@@ -362,9 +364,9 @@ Item {
 
         property color sunColor: ActiveTheme.colors["WARNING"]
         property color moonColor: ActiveTheme.colors["ACCENT_MUTED"]
-        property color cloudColor: ActiveTheme.colors["FG_MUTED"]
+        property color cloudColor: "#b8c2cf"
         property color rainColor: ActiveTheme.colors["SECONDARY"]
-        property color snowColor: ActiveTheme.colors["FG"]
+        property color snowColor: "#f2f5fa"
         property color boltColor: ActiveTheme.colors["WARNING_LOW"]
 
         implicitWidth: 24
@@ -508,14 +510,16 @@ Item {
     //  BACKGROUND SCENE
     // ═════════════════════════════════════════════════════════════
     WeatherScene {
+        active: root.active
         anchors.fill: parent
+        expanded: root.expanded
         code: root.ready ? WeatherService.weatherCode : 0
         isDay: WeatherService.isDay
         moonPhase: root.dly("moon_phase", 0, 0.5)
         cloudCover: root.cur("cloud_cover", 0)
         windSpeed: WeatherService.windSpeed
         windDir: root.cur("wind_direction_10m", 270)
-        debugCycle: true     // set to false once you're done testing
+        debugCycle: false
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -539,16 +543,6 @@ Item {
             text: root.ready ? Math.round(WeatherService.temperature) + "°" : "--"
         }
 
-        WeatherIcon {
-            anchors.right: parent.right
-            anchors.rightMargin: 12 * root.c
-            y: 11 * root.c
-            width: 32 * root.c
-            height: 32 * root.c
-            code: root.ready ? WeatherService.weatherCode : 0
-            day: WeatherService.isDay
-        }
-
         T {
             x: 14 * root.c
             width: 150 * root.c
@@ -557,7 +551,7 @@ Item {
             s: root.c
             fs: 10
             elide: Text.ElideRight
-            color: ActiveTheme.colors["FG_MUTED"]
+            color: "#b8c2cf"
             text: root.ready
                   ? WeatherService.description + " · feels " + Math.round(WeatherService.feelsLike) + "°"
                   : (WeatherService.error !== "" ? WeatherService.error : "Loading…")
@@ -621,7 +615,7 @@ Item {
                 anchors.leftMargin: 8 * root.s
                 anchors.baseline: title.baseline
                 s: root.s; fs: 11
-                color: ActiveTheme.colors["FG_MUTED"]
+                color: "#b8c2cf"
                 text: WeatherService.city
             }
 
@@ -642,7 +636,7 @@ Item {
                 T {
                     anchors.verticalCenter: parent.verticalCenter
                     s: root.s; fs: 10
-                    color: WeatherService.error !== "" ? ActiveTheme.colors["ERROR_LOW"] : ActiveTheme.colors["FG_MUTED"]
+                    color: WeatherService.error !== "" ? ActiveTheme.colors["ERROR_LOW"] : "#b8c2cf"
                     text: WeatherService.error !== "" ? "offline"
                           : (root.ready ? "updated " + Qt.formatTime(WeatherService.lastUpdated, "HH:mm") : "loading…")
                 }
@@ -660,7 +654,7 @@ Item {
                         anchors.centerIn: parent
                         text: "󰑐"   // nf-md-refresh
                         font.pixelSize: Math.max(1, Math.round(13 * root.s))
-                        color: refreshArea.containsMouse ? ActiveTheme.colors["BG"] : ActiveTheme.colors["FG_GHOST"]
+                        color: refreshArea.containsMouse ? "#10151c" : "#8d99a8"
 
                         Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
                     }
@@ -729,7 +723,7 @@ Item {
                             T { s: root.s; fs: 13; text: root.ready ? WeatherService.description : "" }
                             T {
                                 s: root.s; fs: 10
-                                color: ActiveTheme.colors["FG_MUTED"]
+                                color: "#b8c2cf"
                                 text: root.ready ? "Feels like " + WeatherService.feelsLike.toFixed(1) + "°" : ""
                             }
                         }
@@ -746,18 +740,9 @@ Item {
                             }
                             T {
                                 s: root.s; fs: 11
-                                color: ActiveTheme.colors["FG_MUTED"]
+                                color: "#b8c2cf"
                                 text: "L " + root.dly("temperature_2m_min", 0, 0).toFixed(1) + "°"
                             }
-                        }
-
-                        WeatherIcon {
-                            anchors.right: parent.right
-                            anchors.bottom: parent.bottom
-                            width: 44 * root.s
-                            height: 44 * root.s
-                            code: root.ready ? WeatherService.weatherCode : 0
-                            day: WeatherService.isDay
                         }
                     }
 
@@ -817,7 +802,7 @@ Item {
                             ScaleBar {
                                 s: root.s
                                 ratio: root.clamp01((root.cur("pressure_msl", 1013) - 980) / 60)
-                                colorA: ActiveTheme.colors["FG_GHOST"]
+                                colorA: "#8d99a8"
                                 colorB: ActiveTheme.colors["ACCENT"]
                                 colorC: ActiveTheme.colors["ACCENT_MUTED"]
                             }
@@ -854,7 +839,7 @@ Item {
                             unit: "%"
                             sub: "Rain today " + Number(root.dly("precipitation_sum", 0, 0)).toFixed(1) + " mm"
 
-                            Bar { s: root.s; ratio: root.cur("cloud_cover", 0) / 100; fill: ActiveTheme.colors["FG_MUTED"] }
+                            Bar { s: root.s; ratio: root.cur("cloud_cover", 0) / 100; fill: "#b8c2cf" }
                         }
 
                         // Next hours
@@ -864,7 +849,7 @@ Item {
                             width: parent.width
                             height: center.hourlyH
                             radius: 10 * root.s
-                            color: ActiveTheme.colors["BG_ACTIVE"]
+                            color: "#73111823"
 
                             Cap { x: 9 * root.s; y: 7 * root.s; s: root.s; text: "NEXT HOURS" }
 
@@ -891,7 +876,7 @@ Item {
                                         T {
                                             anchors.horizontalCenter: parent.horizontalCenter
                                             s: root.s; fs: 9
-                                            color: ActiveTheme.colors["FG_MUTED"]
+                                            color: "#b8c2cf"
                                             text: hcell.modelData.label
                                         }
 
@@ -922,7 +907,7 @@ Item {
                         width: 190 * root.s
                         height: parent.height
                         radius: 10 * root.s
-                        color: ActiveTheme.colors["BG_ACTIVE"]
+                        color: "#73111823"
 
                         Cap { x: 12 * root.s; y: 10 * root.s; s: root.s; text: "7 DAYS" }
 
@@ -948,7 +933,7 @@ Item {
                                         width: 34 * root.s
                                         anchors.verticalCenter: parent.verticalCenter
                                         s: root.s; fs: 10
-                                        color: ActiveTheme.colors["FG_MUTED"]
+                                        color: "#b8c2cf"
                                         text: drow.modelData.name
                                     }
 
@@ -958,7 +943,7 @@ Item {
                                         anchors.verticalCenter: parent.verticalCenter
                                         horizontalAlignment: Text.AlignRight
                                         s: root.s; fs: 10
-                                        color: ActiveTheme.colors["FG_MUTED"]
+                                        color: "#b8c2cf"
                                         text: drow.modelData.min + "°"
                                     }
 
@@ -969,7 +954,7 @@ Item {
                                         height: Math.max(2, 4 * root.s)
                                         radius: height / 2
                                         anchors.verticalCenter: parent.verticalCenter
-                                        color: ActiveTheme.colors["DARK6"]
+                                        color: "#33ffffff"
 
                                         Rectangle {
                                             x: drow.modelData.from * dtrack.width

@@ -9,6 +9,8 @@ import "../../../base"
 Item {
     id: root
 
+    property bool active: false
+
     readonly property int _gridColumns: 20
     readonly property int _gridRows: 10
     readonly property real _gridSpacing: 12
@@ -21,12 +23,14 @@ Item {
 
     // Called when opening a page
     function refresh() {
+        active = true
         calendar.refreshLocale()
         ClipboardService.refresh()
     }
 
     // Called after completely switching to another page (animation finished)
     function leave() {
+        active = false
         notificationBlock.collapseImmediately()
         clipboardBlock.collapseImmediately()
         meteoBlock.collapseImmediately()
@@ -72,6 +76,7 @@ Item {
 
             WeatherMenu {
                 anchors.fill: parent
+                active: root.active
                 expanded: meteoBlock.expanded
                 onToggleRequested: meteoBlock.toggle()
             }
