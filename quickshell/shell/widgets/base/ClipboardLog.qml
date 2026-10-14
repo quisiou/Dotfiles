@@ -96,6 +96,11 @@ Rectangle {
 
     signal toggleRequested()
 
+    Glass {
+        anchors.fill: parent
+        radius: root.radius
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: root.padding
@@ -136,7 +141,7 @@ Rectangle {
                 Text {
                     text: root.entries.length
                     font.pixelSize: root.s(12)
-                    color: ActiveTheme.colors["FG_GHOST"]
+                    color: ActiveTheme.colors["FG_MUTED"]
                 }
                 Item { Layout.fillWidth: true }
 
@@ -153,7 +158,7 @@ Rectangle {
                         anchors.centerIn: parent
                         text: "\udb82\ude7a"
                         font.pixelSize: root.s(13)
-                        color: clearArea.containsMouse ? ActiveTheme.colors["BG"] : ActiveTheme.colors["FG_GHOST"]
+                        color: clearArea.containsMouse ? ActiveTheme.colors["BG"] : ActiveTheme.colors["FG_MUTED"]
 
                         Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
                     }
@@ -181,10 +186,39 @@ Rectangle {
                 boundsBehavior: Flickable.StopAtBounds
 
                 readonly property int _animDuration: 200
+                readonly property real _barWidth: root.s(9)                 // thickness of the scroll bar
+                readonly property real _gutter: _barWidth + root.s(5)
 
                 model: listModel
 
-                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                ScrollBar.vertical: ScrollBar {
+                    id: bar
+                    policy: ScrollBar.AsNeeded
+                    implicitWidth: list._barWidth
+
+                    readonly property bool shown: policy === ScrollBar.AlwaysOn || (active && size < 1.0)
+
+                    contentItem: Rectangle {
+                        implicitWidth: list._barWidth
+                        radius: width / 2
+                        color: bar.pressed ? ActiveTheme.colors["ACCENT_LOW"]
+                             : bar.hovered ? Qt.alpha(ActiveTheme.colors["FG"], 0.60)
+                             : Qt.alpha(ActiveTheme.colors["FG"], 0.38)
+                        opacity: bar.shown ? 1 : 0
+
+                        Behavior on color   { ColorAnimation  { duration: 150; easing.type: Easing.InOutCubic } }
+                        Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.InOutCubic } }
+                    }
+
+                    background: Rectangle {
+                        implicitWidth: list._barWidth
+                        radius: width / 2
+                        color: Qt.alpha(ActiveTheme.colors["FG"], 0.06)
+                        opacity: bar.shown ? 1 : 0
+
+                        Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.InOutCubic } }
+                    }
+                }
 
                 add: Transition { NumberAnimation {
                     duration: list._animDuration
@@ -232,14 +266,36 @@ Rectangle {
                     required property string meta
                     required property string thumb
 
-                    width: list.width
+                    width: list.width - list._gutter
                     height: cardCol.implicitHeight + root.s(16)
                     radius: root.s(8)
-                    color: ActiveTheme.colors["BG_ACTIVE"]
+
+                    // Card is "hot" while hovered, but not while the pointer is over the close button
+                    readonly property bool hot: cardArea.containsMouse && !closeArea.containsMouse
+
+                    // Resting: dark glass. Hover: blue glass. Pressed: a bit stronger.
+                    color: cardArea.pressed ? Qt.alpha(ActiveTheme.colors["ACCENT"], 0.40)
+                         : card.hot ? Qt.alpha(ActiveTheme.colors["ACCENT"], 0.30)
+                         : Qt.alpha(ActiveTheme.colors["FG"], 0.07)
+
+                    Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
+
+                    // Glass finish on top of the color: tint, top highlight, hairline border.
+                    // Its strength rises on hover, so the highlight and the border brighten too.
+                    Glass {
+                        anchors.fill: parent
+                        radius: card.radius
+                        tint: card.hot ? 1.8 : 1.3
+
+                        Behavior on tint { NumberAnimation { duration: 150; easing.type: Easing.InOutCubic } }
+                    }
 
                     MouseArea {
+                        id: cardArea
                         anchors.fill: parent
-                        // Reserved for future card actions.
+                        cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
+                        onClicked: ClipboardService.copy(card.entryId)
                     }
 
                     ColumnLayout {
@@ -259,30 +315,7 @@ Rectangle {
                                 text: card.kind === "image" ? "\udb80\udee9  " + card.meta : "Text"
                                 elide: Text.ElideRight
                                 font.pixelSize: root.s(11)
-                                color: ActiveTheme.colors["FG_GHOST"]
-                            }
-
-                            // Copy button
-                            Rectangle {
-                                Layout.preferredWidth: root.s(18)
-                                Layout.preferredHeight: root.s(18)
-                                radius: root.s(4)
-                                color: copyArea.containsMouse ? ActiveTheme.colors["ACCENT_LOW"] : "transparent"
-                                Behavior on color { ColorAnimation { duration: 150; easing.type: Easing.InOutCubic } }
-
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "\udb80\udd8f"
-                                    font.pixelSize: root.s(11)
-                                    color: copyArea.containsMouse ? ActiveTheme.colors["BG"] : ActiveTheme.colors["FG_GHOST"]
-                                }
-                                MouseArea {
-                                    id: copyArea
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: ClipboardService.copy(card.entryId)
-                                }
+                                color: ActiveTheme.colors["FG_MUTED"]
                             }
 
                             // delete button (same as the notification close button)
@@ -297,7 +330,7 @@ Rectangle {
                                     anchors.centerIn: parent
                                     text: "\u2715"
                                     font.pixelSize: root.s(11)
-                                    color: closeArea.containsMouse ? ActiveTheme.colors["BG"] : ActiveTheme.colors["FG_GHOST"]
+                                    color: closeArea.containsMouse ? ActiveTheme.colors["BG"] : ActiveTheme.colors["FG_MUTED"]
                                 }
                                 MouseArea {
                                     id: closeArea

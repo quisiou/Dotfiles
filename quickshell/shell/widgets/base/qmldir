@@ -5,6 +5,7 @@ Calendar 1.0 Calendar.qml
 ClipboardLog 1.0 ClipboardLog.qml
 ClockText 1.0 ClockText.qml
 FillMeter 1.0 FillMeter.qml
+Glass 1.0 Glass.qml
 Grid 1.0 Grid.qml
 GridBlock 1.0 GridBlock.qml
 MorphingContainer 1.0 MorphingContainer.qml
