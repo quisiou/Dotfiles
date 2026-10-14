@@ -43,6 +43,10 @@ Item {
 
     function hhmm(iso) { return iso ? String(iso).slice(11, 16) : "—" }
 
+    function minutesOf(iso) {
+        return iso ? Number(String(iso).slice(11, 13)) * 60 + Number(String(iso).slice(14, 16)) : -1
+    }
+
     function compassName(deg) {
         const names = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
         return names[Math.round(deg / 45) % 8]
@@ -510,8 +514,8 @@ Item {
     //  BACKGROUND SCENE
     // ═════════════════════════════════════════════════════════════
     WeatherScene {
-        active: root.active
         anchors.fill: parent
+        active: root.active
         expanded: root.expanded
         code: root.ready ? WeatherService.weatherCode : 0
         isDay: WeatherService.isDay
@@ -519,7 +523,11 @@ Item {
         cloudCover: root.cur("cloud_cover", 0)
         windSpeed: WeatherService.windSpeed
         windDir: root.cur("wind_direction_10m", 270)
+        sunriseMin: root.minutesOf(root.dly("sunrise", 0, ""))
+        sunsetMin: root.minutesOf(root.dly("sunset", 0, ""))
+        utcOffset: WeatherService.utcOffsetSeconds
         debugCycle: false
+        debugSweep: false
     }
 
     // ═════════════════════════════════════════════════════════════

@@ -20,6 +20,72 @@ Item {
     property real cloudCover: 50      // 0..100
     property real windSpeed: 10       // km/h
     property real windDir: 270        // degrees the wind comes FROM
+
+        // ── Time of day ──────────────────────────────────────────────
+    property real sunriseMin: -1      // minutes since local midnight, -1 = unknown
+    property real sunsetMin: -1
+    property int utcOffset: 0         // seconds, from the API
+
+    // Debug: plays a full day, 15 minutes per tick
+    property bool debugSweep: false
+    property real sweepMin: 0
+
+    Timer {
+        interval: 250
+        repeat: true
+        running: root.debugSweep && root.live
+        onTriggered: root.sweepMin = (root.sweepMin + 15) % 1440
+    }
+
+    // Bumped every minute so the clock-based bindings re-evaluate
+    property real _tick: 0
+    Timer {
+        interval: 60000
+        repeat: true
+        running: true
+        onTriggered: root._tick++
+    }
+
+    readonly property real realMin: {
+        _tick
+        return ((Date.now() / 60000 + utcOffset / 60) % 1440 + 1440) % 1440
+    }
+    readonly property real clockMin: debugSweep ? sweepMin : realMin
+
+    readonly property real riseMin: sunriseMin >= 0 ? sunriseMin : 450     // fallbacks only matter for the sweep
+    readonly property real setMin:  sunsetMin  >= 0 ? sunsetMin  : 1170
+    readonly property bool haveSun: debugSweep || sunriseMin >= 0
+
+    readonly property real twilightMin: 40     // half-width of the night <-> day blend
+    readonly property real glowMin: 55         // how far from sunrise / sunset the warm tint reaches
+
+    function smoothen(t) {
+        t = Math.max(0, Math.min(1, t))
+        return t * t * (3 - 2 * t)
+    }
+
+    // 0 = night, 1 = day
+    readonly property real daylight: {
+        if (debugCycle) return _tests[_step][1] ? 1 : 0
+        if (!haveSun) return isDay ? 1 : 0
+        const up = smoothen((clockMin - (riseMin - twilightMin)) / (2 * twilightMin))
+        const down = smoothen(((setMin + twilightMin) - clockMin) / (2 * twilightMin))
+        return Math.min(up, down)
+    }
+
+    // 0..1, peaks at sunrise and sunset
+    readonly property real twilightGlow: {
+        if (debugCycle || !haveSun) return 0
+        const d = Math.min(Math.abs(clockMin - riseMin), Math.abs(clockMin - setMin))
+        return smoothen(1 - d / glowMin)
+    }
+
+    // How much of the warm tint survives each condition (clouds and rain mute it)
+    readonly property var glowStrength: ({
+        clear: 1, partly: 0.85, overcast: 0.35, fog: 0.3,
+        drizzle: 0.3, rain: 0.2, snow: 0.35, storm: 0.1
+    })
+
     property real cornerRadius: 12
     property bool expanded: false
     property real bodyX: expanded ? 0.20 : 0.80     // where the sun / moon sits, as a ratio
@@ -28,7 +94,7 @@ Item {
     Behavior on bodyX { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
     Behavior on bodyY { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
 
-        // Clip everything to the rounded rectangle
+    // Clip everything to the rounded rectangle
     layer.enabled: true
     layer.effect: MultiEffect {
         maskEnabled: true
@@ -62,7 +128,7 @@ Item {
     ]
 
     readonly property int effCode: debugCycle ? _tests[_step][0] : code
-    readonly property bool effDay: debugCycle ? _tests[_step][1] : isDay
+    readonly property bool effDay: daylight >= 0.5
     readonly property real effMoon: debugCycle ? _tests[_step][2] : moonPhase
     readonly property real effCover: debugCycle ? 50 : cloudCover
     readonly property real effWind: debugCycle ? 14 : windSpeed
@@ -101,10 +167,23 @@ Item {
         storm:    { day: ["#262c36", "#454e5a"], night: ["#06080c", "#141820"] }
     })
 
-    readonly property var pal: palettes[condition][effDay ? "day" : "night"]
+    function mixc(a, b, t) {
+        return Qt.rgba(a.r + (b.r - a.r) * t,
+                       a.g + (b.g - a.g) * t,
+                       a.b + (b.b - a.b) * t, 1)
+    }
 
-    property color topColor: pal[0]
-    property color bottomColor: pal[1]
+    function skyColor(i) {
+        const p = palettes[condition]
+        const base = mixc(Qt.color(p.night[i]), Qt.color(p.day[i]), daylight)
+        // violet at the top, orange at the horizon
+        const warm = Qt.color(i === 0 ? "#4a3f7a" : "#e8946a")
+        const amount = twilightGlow * glowStrength[condition] * (i === 0 ? 0.35 : 0.6)
+        return mixc(base, warm, amount)
+    }
+
+    property color topColor: skyColor(0)
+    property color bottomColor: skyColor(1)
 
     Behavior on topColor    { ColorAnimation { duration: 900; easing.type: Easing.InOutQuad } }
     Behavior on bottomColor { ColorAnimation { duration: 900; easing.type: Easing.InOutQuad } }
@@ -123,9 +202,9 @@ Item {
 
         // ── Layer 2: celestial ───────────────────────────────────────
     // How visible each body is, per condition (0 = hidden)
-    readonly property real sunAlpha:  effDay  ? ({ clear: 1, partly: 0.85, fog: 0.25 })[condition] ?? 0 : 0
-    readonly property real moonAlpha: !effDay ? ({ clear: 1, partly: 0.80, fog: 0.25 })[condition] ?? 0 : 0
-    readonly property real starAlpha: !effDay ? ({ clear: 1, partly: 0.50, fog: 0.15 })[condition] ?? 0 : 0
+    readonly property real sunAlpha:  smoothen((daylight - 0.5) / 0.5)  * (({ clear: 1, partly: 0.85, fog: 0.25 })[condition] ?? 0)
+    readonly property real moonAlpha: smoothen((0.5 - daylight) / 0.5)  * (({ clear: 1, partly: 0.80, fog: 0.25 })[condition] ?? 0)
+    readonly property real starAlpha: (1 - daylight)                  * (({ clear: 1, partly: 0.50, fog: 0.15 })[condition] ?? 0)
 
     // Reference size: the disc is about 28% of the shorter side's 1/260 scale (see `body`)
     readonly property real bodyScale: Math.max(0.2, Math.min(width, height) / 260)
@@ -380,7 +459,11 @@ Item {
         storm:    { day: "#5b6572", night: "#161b24" }
     })
 
-    property color cloudColor: cloudTints[condition][effDay ? "day" : "night"]
+    property color cloudColor: {
+        const t = cloudTints[condition]
+        const base = mixc(Qt.color(t.night), Qt.color(t.day), daylight)
+        return mixc(base, Qt.color("#ffb98a"), twilightGlow * glowStrength[condition] * 0.55)
+    }
     Behavior on cloudColor { ColorAnimation { duration: 900; easing.type: Easing.InOutQuad } }
 
     // Wind FROM `effDir` blows TOWARD effDir + 180, so the screen-x component is -sin(effDir)
@@ -787,12 +870,17 @@ Item {
 
     // Debug label, only visible while cycling
     Text {
-        visible: root.debugCycle
+        visible: root.debugCycle || root.debugSweep
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: 6
         color: "white"
         font.pixelSize: 10
-        text: root.condition + (root.effDay ? " · day" : " · night") + " (" + root.effCode + ")"
+        text: root.condition
+              + (root.debugSweep
+                 ? " · " + String(Math.floor(root.clockMin / 60)).padStart(2, "0") + ":"
+                   + String(Math.floor(root.clockMin % 60)).padStart(2, "0")
+                 : "")
+              + " · d=" + root.daylight.toFixed(2)
     }
 }
