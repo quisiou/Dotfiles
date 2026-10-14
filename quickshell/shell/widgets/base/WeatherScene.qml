@@ -124,7 +124,7 @@ Item {
         [0, true, 0.5],  [0, false, 0.12], [0, false, 0.40], [0, false, 0.62],
         [0, false, 0.88], [2, true, 0.5],  [2, false, 0.30], [3, true, 0.5],
         [45, true, 0.5], [45, false, 0.5], [53, true, 0.5],  [63, false, 0.5],
-        [73, true, 0.5], [95, false, 0.5]
+        [73, true, 0.5], [95, false, 0.5], [96, false, 0.5], [99, true, 0.5]
     ]
 
     readonly property int effCode: debugCycle ? _tests[_step][0] : code
@@ -484,7 +484,7 @@ Item {
         switch (condition) {
         case "drizzle": return 25
         case "rain":    return 55
-        case "storm":   return 80
+        case "storm":   return hail ? 40 : 80
         case "snow":    return 45
         }
         return 0
@@ -518,6 +518,42 @@ Item {
             })
         }
         return out
+    }
+
+    // ── Ripple helpers ───────────────────────────────────────────
+    readonly property int rippleCount: {
+        switch (condition) {
+            case "drizzle": return 8
+            case "rain":    return 16
+            case "storm":   return 24
+        }
+        return 0
+    }
+
+    // Average pause between two ripples of the same slot (ms)
+    readonly property real rippleGap: condition === "storm" ? 1400 : (condition === "drizzle" ? 2200 : 1600)
+
+    // ── Hail helpers ─────────────────────────────────────────────
+    readonly property bool hail: effCode === 96 || effCode === 99
+    readonly property int hailCount: !hail ? 0 : (effCode === 99 ? 60 : 36)
+    readonly property real hailSize: effCode === 99 ? 1.3 : 1.0
+
+    // Vertical position of a pellet at life fraction p (0..1):
+    // accelerating fall, big bounce, small bounce, rest.
+    function hailY(p, h, ground) {
+        if (p < 0.62) {
+            const t = p / 0.62
+            return -h + t * t * (ground + h)
+        }
+        if (p < 0.80) {
+            const t = (p - 0.62) / 0.18
+            return ground - 4 * t * (1 - t) * root.height * 0.22
+        }
+        if (p < 0.90) {
+            const t = (p - 0.80) / 0.10
+            return ground - 4 * t * (1 - t) * root.height * 0.08
+        }
+        return ground
     }
 
     // Fixed pseudo-random pool: layer 0 = far, 1 = mid, 2 = near
@@ -731,6 +767,97 @@ Item {
                     duration: (11000 - flake.modelData.size * 5000) * flake.modelData.speed
                     loops: Animation.Infinite
                     running: root.live && flake.active
+                }
+            }
+        }
+
+        // Hail: fast pellets that bounce off the bottom edge
+        Repeater {
+            model: root.dropData
+
+            delegate: Rectangle {
+                id: pellet
+                required property var modelData
+                required property int index
+
+                readonly property bool active: root.hail && index < root.hailCount
+                property real progress: 0
+                readonly property real p: (progress + modelData.offset) % 1
+
+                width: (2.5 + modelData.size * 2.5) * root.ps * root.hailSize
+                height: width
+                radius: width / 2
+                color: "#e8f1fb"
+
+                // visible while falling and bouncing, fades out while resting
+                opacity: active ? (0.55 + 0.4 * modelData.alpha) * (p < 0.9 ? 1 : 1 - (p - 0.9) / 0.1) : 0
+                visible: opacity > 0
+                Behavior on opacity { enabled: !pellet.active; NumberAnimation { duration: 500 } }
+
+                x: modelData.x * root.width
+                   + Math.min(p / 0.62, 1) * root.height * Math.tan(root.slantDeg * 0.4 * Math.PI / 180)
+                y: root.hailY(p, height, root.height * 0.97 - height)
+
+                NumberAnimation on progress {
+                    from: 0
+                    to: 1
+                    duration: 1300 * pellet.modelData.speed
+                    loops: Animation.Infinite
+                    running: root.live && pellet.active
+                }
+            }
+        }
+    }
+
+    // ── Layer 5b: rain ripples ───────────────────────────────────
+    Item {
+        id: ripples
+        anchors.fill: parent
+
+        Repeater {
+            model: 12
+
+            delegate: Rectangle {
+                id: rip
+                required property int index
+
+                readonly property bool active: root.precipKind === "rain" && index < root.rippleCount
+                property real rx: 0.5      // position as a ratio of the scene
+                property real ry: 0.95
+                property real grow: 0      // 0..1 over the ripple's life
+                readonly property real maxW: (16 + (index % 3) * 6) * root.ps
+
+                width: 4 * root.ps + grow * maxW
+                height: width * 0.3
+                radius: height / 2
+                x: rx * root.width - width / 2
+                y: ry * root.height - height / 2
+
+                color: "transparent"
+                border.width: Math.max(1, 0.8 * root.ps)
+                border.color: "#a9c7e8"
+                opacity: 0
+                visible: opacity > 0
+
+                ParallelAnimation {
+                    id: anim
+                    NumberAnimation { target: rip; property: "grow"; from: 0; to: 1; duration: 900; easing.type: Easing.OutQuad }
+                    SequentialAnimation {
+                        NumberAnimation { target: rip; property: "opacity"; to: 0.55; duration: 80 }
+                        NumberAnimation { target: rip; property: "opacity"; to: 0; duration: 820; easing.type: Easing.OutQuad }
+                    }
+                }
+
+                Timer {
+                    interval: 200 + rip.index * 150     // staggered first spawn
+                    repeat: true
+                    running: root.live && rip.active
+                    onTriggered: {
+                        rip.rx = 0.04 + Math.random() * 0.92
+                        rip.ry = 0.90 + Math.random() * 0.08
+                        anim.restart()
+                        interval = root.rippleGap * (0.6 + Math.random() * 0.8)
+                    }
                 }
             }
         }
