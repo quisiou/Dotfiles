@@ -15,7 +15,7 @@ Item {
     property string passwordText: ""
     property string errorMessage: ""
     property bool errorVisible: false
-    property real secondsTillBlackOut: 60
+    property real secondsTillBlackOut: 30
     readonly property bool isLocked: sessionLock.locked
     readonly property int _fadeDuration: 200
 
@@ -24,11 +24,22 @@ Item {
     function lock() {
         errorVisible = false
         errorMessage = ""
-        sessionLock.locked = true
         sessionLock.blackedOut = false
-        idleTimer.restart() 
+        sessionLock.locked = true
+        idleTimer.restart()
     }
+
     function unlock() { sessionLock.locked = false }
+
+    Connections {
+        target: sessionLock
+        function onLockedChanged() {
+            if (sessionLock.locked) return
+            idleTimer.stop()
+            sessionLock.blackedOut = false
+            dpmsOn.running = true
+        }
+    }
 
     PamContext {
         id: pam
@@ -54,20 +65,40 @@ Item {
         }
     }
 
-    Process { id: dpmsOff; command: ["wlopm", "--off", "*"] }
-    Process { id: dpmsOn;  command: ["wlopm", "--on", "*"] }
+    Process {
+        id: dpmsOff
+        command: ["wlopm", "--off", "*"]
+
+        // qmllint disable signal-handler-parameters
+        onExited: (code) => { running = false }
+        // qmllint enable signal-handler-parameters
+    }
+    Process {
+        id: dpmsOn
+        command: ["wlopm", "--on", "*"]
+
+        // qmllint disable signal-handler-parameters
+        onExited: (code) => { running = false }
+        // qmllint enable signal-handler-parameters
+
+    }
 
     Timer {
         id: idleTimer
         interval: root.secondsTillBlackOut * 1000
-        running: sessionLock.locked
         onTriggered: {
+            if (!sessionLock.locked)
+                return
+
             sessionLock.blackedOut = true
             dpmsOff.running = true
         }
     }
 
     function resetIdle() {
+        if (!sessionLock.locked)
+            return
+
         if (sessionLock.blackedOut) {
             sessionLock.blackedOut = false
             dpmsOn.running = true
