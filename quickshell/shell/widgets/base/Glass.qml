@@ -11,11 +11,13 @@ Item {
 
     property real radius: 12
     property real tint: 1.0      // overall strength: 0 = invisible, 1 = default, 1.5 = stronger
+    property bool showTint: true
 
     // Tint: lighter at the top, almost nothing at the bottom
     Rectangle {
         anchors.fill: parent
         radius: root.radius
+        visible: root.showTint
         gradient: Gradient {
             GradientStop { position: 0.0; color: Qt.alpha(ActiveTheme.colors["ACCENT_LOW"], 0.09 * root.tint) }
             GradientStop { position: 0.5; color: Qt.alpha(ActiveTheme.colors["ACCENT"],     0.04 * root.tint) }
@@ -25,13 +27,15 @@ Item {
 
     // Highlight along the top edge, fading out toward the corners
     Rectangle {
-        anchors.top: parent.top
-        anchors.topMargin: 1
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.leftMargin: root.radius
-        anchors.rightMargin: root.radius
         height: 1
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            topMargin: 1
+            leftMargin: root.radius
+            rightMargin: root.radius
+        }
         gradient: Gradient {
             orientation: Gradient.Horizontal
             GradientStop { position: 0.0; color: "transparent" }

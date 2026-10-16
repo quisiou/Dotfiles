@@ -27,6 +27,22 @@ PanelWindow {
     property bool pendingOpen: false
     property int  pendingSet:  0
 
+    property var menuStack: []
+
+    function enterSubmenu(entry) {
+        menuStack.push(menuOpener.menu)
+        menuOpener.pendingX = optionMenu.centerX
+        menuOpener.pendingY = optionMenu.centerY
+        menuOpener.menu = entry
+    }
+
+    function goBack() {
+        if (menuStack.length === 0) return
+        menuOpener.pendingX = optionMenu.centerX
+        menuOpener.pendingY = optionMenu.centerY
+        menuOpener.menu = menuStack.pop()
+    }
+
     signal menuClosed()
 
     function openMenu(set_index, posX, posY) {
@@ -113,6 +129,7 @@ PanelWindow {
         onCloseRequested: {
             optionMenu.sets = []
             menuOpener.menu = null
+            root.menuStack = []
             if (fullClose) {
                 fullClose = false
                 trayMenu.closeMenu()
@@ -130,28 +147,46 @@ PanelWindow {
     function buildOptionSets(entries) {
         let values = entries.values
         let allEntries = []
+
+        const makeObj = () => Qt.createQmlObject(`
+            import QtQuick
+            QtObject {
+                property string name:     ""
+                property bool useImg
+                property string comment:  ""
+                property string icon:     ""
+                property bool   selected: false
+                property bool   stateful: false
+                property var    leftAction:  null
+                property var    rightAction: null
+            }
+        `, root)
+
+        // Back bubble when inside a submenu
+        if (menuStack.length > 0) {
+            let back = makeObj()
+            back.name       = "Back"
+            back.useImg     = false
+            back.icon       = "‹"          // or a nerd font glyph
+            back.stateful   = true
+            back.leftAction = function() { root.goBack() }
+            allEntries.push(back)
+        }
+
         for (let i = 0; i < values.length; i++) {
             let e = values[i]
             if (e.isSeparator) continue
-            allEntries.push(Qt.createQmlObject(`
-                import QtQuick
-                QtObject {
-                    property string name:     ""
-                    property bool useImg
-                    property string comment:  ""
-                    property string icon:     ""
-                    property bool   selected: false
-                    property bool   stateful: false
-                    property var    leftAction:  null
-                    property var    rightAction: null
-                }
-            `, root))
-            let obj = allEntries[allEntries.length - 1]
-            obj.name       = e.text
-            obj.useImg     = true
-            obj.icon       = e.icon
-            obj.leftAction = function() { e.triggered() }
-            obj.rightAction = e.hasChildren ? function() { /* nested, later */ } : null
+            let obj = makeObj()
+            obj.name   = e.text
+            obj.useImg = true
+            obj.icon   = e.icon
+            if (e.hasChildren) {
+                obj.stateful   = true       // don't close the whole menu on click
+                obj.leftAction = function() { root.enterSubmenu(e) }
+            } else {
+                obj.leftAction = function() { e.triggered() }
+            }
+            allEntries.push(obj)
         }
 
         let newSets = []
