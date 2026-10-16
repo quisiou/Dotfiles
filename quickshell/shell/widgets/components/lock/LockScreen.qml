@@ -16,7 +16,7 @@ Item {
     property string errorMessage: ""
     property bool errorVisible: false
     property real secondsTillBlackOut: 30
-    readonly property bool isLocked: sessionLock.locked
+    property bool isLocked: false
     readonly property int _fadeDuration: 200
 
     signal readyToUnlock()
@@ -24,21 +24,15 @@ Item {
     function lock() {
         errorVisible = false
         errorMessage = ""
-        sessionLock.blackedOut = false
         sessionLock.locked = true
+        sessionLock.blackedOut = false
+        isLocked = true
         idleTimer.restart()
     }
-
-    function unlock() { sessionLock.locked = false }
-
-    Connections {
-        target: sessionLock
-        function onLockedChanged() {
-            if (sessionLock.locked) return
-            idleTimer.stop()
-            sessionLock.blackedOut = false
-            dpmsOn.running = true
-        }
+    function unlock() {
+        idleTimer.stop()
+        sessionLock.locked = false
+        isLocked = false
     }
 
     PamContext {
@@ -65,40 +59,21 @@ Item {
         }
     }
 
-    Process {
-        id: dpmsOff
-        command: ["wlopm", "--off", "*"]
-
-        // qmllint disable signal-handler-parameters
-        onExited: (code) => { running = false }
-        // qmllint enable signal-handler-parameters
-    }
-    Process {
-        id: dpmsOn
-        command: ["wlopm", "--on", "*"]
-
-        // qmllint disable signal-handler-parameters
-        onExited: (code) => { running = false }
-        // qmllint enable signal-handler-parameters
-
-    }
+    Process { id: dpmsOff; command: ["wlopm", "--off", "*"] }
+    Process { id: dpmsOn;  command: ["wlopm", "--on", "*"] }
 
     Timer {
         id: idleTimer
         interval: root.secondsTillBlackOut * 1000
         onTriggered: {
-            if (!sessionLock.locked)
-                return
-
+            if (!sessionLock.locked) return
             sessionLock.blackedOut = true
             dpmsOff.running = true
         }
     }
 
-    function resetIdle() {
-        if (!sessionLock.locked)
-            return
-
+    function resetIdle(reason) {
+        if (!sessionLock.locked) return
         if (sessionLock.blackedOut) {
             sessionLock.blackedOut = false
             dpmsOn.running = true
@@ -109,6 +84,7 @@ Item {
     WlSessionLock {
         id: sessionLock
         property bool blackedOut: false
+        onLockedChanged: if (!locked) root.isLocked = false
 
         WlSessionLockSurface {
             color: "#000000"
@@ -123,11 +99,11 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     propagateComposedEvents: true
-                    onPositionChanged: root.resetIdle()
-                    onPressed: (mouse) => { root.resetIdle(); mouse.accepted = false }
+                    onPositionChanged: root.resetIdle("mouse-move")
+                    onPressed: (mouse) => { root.resetIdle("mouse-press"); mouse.accepted = false }
                 }
 
-                Keys.onPressed: (event) => { root.resetIdle(); event.accepted = false }
+                Keys.onPressed: (event) => { root.resetIdle("key"); event.accepted = false }
 
                 Loader {
                     anchors.fill: parent
@@ -162,7 +138,7 @@ Item {
                             echoMode: TextInput.Password
                             enabled: !pam.active
                             text: root.passwordText
-                            onTextChanged: { root.passwordText = text; root.resetIdle() }
+                            onTextChanged: { root.passwordText = text; root.resetIdle("text-changed") }
                             onAccepted: root.tryUnlock()
                             Keys.onEscapePressed: sessionItem.forceActiveFocus()
                             HoverHandler { cursorShape: Qt.IBeamCursor }
