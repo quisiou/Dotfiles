@@ -1,50 +1,77 @@
 # yazi/yazi.toml
 
 
-[opener]
-vscodium = [
-    { run = 'codium %s', desc = "VSCodium", block = false }
-]
-nvim = [
-    { run = 'nvim %s', block = true }
-]
-default = [
-    { run = 'xdg-open %s', block = false }
-]
+[[opener.vscodium]]
+run   = 'codium %s'
+desc  = "VSCodium"
+block = false
+
+[[opener.nvim]]
+run   = 'nvim %s'
+block = true
+
+[[opener.default]]
+run   = 'xdg-open %s'
+block = false
 
 
-[open]
-rules = [
+###############
+# DIRECTORIES #
+###############
+[[open.prepend_rules]]
+mime = "inode/directory"
+use  = "nvim"
 
-    ###############
-    # DIRECTORIES #
-    ###############
-    { mime = "inode/directory", use = "nvim" },
-    { url = "*/", use = "nvim" },
+[[open.prepend_rules]]
+url = "*/"
+use = "nvim"
 
-    ######################
-    # JSON / IPYNB RULES #
-    ######################
-    { url = "*.ipynb", use = "vscodium" },
-    { mime = "application/json", use = "nvim" },
+######################
+# JSON / IPYNB RULES #
+######################
+[[open.prepend_rules]]
+url = "*.ipynb"
+use = "vscodium"
 
-    ##############
-    # TEXT FILES #
-    ##############
-    { mime = "text/*", use = "nvim" },
-    
-    #############################
-    # OTHER APPLICATION/* FILES #
-    #############################
-    { mime = "application/octet-stream", use = "nvim" },
+[[open.prepend_rules]]
+mime = "application/json"
+use  = "nvim"
 
-    ###########
-    # SVG+XML #
-    ###########
-    { mime = "image/svg+xml", use = "nvim" },
+##############
+# TEXT FILES #
+##############
+[[open.prepend_rules]]
+mime = "text/*"
+use  = "nvim"
 
-    ###########
-    # DEFAULT #
-    ###########
-    { mime = "*/*", use = "default" }
-]
+#############################
+# OTHER APPLICATION/* FILES #
+#############################
+[[open.prepend_rules]]
+mime = "application/octet-stream"
+use  = "nvim"
+
+###########
+# SVG+XML #
+###########
+[[open.prepend_rules]]
+mime = "image/svg+xml"
+use  = "nvim"
+
+###############
+# EMPTY FILES #
+###############
+[[open.prepend_rules]]
+mime = "inode/x-empty"
+use  = "nvim"
+
+[[open.prepend_rules]]
+mime = "inode/empty"
+use  = "nvim"
+
+###########
+# DEFAULT #
+###########
+[[open.prepend_rules]]
+mime = "*/*"
+use  = "default"

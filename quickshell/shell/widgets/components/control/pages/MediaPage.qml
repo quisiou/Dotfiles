@@ -13,7 +13,7 @@ import "../../../base"
 Item {
     id: root
 
-    property string visualizerShape: "sphere"
+    property string visualizerShape: "rect"
 
     implicitWidth: 320
     implicitHeight: contentRow.implicitHeight
