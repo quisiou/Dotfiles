@@ -32,6 +32,6 @@ foreach(src_file ${C_HELPER_SOURCES})
 endforeach()
 
 # GPU info helper needs libdl for dlopen/dlsym
-if(TARGET get_gpu_info)
-    target_link_libraries(get_gpu_info PRIVATE dl)
+if(TARGET daemon_gpu_info)
+    target_link_libraries(daemon_gpu_info PRIVATE ${CMAKE_DL_LIBS})
 endif()
