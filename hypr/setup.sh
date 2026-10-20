@@ -109,6 +109,7 @@ else
     echo "    skipped    $USER_DIR/: file already exists"
 fi
 
+create_file "init.lua"             "EARLY CONFIGURATION"
 create_file "env.lua"              "ENVIRONMENT VARIABLES CONFIGURATION"
 create_file "variables.lua"        "GENERAL SETTINGS"
 create_file "monitors.lua"         "MONITORS CONFIGURATION"

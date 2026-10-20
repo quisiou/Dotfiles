@@ -2,7 +2,6 @@
 
 
 pkgs: with pkgs; [
-    hyprland
     hyprshot
     wl-clipboard
     cliphist

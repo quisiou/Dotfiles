@@ -4,14 +4,22 @@
 { lib, pkgs }:
 
 {
-    package = lib.mkOption {
-        description = "The hyprland package to use.";
-        type = lib.types.package;
-        default = pkgs.hyprland;
-    };
+    # package = lib.mkOption {
+    #     description = "The hyprland package to use.";
+    #     type = lib.types.package;
+    #     default = pkgs.hyprland;
+    # };
 
     extraAutostart = lib.mkOption {
         description = "Extra settings to append to `autostart` config";
+        type = lib.types.lines;
+        default = "";
+    };
+    extraConfig = lib.mkOption {
+        description = ''
+            Settings written to `user/init.lua`, run after the theme loads and after
+            `plugins` are loaded, but before any default or user config file.
+        '';
         type = lib.types.lines;
         default = "";
     };
@@ -49,5 +57,13 @@
         description = "Extra settings to append to `window rules` config";
         type = lib.types.lines;
         default = "";
+    };
+    plugins = lib.mkOption {
+        description = ''
+            Plugins to load at startup. A package is loaded from `lib/lib<pname>.so`,
+            a path is used as is. They must be compatible with the running Hyprland's version.
+        '';
+        type = lib.types.listOf (lib.types.either lib.types.package lib.types.path);
+        default = [ ];
     };
 }

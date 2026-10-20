@@ -10,6 +10,10 @@ package.path = hypr_config_dir .. "/?.lua;" .. hypr_config_dir .. "/?/init.lua;"
 theme = require("theme")
 
 
+------ LOAD EARLY USER CONFIG (BEFORE ANY CONFIG FILE) --
+require("user.init")
+
+
 ------ LOAD ENV VARIABLES (DEFAULT AND/OR CUSTOM) -------
 require("default.env")
 require("user.env")
