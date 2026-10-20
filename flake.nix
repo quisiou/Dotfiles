@@ -45,9 +45,18 @@
                         let
                             optsFile = self + "/${name}/options.nix";
                         in
-                            if builtins.pathExists optsFile then callWith optsFile { inherit lib config pkgs; } else {};
+                            if builtins.pathExists optsFile
+                            then callWith optsFile { inherit lib config pkgs; }
+                            else {};
+
+                    hasModuleConfig = name: builtins.pathExists (self + "/${name}/config.nix");
+
+                    getModuleConfig = name: cfg:
+                        if hasModuleConfig name
+                        then callWith (self + "/${name}/config.nix") { inherit lib config pkgs cfg; }
+                        else {};
                 in {
-                    inherit moduleNames getTools getDepsDirect getDeps getExtraOptions;
+                    inherit moduleNames getTools getDepsDirect getDeps getExtraOptions hasModuleConfig getModuleConfig;
                 };
         in
             (flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (system:
@@ -117,13 +126,17 @@
                 homeManagerModules.default = { config, lib, pkgs, ... }:
                     let
                         dl = mkDotfilesLib { inherit pkgs lib config; };
-                        inherit (dl) moduleNames getTools getDeps getExtraOptions;
+                        inherit (dl) moduleNames getTools getDeps getExtraOptions hasModuleConfig getModuleConfig;
 
                         cfg = config.programs.dotfiles;
 
                         enabledDirectly = builtins.filter (n: cfg.modules.${n}.enable) moduleNames;
                         activeModules = if cfg.allEnabled then moduleNames else enabledDirectly;
                         selected = lib.unique (builtins.concatMap (m: getDeps m ++ [ m ]) activeModules);
+
+                        # Static on purpose: this is the list spine of mkMerge below, so it must not
+                        # depend on config values (e.g. `selected`) or evaluation recurses infinitely.
+                        configModules = builtins.filter hasModuleConfig moduleNames;
                     in {
                         options.programs.dotfiles = {
                             enable = lib.mkEnableOption "personal dotfiles";
@@ -150,26 +163,33 @@
                             } // (getExtraOptions name));
                         };
 
-                        config = lib.mkIf cfg.enable {
-                            home.sessionVariables.ELYSIAN_DOTS_HOME = cfg.dotsHome;
-                            systemd.user.sessionVariables.ELYSIAN_DOTS_HOME = cfg.dotsHome;
+                        config = lib.mkIf cfg.enable (lib.mkMerge ([
+                            {
+                                home.sessionVariables.ELYSIAN_DOTS_HOME = cfg.dotsHome;
+                                systemd.user.sessionVariables.ELYSIAN_DOTS_HOME = cfg.dotsHome;
 
-                            home.packages = builtins.concatMap getTools selected;
+                                home.packages = builtins.concatMap getTools selected;
 
-                            home.activation.dotfilesSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] (
-                                ''
-                                    export ELYSIAN_DOTS_HOME="${cfg.dotsHome}"
-                                    export PATH="${lib.makeBinPath (builtins.concatMap getTools selected)}:$PATH"
-                                '' + builtins.concatStringsSep "\n" (map (m: ''
-                                    if [ -e "$HOME/.config/${m}" ]; then
-                                        echo "dotfiles: skipping ${m} (already set up)"
-                                    else
-                                        echo "dotfiles: setting up ${m}"
-                                        (cd "${self}/${m}" && $DRY_RUN_CMD ./setup.sh)
-                                    fi
-                                '') selected)
-                            );
-                        };
+                                # After linkGeneration so files declared by config.nix are already in place
+                                home.activation.dotfilesSetup = lib.hm.dag.entryAfter [ "writeBoundary" "linkGeneration" ] (
+                                    ''
+                                        export ELYSIAN_DOTS_HOME="${cfg.dotsHome}"
+                                        export PATH="${lib.makeBinPath (builtins.concatMap getTools selected)}:$PATH"
+                                    '' + builtins.concatStringsSep "\n" (map (m:
+                                        if hasModuleConfig m then ''
+                                            echo "dotfiles: setting up ${m}"
+                                            (cd "${self}/${m}" && $DRY_RUN_CMD ./setup.sh)
+                                        '' else ''
+                                            if [ -e "$HOME/.config/${m}" ]; then
+                                                echo "dotfiles: skipping ${m} (already set up)"
+                                            else
+                                                echo "dotfiles: setting up ${m}"
+                                                (cd "${self}/${m}" && $DRY_RUN_CMD ./setup.sh)
+                                            fi
+                                        '') selected)
+                                );
+                            }
+                        ] ++ map (m: lib.mkIf (builtins.elem m selected) (getModuleConfig m cfg.modules.${m})) configModules));
                     };
             };
 }

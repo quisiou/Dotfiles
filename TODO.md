@@ -14,4 +14,4 @@
 
 ## Flake
 ### Already configured modules:
-
+- `yazi`
