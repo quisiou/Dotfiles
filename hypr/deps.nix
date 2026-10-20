@@ -1,4 +1,0 @@
-# hypr/deps.nix
-
-
-[ "kitty" ]

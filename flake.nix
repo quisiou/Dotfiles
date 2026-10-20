@@ -19,15 +19,18 @@
                             (builtins.readDir self)
                     );
 
+                    # A module's nix-side files live in <module>/nix/
+                    nixFile = name: file: self + "/${name}/nix/${file}";
+
                     getTools = name:
                         let
-                            toolsFile = self + "/${name}/tools.nix";
+                            toolsFile = nixFile name "tools.nix";
                         in
                             if builtins.pathExists toolsFile then import toolsFile pkgs else [];
 
                     getDepsDirect = name:
                         let
-                            depsFile = self + "/${name}/deps.nix";
+                            depsFile = nixFile name "deps.nix";
                         in
                             if builtins.pathExists depsFile then import depsFile else [];
 
@@ -43,17 +46,17 @@
                         let f = import file; in f (builtins.intersectAttrs (lib.functionArgs f) args);
                     getExtraOptions = name:
                         let
-                            optsFile = self + "/${name}/options.nix";
+                            optsFile = nixFile name "options.nix";
                         in
                             if builtins.pathExists optsFile
                             then callWith optsFile { inherit lib config pkgs; }
                             else {};
 
-                    hasModuleConfig = name: builtins.pathExists (self + "/${name}/config.nix");
+                    hasModuleConfig = name: builtins.pathExists (nixFile name "config.nix");
 
                     getModuleConfig = name: cfg:
                         if hasModuleConfig name
-                        then callWith (self + "/${name}/config.nix") { inherit lib config pkgs cfg; }
+                        then callWith (nixFile name "config.nix") { inherit lib config pkgs cfg; }
                         else {};
                 in {
                     inherit moduleNames getTools getDepsDirect getDeps getExtraOptions hasModuleConfig getModuleConfig;
