@@ -36,10 +36,10 @@ in
     # Managed here instead of letting setup.sh link them: setup.sh would link to the
     # store path of the first run and keep pointing there after updates.
     # setup.sh sees the existing links and skips them.
-    home.file = lib.listToAttrs (map (name: {
+    home.file = lib.mkIf cfg.linkRcFiles (lib.listToAttrs (map (name: {
         name = ".${lib.removeSuffix ".zsh" name}";
         value.source = root + "/${name}";
-    }) (zshFiles root));
+    }) (zshFiles root)));
 
     xdg.configFile =
         lib.listToAttrs (map (name: {

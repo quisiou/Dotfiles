@@ -54,4 +54,13 @@
         type = lib.types.lines;
         default = "";
     };
+    linkRcFiles = lib.mkOption {
+        description = ''
+            Link `zshenv`, `zshrc` and `zprofile` into `$HOME`. Turn off if you generate those
+            yourself (e.g. Home Manager's `programs.zsh`); they then have to source
+            `~/.config/zsh/{env,main,profile}.zsh`, as the dotfiles' own versions do.
+        '';
+        type = lib.types.bool;
+        default = true;
+    };
 }
