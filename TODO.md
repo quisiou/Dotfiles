@@ -14,4 +14,5 @@
 
 ## Flake
 ### Already configured modules:
+- `kitty`
 - `yazi`

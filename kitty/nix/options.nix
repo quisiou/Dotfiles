@@ -11,7 +11,10 @@
     };
 
     extraConfig = lib.mkOption {
-        description = "Extra settings to append to `kitty.conf`";
+        description = ''
+            Extra settings written to `user.conf`, which `kitty.conf` includes last,
+            so they override the defaults.
+        '';
         type = lib.types.lines;
         default = "";
     };

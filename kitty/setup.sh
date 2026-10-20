@@ -59,6 +59,16 @@ fi
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 
+echo "Creating user configuration file..."
+if [ -e "$DEST/user.conf" ] || [ -L "$DEST/user.conf" ]; then
+    echo "    skipped    $DEST/user.conf: file already exists"
+else
+    : > "$DEST/user.conf"
+    echo "    created    $DEST/user.conf"
+fi
+
+echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+
 echo "Linking main configuration file..."
 link_file "$ROOT_DIR/kitty.conf" "$DEST/kitty.conf"
 
