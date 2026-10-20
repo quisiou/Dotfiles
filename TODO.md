@@ -1,4 +1,5 @@
 # TODO
+## Tasks
 - Make connections and system topbar part.
 - Make changing between launcher and carousel not move the searchbar.
 - Make MainPill size consistent vertically between modes.
@@ -10,3 +11,7 @@
 - When adding/removing bluetooth devices, make the launcher update its entries.
 - Implement secondary actions on launcher (right-click/shitf+Enter) and QuickApps, like desktop files provide.
 - Optmize code for speed and resource consumption.
+
+## Flake
+### Already configured modules:
+

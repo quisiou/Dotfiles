@@ -38,11 +38,14 @@
                         in
                             lib.unique (nested ++ direct);
 
+                    # Call a file's function with only the arguments it declares
+                    callWith = file: args:
+                        let f = import file; in f (builtins.intersectAttrs (lib.functionArgs f) args);
                     getExtraOptions = name:
                         let
                             optsFile = self + "/${name}/options.nix";
                         in
-                            if builtins.pathExists optsFile then import optsFile { inherit lib config pkgs; } else {};
+                            if builtins.pathExists optsFile then callWith optsFile { inherit lib config pkgs; } else {};
                 in {
                     inherit moduleNames getTools getDepsDirect getDeps getExtraOptions;
                 };
@@ -53,14 +56,14 @@
                         inherit system;
                         config.allowUnfree = true;
                     };
-                    dl = mkDotfilesLib { inherit pkgs; lib = pkgs.lib; };
+                    dl = mkDotfilesLib { inherit pkgs; config = {}; lib = pkgs.lib; };
                     inherit (dl) moduleNames getTools getDeps;
 
                     mkApp = name: {
                         type = "app";
                         program = "${pkgs.writeShellApplication {
                             name = "setup-${name}";
-                            runtimeInputs = getTools name;
+                            runtimeInputs = getTools name ++ builtins.concatMap getTools (getDeps name);
                             text = ''
                                 export ELYSIAN_DOTS_HOME="''${ELYSIAN_DOTS_HOME:-$HOME/.local/share/elysian-dots}"
 
@@ -140,15 +143,11 @@
                                 '';
                             };
 
-                            modules = lib.mkOption {
-                                type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
-                                    options = {
-                                        enable = lib.mkEnableOption "the '${name}' dotfiles module";
-                                    } // (getExtraOptions name);
-                                }));
-                                default = lib.genAttrs moduleNames (_: {});
-                                description = "Per-module dotfiles configuration.";
-                            };
+                            # Declared per module so setting only modules.yazi.enable
+                            # doesn't discard the defaults of every other module.
+                            modules = lib.genAttrs moduleNames (name: {
+                                enable = lib.mkEnableOption "the '${name}' dotfiles module";
+                            } // (getExtraOptions name));
                         };
 
                         config = lib.mkIf cfg.enable {
@@ -160,12 +159,13 @@
                             home.activation.dotfilesSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] (
                                 ''
                                     export ELYSIAN_DOTS_HOME="${cfg.dotsHome}"
+                                    export PATH="${lib.makeBinPath (builtins.concatMap getTools selected)}:$PATH"
                                 '' + builtins.concatStringsSep "\n" (map (m: ''
                                     if [ -e "$HOME/.config/${m}" ]; then
                                         echo "dotfiles: skipping ${m} (already set up)"
                                     else
                                         echo "dotfiles: setting up ${m}"
-                                        (cd "${self}/${m}" && ./setup.sh)
+                                        (cd "${self}/${m}" && $DRY_RUN_CMD ./setup.sh)
                                     fi
                                 '') selected)
                             );
