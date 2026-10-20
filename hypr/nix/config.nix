@@ -18,15 +18,15 @@ let
     # user/<file>.lua -> its content.
     # hyprland.lua requires every one of these, so all must exist even when empty.
     userFiles = {
-        "init.lua"          = initLua;
+        "autostart.lua"     = cfg.extraAutostart;
         "env.lua"           = cfg.extraEnv;
-        "variables.lua"     = cfg.extraVariables;
-        "monitors.lua"      = cfg.extraMonitors;
-        "look_and_feel.lua" = cfg.extraLookAndFeel;
+        "init.lua"          = initLua;
         "input.lua"         = cfg.extraInput;
         "keybinds.lua"      = cfg.extraKeybinds;
+        "look_and_feel.lua" = cfg.extraLookAndFeel;
+        "monitors.lua"      = cfg.extraMonitors;
+        "variables.lua"     = cfg.extraVariables;
         "windowrules.lua"   = cfg.extraWindowRules;
-        "autostart.lua"     = cfg.extraAutostart;
     };
 in
 {

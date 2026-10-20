@@ -13,6 +13,11 @@
 - Optmize code for speed and resource consumption.
 
 ## Flake
-### Already configured modules:
-- `kitty`
-- `yazi`
+### Modules left to configure:
+- `awww`
+- `btop`
+- `fastfetch`
+- `nvim`
+- `quickshell`
+- `starship`
+- `vscodium`

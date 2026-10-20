@@ -20,6 +20,25 @@
         type = lib.types.lines;
         default = "";
     };
+    extraFiles = lib.mkOption {
+        description = ''
+            Extra zsh files. Each attribute name is a file name (without `.zsh`) written to
+            `~/.config/zsh/user/`, and its value is the content of that file.
+            `main.zsh` sources every file there in alphabetical order, so prefix names
+            (`10-foo`) to control the order. `env` and `profile` are sourced by zshenv and
+            zprofile instead. A name that matches another option's file (`env`, `profile`,
+            `alias`, `functions`, `options`) is appended to that option's content.
+        '';
+        type = lib.types.attrsOf lib.types.lines;
+        default = { };
+        example = lib.literalExpression ''
+            {
+                "10-fzf" = '''
+                    source <(fzf --zsh)
+                ''';
+            }
+        '';
+    };
     extraFunctions = lib.mkOption {
         description = "Extra functions to set";
         type = lib.types.lines;
