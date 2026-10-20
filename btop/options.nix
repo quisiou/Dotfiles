@@ -10,6 +10,7 @@
         default = pkgs.btop;
     };
 
+    # Still trying to figure out how to apply these
     settings = lib.mkOption {
         description = ''
             Btop internal settings (check `btop --help` for more information).
