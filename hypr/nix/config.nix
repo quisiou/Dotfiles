@@ -30,6 +30,8 @@ let
     };
 in
 {
+    home.packages = lib.optional (cfg.package != null) cfg.package;
+
     xdg.configFile = {
         "hypr/hyprland.lua".source = ../hyprland.lua;
         "hypr/default".source      = ../config;

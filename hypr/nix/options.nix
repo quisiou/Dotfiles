@@ -1,14 +1,19 @@
 # hypr/nix/options.nix
 
 
-{ lib, pkgs }:
+{ lib }:
 
 {
-    # package = lib.mkOption {
-    #     description = "The hyprland package to use.";
-    #     type = lib.types.package;
-    #     default = pkgs.hyprland;
-    # };
+    package = lib.mkOption {
+        description = ''
+            Hyprland package to install into the user profile. Leave null when the system
+            already provides it (NixOS `programs.hyprland`), and set it to that same package
+            otherwise: a different build would put a mismatched `hyprctl` first in PATH.
+        '';
+        type = lib.types.nullOr lib.types.package;
+        default = null;
+        example = lib.literalExpression "pkgs.hyprland";
+    };
 
     extraAutostart = lib.mkOption {
         description = "Extra settings to append to `autostart` config";
