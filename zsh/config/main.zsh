@@ -32,3 +32,8 @@ if [ -d "$CONFIG_DIR" ]; then
         [ -r "$script" ] && . "$script" # Source every readable file inside the user directory
     done
 fi
+
+# Init starship
+if command -v starship >/dev/null 2>&1; then
+    eval "$(starship init zsh)"
+fi

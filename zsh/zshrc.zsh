@@ -18,8 +18,3 @@ bindkey -e
 
 # Source main config
 [ -f "$HOME/.config/zsh/main.zsh" ] && . "$HOME/.config/zsh/main.zsh"
-
-# Init starship
-if command -v starship >/dev/null 2>&1; then
-    eval "$(starship init zsh)"
-fi

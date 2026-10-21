@@ -16,7 +16,5 @@
 ### Modules left to configure:
 - `awww`
 - `btop`
-- `fastfetch`
 - `quickshell`
-- `starship`
 - `vscodium`

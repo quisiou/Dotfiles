@@ -5,6 +5,9 @@
 # Set dotfiles home dir
 export ELYSIAN_DOTS_HOME="${ELYSIAN_DOTS_HOME:-$HOME/.local/share/elysian-dots}"
 
+# Starship config file
+export STARSHIP_CONFIG="${STARSHIP_CONFIG:-$HOME/.config/starship/starship.toml}"
+
 
 # LESS command formatting
 export GROFF_NO_SGR=1
