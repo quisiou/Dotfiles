@@ -7,7 +7,7 @@
 {
     # hiPrio lets a custom `package` win without a collision; with the default
     # package both entries are the same store path.
-    home.packages = [ (lib.hiPrio cfg.package) ];
+    home.packages = [ (lib.setPrio 0 cfg.package) ];
 
     xdg.configFile."yazi/user/keymap.toml".text = cfg.extraKeymaps;
     xdg.configFile."yazi/user/yazi.toml".text   = cfg.extraOptions;

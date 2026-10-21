@@ -71,7 +71,37 @@ fi
 
 link_file "$ROOT_DIR/lazy-lock.json" "$DEST/lazy-lock.json"
 link_file "$ROOT_DIR/colors" "$DEST/colors"
-link_file "$ROOT_DIR/lua" "$DEST/lua"
+
+echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+
+echo "Linking lua files..."
+
+mkdir -p "$DEST/lua"
+
+for entry in "$ROOT_DIR"/lua/*; do
+    [ -e "$entry" ] || continue
+    entry_name=$(basename "$entry")
+    case "$entry_name" in
+        user|plugins) continue ;;   # real directories, handled below
+    esac
+    link_file "$entry" "$DEST/lua/$entry_name"
+done
+
+echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+
+echo "Linking plugin specs..."
+
+mkdir -p "$DEST/lua/plugins"
+
+for entry in "$ROOT_DIR"/lua/plugins/*.lua; do
+    [ -e "$entry" ] || continue
+    link_file "$entry" "$DEST/lua/plugins/$(basename "$entry")"
+done
+
+echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
+
+echo "Creating user lua directory..."
+mkdir -p "$DEST/lua/user"
 
 echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌"
 

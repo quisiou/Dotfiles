@@ -78,3 +78,8 @@ vim.api.nvim_create_autocmd("BufWritePre", {
         vim.api.nvim_win_set_cursor(0, pos)
     end,
 })
+
+-- User overrides (optional): lua/user/options.lua
+if #vim.api.nvim_get_runtime_file("lua/user/options.lua", false) > 0 then
+    require("user.options")
+end

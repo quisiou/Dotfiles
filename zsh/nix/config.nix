@@ -31,7 +31,7 @@ let
 in
 {
     # tools.nix already installs the default zsh; same hiPrio trick as yazi and kitty
-    home.packages = [ (lib.hiPrio cfg.package) ];
+    home.packages = [ (lib.setPrio 0 cfg.package) ];
 
     # Managed here instead of letting setup.sh link them: setup.sh would link to the
     # store path of the first run and keep pointing there after updates.

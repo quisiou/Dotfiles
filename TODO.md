@@ -17,7 +17,6 @@
 - `awww`
 - `btop`
 - `fastfetch`
-- `nvim`
 - `quickshell`
 - `starship`
 - `vscodium`

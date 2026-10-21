@@ -91,3 +91,8 @@ vim.api.nvim_create_autocmd("FileType", {
 map("n",    "gl",   vim.diagnostic.open_float,                          { desc = "Show line diagnostics" })
 map("n",    "]d",   function() vim.diagnostic.jump({ count = 1 }) end,  { desc = "Next diagnostic" })
 map("n",    "[d",   function() vim.diagnostic.jump({ count = -1 }) end, { desc = "Prev diagnostic" })
+
+-- User overrides (optional): lua/user/keymaps.lua
+if #vim.api.nvim_get_runtime_file("lua/user/keymaps.lua", false) > 0 then
+    require("user.keymaps")
+end
