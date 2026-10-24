@@ -14,6 +14,5 @@
 
 ## Flake
 ### Modules left to configure:
-- `awww`
 - `quickshell`
 - `vscodium`

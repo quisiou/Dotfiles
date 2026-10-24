@@ -63,7 +63,7 @@ echo "╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌�
 
 echo "Setting default wallpaper if cache is missing..."
 
-AWWW_VERSION=$(awww --version | awk '{print $2}')
+AWWW_VERSION=$(awww --version | cut -d' ' -f2)
 
 if [ -z "$AWWW_VERSION" ]; then
     echo "Error: Could not detect awww version."
