@@ -15,6 +15,5 @@
 ## Flake
 ### Modules left to configure:
 - `awww`
-- `btop`
 - `quickshell`
 - `vscodium`
