@@ -133,9 +133,8 @@
 
                         cfg = config.programs.dotfiles;
 
-                        enabledDirectly = builtins.filter (n: cfg.modules.${n}.enable) moduleNames;
-                        activeModules = if cfg.allEnabled then moduleNames else enabledDirectly;
-                        selected = lib.unique (builtins.concatMap (m: getDeps m ++ [ m ]) activeModules);
+                        enabledModules = builtins.filter (n: cfg.modules.${n}.enable) moduleNames;
+                        selected = lib.unique (builtins.concatMap (m: getDeps m ++ [ m ]) enabledModules);
 
                         # Static on purpose: this is the list spine of mkMerge below, so it must not
                         # depend on config values (e.g. `selected`) or evaluation recurses infinitely.
@@ -144,10 +143,14 @@
                         options.programs.dotfiles = {
                             enable = lib.mkEnableOption "personal dotfiles";
 
-                            allEnabled = lib.mkOption {
+                            defaultEnabled = lib.mkOption {
                                 type = lib.types.bool;
-                                default = true;
-                                description = "If true, every discovered module is activated, ignoring modules.<name>.enable.";
+                                default = false;
+                                description = ''
+                                    Default for every module's `enable`. With false you list the modules you
+                                    want (`modules.<name>.enable = true`); with true every module is on and
+                                    you can switch individual ones off (`modules.<name>.enable = false`).
+                                '';
                             };
 
                             dotsHome = lib.mkOption {
@@ -159,10 +162,12 @@
                                 '';
                             };
 
-                            # Declared per module so setting only modules.yazi.enable
-                            # doesn't discard the defaults of every other module.
                             modules = lib.genAttrs moduleNames (name: {
-                                enable = lib.mkEnableOption "the '${name}' dotfiles module";
+                                enable = lib.mkOption {
+                                    description = "Whether to set up the '${name}' dotfiles module and the modules it depends on.";
+                                    type = lib.types.bool;
+                                    default = cfg.defaultEnabled;
+                                };
                             } // (getExtraOptions name));
                         };
 
