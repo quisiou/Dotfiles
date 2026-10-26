@@ -26,15 +26,8 @@ map("n",    "<leader>a",    "ggVG",                 { desc = "Select all" })
 map("v",    "<leader>y",    '"+y',                  { desc = "Yank to system clipboard" })
 
 --- Indent / un-indent --------------------------------------------------------
-map("n",    "<leader>.",    ">>",                   { desc = "Indent line" })
-map("n",    "<leader>,",    "<<",                   { desc = "Un-indent line" })
 map("v",    "<Tab>",        ">gv",                  { desc = "Indent selection" })
 map("v",    "<S-Tab>",      "<gv",                  { desc = "Un-indent selection" })
-
--- Toggle comments ------------------------------------------------------------
-map("n",    "<C-.>",        "gcc",                  { remap = true, desc = "Toggle line comment" })
-map("v",    "<C-.>",        "gc",                   { remap = true, desc = "Toggle line comment" })
-map("i",    "<C-.>",        "<Esc>gccgi",           { remap = true, desc = "Toggle line comment" })
 
 --- Window navigation ---------------------------------------------------------
 -- Standard pane navigation

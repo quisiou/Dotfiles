@@ -1,7 +1,7 @@
 # TODO
 ## Tasks
 - Make connections and system topbar part.
-- Make changing between launcher and carousel not move the searchbar.
+- Change wallpaper menu to serpentinum-like (it's very cool)
 - Make MainPill size consistent vertically between modes.
 - Try to make workspace indicators when more than 5 not clip too much.
 - Fix slidebar widget not reaching min and max limits completely.

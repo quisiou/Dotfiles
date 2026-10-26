@@ -6,12 +6,14 @@ run   = 'codium %s'
 desc  = "VSCodium"
 block = false
 
-[[opener.nvim]]
-run   = 'nvim %s'
+[[opener.edit]]
+run   = '${EDITOR:-vi} %s'
+desc  = "Editor"
 block = true
 
 [[opener.default]]
 run   = 'xdg-open %s'
+desc  = "Default"
 block = false
 
 
@@ -20,54 +22,54 @@ block = false
 ###############
 [[open.prepend_rules]]
 mime = "inode/directory"
-use  = "nvim"
+use  = "edit"
 
 [[open.prepend_rules]]
 url = "*/"
-use = "nvim"
+use = "edit"
 
 ######################
 # JSON / IPYNB RULES #
 ######################
 [[open.prepend_rules]]
 url = "*.ipynb"
-use = "vscodium"
+use = [ "edit", "vscodium" ]
 
 [[open.prepend_rules]]
 mime = "application/json"
-use  = "nvim"
+use  = "edit"
 
 ##############
 # TEXT FILES #
 ##############
 [[open.prepend_rules]]
 mime = "text/*"
-use  = "nvim"
+use  = "edit"
 
 #############################
 # OTHER APPLICATION/* FILES #
 #############################
 [[open.prepend_rules]]
 mime = "application/octet-stream"
-use  = "nvim"
+use  = "edit"
 
 ###########
 # SVG+XML #
 ###########
 [[open.prepend_rules]]
 mime = "image/svg+xml"
-use  = "nvim"
+use  = "edit"
 
 ###############
 # EMPTY FILES #
 ###############
 [[open.prepend_rules]]
 mime = "inode/x-empty"
-use  = "nvim"
+use  = "edit"
 
 [[open.prepend_rules]]
 mime = "inode/empty"
-use  = "nvim"
+use  = "edit"
 
 ###########
 # DEFAULT #
