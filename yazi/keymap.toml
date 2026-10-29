@@ -2,7 +2,7 @@
 
 
 [[mgr.prepend_keymap]]
-on   = [ "g", "l" ]
+on   = [ "g", "s" ]
 run  = "cd ~/.local/share"
 desc = "Go to ~/.local/share (user)"
 
