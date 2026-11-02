@@ -10,6 +10,7 @@ pkgs: with pkgs; [
     lazygit
     gh gh-dash
     texliveMedium
+    zathura
     gcc clang-tools
     tree-sitter
     lua-language-server

@@ -38,7 +38,10 @@ return {
         -- Highlighting
         vim.api.nvim_create_autocmd("FileType", {
             pattern = filetypes,
-            callback = function()
+            callback = function(args)
+                if vim.tbl_contains({ "tex", "latex", "plaintex" }, vim.bo[args.buf].filetype) then
+                    return
+                end
                 vim.treesitter.start()
             end,
         })

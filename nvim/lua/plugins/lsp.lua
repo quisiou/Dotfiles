@@ -131,27 +131,14 @@ local servers = {
         settings = {
             texlab = {
                 build = {
-                    executable = "latexmk",
-                    args = {
-                        "-pdf",
-                        "-lualatex",
-                        "-output-directory=build",
-                        "-interaction=nonstopmode",
-                        "-synctex=1",
-                        "%f",
-                    },
-                    onSave = true,        -- rebuild automatically every time you save
-                    forwardSearchAfter = false,
-                },
-                chktex = {
-                    onOpenAndSave = false,
-                    onEdit = false,
+                    auxDirectory = "build",
+                    logDirectory = "build",
                 },
             },
         },
     },
 
-        basedpyright = {
+    basedpyright = {
         handlers = filtering_handlers,
         settings = {
             basedpyright = {
