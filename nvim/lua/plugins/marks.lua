@@ -14,13 +14,13 @@ return {
 
         local set = vim.keymap.set
 
-        set("n", "<leader>ml", "<cmd>MarksListBuf<CR>", { desc = "List marks in buffer" })
-        set("n", "<leader>mn", function() require("marks").next() end, { desc = "Next mark" })
-        set("n", "<leader>mp", function() require("marks").prev() end, { desc = "Prev mark" })
+        set("n", "<leader>Ml", "<cmd>MarksListBuf<CR>", { desc = "List marks in buffer" })
+        set("n", "<leader>Mn", function() require("marks").next() end, { desc = "Next mark" })
+        set("n", "<leader>MN", function() require("marks").prev() end, { desc = "Prev mark" })
 
-        set("n", "<leader>md", function() require("marks").delete() end, { desc = "Delete mark under cursor" })
-        set("n", "<leader>mD", function() require("marks").delete_buf() end, { desc = "Delete all marks in buffer" })
+        set("n", "<leader>Md", function() require("marks").delete() end, { desc = "Delete mark by letter" })
+        set("n", "<leader>MD", function() require("marks").delete_buf() end, { desc = "Delete all marks in buffer" })
 
-        set("n", "<leader>mv", function() require("marks").preview() end, { desc = "Preview mark" })
+        set("n", "<leader>Mv", function() require("marks").preview() end, { desc = "Preview mark" })
     end,
 }

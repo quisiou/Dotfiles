@@ -49,8 +49,12 @@ map("n",    "<leader>t",    "<cmd>split | resize 10 | term<CR>i",            { d
 map({ "n", "v" }, "m", "<Nop>", { desc = "Disabled (multicursor prefix)" })
 map("n", "<leader>m", function()
     local char = vim.fn.getcharstr()
+    if char:match("%u") then
+        vim.notify("Uppercase (global) marks are disabled, use a lowercase letter", vim.log.levels.WARN)
+        return
+    end
     vim.cmd("normal! m" .. char)
-end, { desc = "Set mark" })
+end, { desc = "Set mark (lowercase only)" })
 
 vim.keymap.set({ "n", "v" }, "gm", function()
     local char = vim.fn.getcharstr()
