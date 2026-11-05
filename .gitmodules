@@ -1,0 +1,6 @@
+[submodule "yazi/plugins/compress-to.yazi"]
+	path = yazi/plugins/compress-to.yazi
+	url = git@github.com:quisiou/compress-to.yazi.git
+[submodule "yazi/plugins/extract-to.yazi"]
+	path = yazi/plugins/extract-to.yazi
+	url = git@github.com:quisiou/extract-to.yazi.git
