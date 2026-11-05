@@ -58,7 +58,7 @@ use  = "edit"
 ###########
 [[open.prepend_rules]]
 mime = "image/svg+xml"
-use  = "edit"
+use  = [ "edit", "default" ]
 
 ###############
 # EMPTY FILES #
