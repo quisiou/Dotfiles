@@ -12,6 +12,11 @@ run  = "cd ~/.local/share/Trash/files"
 desc = "Go to trash bin"
 
 [[mgr.prepend_keymap]]
-on   = "<C-x>"
+on   = "<A-x>"
 run  = "plugin extract-to"
 desc = "Extract archive to named folder"
+
+[[mgr.prepend_keymap]]
+on   = "<A-c>"
+run  = "plugin compress-to"
+desc = "Compress selection to archive"

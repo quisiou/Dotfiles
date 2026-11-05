@@ -1,10 +1,13 @@
--- Uses 7zz. For tar.* / tgz, 7zz needs two steps (decompress, then untar),
--- so those are piped through sh.
+-- yazi/plugins/extract-to.yazi/main.lua
+
+
+-- tar family goes through tar (it auto-detects gz/xz/bz2/zst on extraction),
+-- everything else (zip, 7z, rar, ...) goes through 7zz.
 local function extract(file, dest)
   local script = [[
     case "$1" in
-      *.tar.*|*.tgz|*.tbz2|*.txz)
-        7zz x -so "$1" | 7zz x -si -ttar -o"$2" -y ;;
+      *.tar|*.tar.gz|*.tar.xz|*.tar.bz2|*.tar.zst|*.tgz|*.txz|*.tbz2|*.tbz|*.tzst)
+        tar -xf "$1" -C "$2" ;;
       *)
         7zz x -o"$2" -y "$1" ;;
     esac
@@ -41,9 +44,9 @@ return {
         local name = (value and value ~= "") and value or stem(file)
         local dest = name:sub(1, 1) == "/" and name or (cwd .. "/" .. name)
 
-        local ok, err = Command("mkdir"):arg({ "-p", dest }):status()
-        if not ok then
-            return ya.notify { title = "Extract", content = "mkdir failed: " .. tostring(err), level = "error", timeout = 5 }
+        local st, err = Command("mkdir"):arg({ "-p", dest }):status()
+        if not st or not st.success then
+            return ya.notify { title = "Extract", content = "mkdir failed: " .. tostring(err or "non-zero exit"), level = "error", timeout = 5 }
         end
 
         local out, err2 = extract(file, dest)
