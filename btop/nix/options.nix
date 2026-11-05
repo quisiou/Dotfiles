@@ -9,7 +9,6 @@
         type = lib.types.package;
         default = pkgs.btop;
     };
-
     extraConfig = lib.mkOption {
         description = ''
             Keys of `btop.conf` written literally. Each entry replaces the value of that key in

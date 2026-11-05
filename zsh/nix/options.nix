@@ -9,7 +9,6 @@
         type = lib.types.package;
         default = pkgs.zsh;
     };
-
     extraAlias = lib.mkOption {
         description = "Extra alias to set";
         type = lib.types.lines;

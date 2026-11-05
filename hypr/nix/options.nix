@@ -14,7 +14,6 @@
         default = null;
         example = lib.literalExpression "pkgs.hyprland";
     };
-
     extraAutostart = lib.mkOption {
         description = "Extra settings to append to `autostart` config";
         type = lib.types.lines;

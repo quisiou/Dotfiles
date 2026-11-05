@@ -17,7 +17,6 @@ in
         type = lib.types.package;
         default = pkgs.awww;
     };
-
     settings = lib.mkOption {
         description = ''
             Defaults for `awww img`, set through the environment variables awww reads

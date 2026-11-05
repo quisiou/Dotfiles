@@ -9,7 +9,6 @@
         type = lib.types.package;
         default = pkgs.kitty;
     };
-
     extraConfig = lib.mkOption {
         description = ''
             Extra settings written to `user.conf`, which `kitty.conf` includes last,
