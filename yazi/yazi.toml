@@ -22,11 +22,11 @@ block = false
 ###############
 [[open.prepend_rules]]
 mime = "inode/directory"
-use  = "edit"
+use  = [ "edit", "vscodium" ]
 
 [[open.prepend_rules]]
 url = "*/"
-use = "edit"
+use  = [ "edit", "vscodium" ]
 
 ######################
 # JSON / IPYNB RULES #
@@ -37,39 +37,39 @@ use = [ "edit", "vscodium" ]
 
 [[open.prepend_rules]]
 mime = "application/json"
-use  = "edit"
+use  = [ "edit", "vscodium" ]
 
 ##############
 # TEXT FILES #
 ##############
 [[open.prepend_rules]]
 mime = "text/*"
-use  = "edit"
+use  = [ "edit", "vscodium" ]
 
 #############################
 # OTHER APPLICATION/* FILES #
 #############################
 [[open.prepend_rules]]
 mime = "application/octet-stream"
-use  = "edit"
+use  = [ "edit", "vscodium" ]
 
 ###########
 # SVG+XML #
 ###########
 [[open.prepend_rules]]
 mime = "image/svg+xml"
-use  = [ "edit", "default" ]
+use  = [ "default", "edit", "vscodium" ]
 
 ###############
 # EMPTY FILES #
 ###############
 [[open.prepend_rules]]
 mime = "inode/x-empty"
-use  = "edit"
+use  = [ "edit", "vscodium" ]
 
 [[open.prepend_rules]]
 mime = "inode/empty"
-use  = "edit"
+use  = [ "edit", "vscodium" ]
 
 ###########
 # DEFAULT #

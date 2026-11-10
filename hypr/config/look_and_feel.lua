@@ -59,6 +59,17 @@ hl.config({
             noise              = 0.02,
             special            = false,
         },
+
+        wobble = {
+            enabled = true,
+            mesh = 16,
+            stiffness = 140,
+            damping = 10,
+            mass = 1.0,
+            intensity = 0.4,
+            value_epsilon = 2.0,
+            velocity_epsilon = 10.0,
+        },
     },
 
     animations = {
@@ -74,12 +85,12 @@ hl.curve("linear",          { type = "bezier", points = { {0, 0},       {1, 1}  
 hl.curve("almostLinear",    { type = "bezier", points = { {0.5, 0.5},   {0.75, 1}    } })
 hl.curve("quick",           { type = "bezier", points = { {0.15, 0},    {0.1, 1}     } })
 
-hl.curve("easy",            { type = "spring", mass = 1, stiffness = 200, dampening = 30 }) -- Default springs
+hl.curve("easy",            { type = "spring", mass = 0.6, stiffness = 400, dampening = 25 })
 
 hl.animation({ leaf = "global",                 enabled = true, speed = 10,     bezier = "default"                              })
 hl.animation({ leaf = "border",                 enabled = true, speed = 5.39,   bezier = "easeOutQuint"                         })
-hl.animation({ leaf = "windows",                enabled = true, speed = 4.79,   spring = "easy"                                 })
-hl.animation({ leaf = "windowsIn",              enabled = true, speed = 4.1,    spring = "easy",            style = "popin 87%" })
+hl.animation({ leaf = "windows",                enabled = true, speed = 8.0,    spring = "easy"                                 })
+hl.animation({ leaf = "windowsIn",              enabled = true, speed = 7.5,    spring = "easy",            style = "popin 87%" })
 hl.animation({ leaf = "windowsOut",             enabled = true, speed = 1.49,   bezier = "linear",          style = "popin 87%" })
 hl.animation({ leaf = "fadeIn",                 enabled = true, speed = 1.73,   bezier = "almostLinear"                         })
 hl.animation({ leaf = "fadeOut",                enabled = true, speed = 1.46,   bezier = "almostLinear"                         })
