@@ -31,12 +31,16 @@ Item {
     // Non-animated shape toggle: false = rounded, true = flat rectangle
     property real cornerRadius: 20
     property bool square: false
+    property bool isPill: false
     property var color: "#000000"
     readonly property real radius: square ? 0 : cornerRadius
 
+    // Pill: all four corners convex, radius capped at half the smaller side
+    readonly property real _pillR: Math.min(cornerRadius, width / 2, height / 2)
+
     // Clamp so radii can never exceed half the box, and top+bottom can't exceed full height
-    readonly property real _br: square ? 0 : Math.min(cornerRadius, width / 2, 3 * height / 5)
-    readonly property real _tr: square ? 0 : Math.min(cornerRadius, width / 2, Math.max(height - _br, 0))
+    readonly property real _br: square ? 0 : (isPill ? _pillR : Math.min(cornerRadius, width / 2, 3 * height / 5))
+    readonly property real _tr: square ? 0 : (isPill ? _pillR : Math.min(cornerRadius, width / 2, Math.max(height - _br, 0)))
 
     property bool _morphing: false
 
@@ -94,23 +98,24 @@ Item {
             fillColor: root.color
             strokeWidth: 0
 
-            startX: -root._tr
+            // Current shape starts outside the box (concave corners); pill starts inside it
+            startX: root.isPill ? root._tr : -root._tr
             startY: 0
 
             // top edge
-            PathLine { x: root.width + root._tr; y: 0 }
+            PathLine { x: root.isPill ? root.width - root._tr : root.width + root._tr; y: 0 }
 
-            // top-right: concave (blends into the bar above)
+            // top-right: concave (current) or convex (pill)
             PathArc {
                 x: root.width; y: root._tr
                 radiusX: root._tr; radiusY: root._tr
-                direction: PathArc.Counterclockwise
+                direction: root.isPill ? PathArc.Clockwise : PathArc.Counterclockwise
             }
 
             // right edge
             PathLine { x: root.width; y: root.height - root._br }
 
-            // bottom-right: convex (pill)
+            // bottom-right: convex
             PathArc {
                 x: root.width - root._br; y: root.height
                 radiusX: root._br; radiusY: root._br
@@ -120,7 +125,7 @@ Item {
             // bottom edge
             PathLine { x: root._br; y: root.height }
 
-            // bottom-left: convex (pill)
+            // bottom-left: convex
             PathArc {
                 x: 0; y: root.height - root._br
                 radiusX: root._br; radiusY: root._br
@@ -130,11 +135,11 @@ Item {
             // left edge
             PathLine { x: 0; y: root._tr }
 
-            // top-left: concave (blends into the bar above)
+            // top-left: concave (current) or convex (pill)
             PathArc {
-                x: -root._tr; y: 0
+                x: root.isPill ? root._tr : -root._tr; y: 0
                 radiusX: root._tr; radiusY: root._tr
-                direction: PathArc.Counterclockwise
+                direction: root.isPill ? PathArc.Clockwise : PathArc.Counterclockwise
             }
         }
 

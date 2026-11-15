@@ -50,8 +50,10 @@ PanelWindow {
     // ── Content ───────────────────────────────────────────────────────────────
     MorphingContainer {
         id: root
+        isPill: false
 
         readonly property int _defaultClockPixelSize: 16
+        readonly property real _pillMargin: isPill ? 4 : 0
 
         DefaultMenu {
             id: defaultMenu
@@ -113,6 +115,7 @@ PanelWindow {
 
         anchors {
             top: parent.top
+            topMargin: root._pillMargin * (1 - root._lockProgress)
             horizontalCenter: parent.horizontalCenter
         }
         color: ActiveTheme.colors["BG"]
