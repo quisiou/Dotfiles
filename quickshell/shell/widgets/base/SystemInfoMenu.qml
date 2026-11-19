@@ -61,7 +61,7 @@ Item {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Math.round(14 * tile.k)
+            anchors.margins: Math.round(12 * tile.k)
             spacing: 0
 
             // Title
@@ -96,7 +96,7 @@ Item {
                             spacing: Math.round(4 * tile.k)
                             Text {
                                 text: stat.modelData.v
-                                font.pixelSize: Math.round(26 * tile.k)
+                                font.pixelSize: Math.round(24 * tile.k)
                                 font.weight: Font.Light
                                 color: ActiveTheme.colors["FG"]
                             }
@@ -121,8 +121,8 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                Layout.topMargin: Math.round(10 * tile.k)
-                Layout.bottomMargin: Math.round(8 * tile.k)
+                Layout.topMargin: Math.round(8 * tile.k)
+                Layout.bottomMargin: Math.round(6 * tile.k)
                 color: Qt.alpha(ActiveTheme.colors["FG"], 0.07)
             }
 
@@ -134,7 +134,7 @@ Item {
                     id: row
                     required property var modelData
                     Layout.fillWidth: true
-                    Layout.bottomMargin: Math.round(4 * tile.k)
+                    Layout.bottomMargin: Math.round(3 * tile.k)
                     spacing: Math.round(8 * tile.k)
 
                     Text {
@@ -334,12 +334,14 @@ Item {
                            ? SystemInfoService.cpuCores : SystemInfoService.cpuThreads,
                       u: SystemInfoService.cpuCores > 0
                            ? "c / " + SystemInfoService.cpuThreads + "t" : "threads",
-                      l: "CPU" },
+                      l: SystemInfoService.cpuBoost !== ""
+                         ? "up to " + SystemInfoService.cpuBoost : "CPU" },
                     { v: SystemInfoService.ramGb, u: "GB", l: "Memory" }
                 ]
-                rows: [{ k: "CPU", v: SystemInfoService.cpuModel }]
+                rows: [{ k: "CPU", v: SystemInfoService.cpuModel, sub: SystemInfoService.cpuInfo }]
                     .concat(SystemInfoService.gpuRows)
-                    .concat([{ k: "Storage", v: SystemInfoService.storage }])
+                    .concat([{ k: "Storage", v: SystemInfoService.storage,
+                               sub: SystemInfoService.storageInfo }])
             }
             Tile {
                 k: root.e
