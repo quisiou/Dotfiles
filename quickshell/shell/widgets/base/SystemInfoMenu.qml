@@ -318,8 +318,13 @@ Item {
                 }]
                 rows: [
                     { k: "Kernel",  v: SystemInfoService.kernel },
-                    { k: "WM",      v: SystemInfoService.wm },
-                    { k: "Shell",   v: "Quickshell" },
+                    { k: "WM",      v: SystemInfoService.wm,
+                      sub: SystemInfoService.wmVersion !== ""
+                           ? "v" + SystemInfoService.wmVersion : "" },
+                    { k: "Shell",   v: SystemInfoService.loginShell },
+                    { k: "Terminal",    v: SystemInfoService.terminal,
+                      sub: SystemInfoService.terminalVersion !== ""
+                           ? "v" + SystemInfoService.terminalVersion : "" },
                     { k: "Session", v: SystemInfoService.session }
                 ]
             }
@@ -355,7 +360,10 @@ Item {
                        ? "Panel · " + SystemInfoService.panelHz : "Panel"
                 }]
                 rows: [
+                    { k: "Size",     v: SystemInfoService.panelSize },
                     { k: "Scale",    v: SystemInfoService.panelScale },
+                    { k: "Color",    v: SystemInfoService.panelDepth },
+                    { k: "VRR",      v: SystemInfoService.panelVrr },
                     { k: "Monitor",  v: SystemInfoService.panelModel },
                     { k: "Renderer", v: SystemInfoService.renderer }
                 ]

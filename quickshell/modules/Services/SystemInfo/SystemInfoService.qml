@@ -71,11 +71,22 @@ Singleton {
     // so round up to the next even number to show what you actually bought
     readonly property int ramGb: Math.ceil(ramGbRaw / 2) * 2
 
+    property string wmVersion: ""
+    property string loginShell: ""
+    property string terminal: ""
+    property string terminalVersion: ""
+
     // ── Display (expanded view) ──────────────────────
     property string panelRes: ""
     property string panelHz: ""
     property string panelScale: ""
     property string panelModel: ""
+    property string edidRaw: ""
+    property int panelW: 0
+    property int panelH: 0
+    property string panelVrr: ""
+    property string panelDepth: ""
+    readonly property string panelSize: _panelSize(edidRaw, panelW, panelH)
 
     // ── Uptime ───────────────────────────────────────
     property real uptimeSec: 0
@@ -142,6 +153,15 @@ Singleton {
         if (drv) parts.push(drv)
         return parts.join(" · ")
     }
+    function _panelSize(edid, w, h) {
+        const b = edid.trim().split(/\s+/).map(Number)
+        if (b.length < 3 || b.some(isNaN)) return ""
+        const mmW = b[0] + ((b[2] >> 4) << 8)
+        const mmH = b[1] + ((b[2] & 15) << 8)
+        if (!mmW || !mmH || !w || !h) return ""
+        const inch = Math.sqrt(mmW * mmW + mmH * mmH) / 25.4
+        return inch.toFixed(1) + "″ · " + Math.round(Math.sqrt(w * w + h * h) / inch) + " PPI"
+    }
 
     // ── Loaders (run once, nothing changes afterwards) ─
     Process {
@@ -185,6 +205,8 @@ Singleton {
             echo "storrota=$(cat /sys/block/$d/queue/rotational 2>/dev/null)"
             echo "storspeed=$(cat /sys/block/$d/device/device/max_link_speed 2>/dev/null)"
             echo "storwidth=$(cat /sys/block/$d/device/device/max_link_width 2>/dev/null)"
+            echo "login=$(basename "$SHELL")"
+            echo "edid=$(od -An -tu1 -j66 -N3 $(ls /sys/class/drm/card*-eDP-*/edid 2>/dev/null | head -1) 2>/dev/null)"
         `]
         running: true
         stdout: StdioCollector {
@@ -208,22 +230,32 @@ Singleton {
                 root.storage = root._cleanStorage(v.storage ?? "")
                 root.storageInfo = root._storInfo(
                     v.stortran ?? "", v.storrota ?? "", v.storspeed ?? "", v.storwidth ?? "")
+                root.loginShell = v.login ?? ""
+                root.edidRaw = v.edid ?? ""
             }
         }
     }
 
     Process {
-        command: ["fastfetch", "-s", "GPU", "--format", "json"]
+        command: ["fastfetch", "-s", "terminal:gpu", "--format", "json"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
-                    const mod = JSON.parse(text).find(m => m.type === "GPU")
-                    root.gpus = (mod?.result ?? []).map(g => ({
+                    const res_gpu = JSON.parse(text).find(m => m.type === "GPU")
+                    root.gpus = (res_gpu?.result ?? []).map(g => ({
                         name: g.name ?? "",
                         driver: g.driver ?? "",
                         type: g.type ?? ""
                     }))
+
+                    const res_term = JSON.parse(text).find(m => m.type === "Terminal")?.result
+                    const name = res_term?.prettyName || res_term?.processName || ""
+                    // Not a terminal: fastfetch found the session or compositor instead
+                    if (/^(hyprland|systemd|login|init|qs|\.?quickshell.*|sh|bash|zsh|fish)$/i.test(name))
+                        return
+                    root.terminal = name
+                    root.terminalVersion = (res_term?.version ?? "").match(/\d+(\.\d+)+/)?.[0] ?? ""
                 } catch (e) {}
             }
         }
@@ -240,7 +272,21 @@ Singleton {
                     root.panelHz = Math.round(m.refreshRate) + " Hz"
                     root.panelScale = m.scale + "×"
                     root.panelModel = m.model ?? ""
+                    root.panelW = m.width
+                    root.panelH = m.height
+                    root.panelVrr = m.vrr ? "On" : "Off"
+                    root.panelDepth = (m.currentFormat ?? "").includes("2101010") ? "10-bit" : "8-bit"
                 } catch (e) {}
+            }
+        }
+    }
+
+    Process {
+        command: ["hyprctl", "version", "-j"]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try { root.wmVersion = JSON.parse(text).version ?? "" } catch (e) {}
             }
         }
     }
