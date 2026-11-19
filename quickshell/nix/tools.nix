@@ -6,4 +6,6 @@ pkgs: with pkgs; [
     libnotify
     inotify-tools
     cava
+    fastfetch
+    mesa-demos
 ]
