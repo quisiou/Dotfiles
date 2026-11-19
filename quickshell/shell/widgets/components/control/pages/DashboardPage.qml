@@ -34,6 +34,7 @@ Item {
         notificationBlock.collapseImmediately()
         clipboardBlock.collapseImmediately()
         meteoBlock.collapseImmediately()
+        systemBlock.collapseImmediately()
     }
 
     Component.onCompleted: WeatherService.refresh()
@@ -84,8 +85,15 @@ Item {
 
         // Center top
         GridBlock {
+            id: systemBlock
             column: 6; row: 0
             columnSpan: 8; rowSpan: 3
+
+            SystemInfoMenu {
+                anchors.fill: parent
+                expanded: systemBlock.expanded
+                onToggleRequested: systemBlock.toggle()
+            }
         }
 
         // Center bottom

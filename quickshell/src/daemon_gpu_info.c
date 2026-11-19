@@ -166,14 +166,14 @@ static char amd_temp_path[PATH_BUF] = {0};
 static int  amd_busy_fd = -1;
 static int  amd_temp_fd = -1;
 
-static double read_val(const char *path) {
-    FILE *f = fopen(path, "r");
-    if (!f) return 0;
-    double val = 0;
-    if (fscanf(f, "%lf", &val) != 1) val = 0;
-    fclose(f);
-    return val;
-}
+// static double read_val(const char *path) {
+//     FILE *f = fopen(path, "r");
+//     if (!f) return 0;
+//     double val = 0;
+//     if (fscanf(f, "%lf", &val) != 1) val = 0;
+//     fclose(f);
+//     return val;
+// }
 
 static double read_val_fd(int fd) {
     if (fd < 0) return 0;
