@@ -88,6 +88,24 @@ Singleton {
     property string panelDepth: ""
     readonly property string panelSize: _panelSize(edidRaw, panelW, panelH)
 
+    property string osLabel: ""
+    property string osVersion: ""
+
+    property real swapGbRaw: 0
+    readonly property string swapText:
+        swapGbRaw >= 0.5 ? "Swap " + Math.round(swapGbRaw) + " GB" : ""
+
+    // "WD PC SN5000S SDEQNSJ 953.9G" -> model + size
+    readonly property var _stor: {
+        const m = storage.match(/^(.*?)\s+([\d.]+)([KMGT])$/)
+        return m ? { model: m[1], num: parseFloat(m[2]), unit: m[3] + "B" }
+                 : { model: storage, num: 0, unit: "" }
+    }
+    readonly property string storageModel: _stor.model
+    readonly property string storageUnit: _stor.unit
+    readonly property string storageValue: _stor.num <= 0 ? ""
+        : (_stor.num >= 100 ? String(Math.round(_stor.num)) : String(_stor.num))
+
     // ── Uptime ───────────────────────────────────────
     property real uptimeSec: 0
     readonly property string uptime: {
@@ -179,10 +197,12 @@ Singleton {
     FileView {
         path: "/etc/os-release"
         onLoaded: {
-            const id = text().match(/^ID=(.*)$/m)
-            const pretty = text().match(/^PRETTY_NAME=(.*)$/m)
-            root.distroId = id ? id[1].replace(/"/g, "") : ""
-            root.osName = pretty ? pretty[1].replace(/"/g, "") : ""
+            const get = k => (text().match(new RegExp("^" + k + "=(.*)$", "m")) ?? [])[1]
+                             ?.replace(/"/g, "") ?? ""
+            root.distroId = get("ID")
+            root.osName = get("PRETTY_NAME")
+            root.osLabel = get("NAME")
+            root.osVersion = get("VERSION_ID")
         }
     }
 
@@ -207,6 +227,7 @@ Singleton {
             echo "storwidth=$(cat /sys/block/$d/device/device/max_link_width 2>/dev/null)"
             echo "login=$(basename "$SHELL")"
             echo "edid=$(od -An -tu1 -j66 -N3 $(ls /sys/class/drm/card*-eDP-*/edid 2>/dev/null | head -1) 2>/dev/null)"
+            echo "swap=$(awk '/SwapTotal/{print $2}' /proc/meminfo)"
         `]
         running: true
         stdout: StdioCollector {
@@ -232,6 +253,7 @@ Singleton {
                     v.stortran ?? "", v.storrota ?? "", v.storspeed ?? "", v.storwidth ?? "")
                 root.loginShell = v.login ?? ""
                 root.edidRaw = v.edid ?? ""
+                root.swapGbRaw = (parseInt(v.swap) || 0) / 1048576
             }
         }
     }
