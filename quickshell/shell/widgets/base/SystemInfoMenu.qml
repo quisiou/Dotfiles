@@ -16,7 +16,7 @@ Item {
 
     // 1.0 at the collapsed size (300 x 105) and at the expanded size (702 x 312)
     readonly property real c: Math.max(0.2, Math.min(width / 300, height / 105))
-    readonly property real e: Math.max(0.2, Math.min(width / 702, height / 312))
+    readonly property real e: Math.max(0.2, Math.min(width / 660, height / 312))
     function s(v)  { return Math.round(v * c) }
     function se(v) { return Math.round(v * e) }
 
@@ -168,21 +168,21 @@ Item {
 
         Item { Layout.fillHeight: true }
 
-        Text {
+        Marquee {
             Layout.fillWidth: true
             visible: tile.sub1 !== ""
+            running: root.expanded
             text: tile.sub1
             font.pixelSize: Math.round(9 * tile.k)
             color: tile.strong ? ActiveTheme.colors["FG"] : ActiveTheme.colors["FG_MUTED"]
-            elide: Text.ElideRight
         }
-        Text {
+        Marquee {
             Layout.fillWidth: true
             visible: tile.sub2 !== ""
+            running: root.expanded
             text: tile.sub2
             font.pixelSize: Math.round(9 * tile.k)
             color: ActiveTheme.colors["FG_MUTED"]
-            elide: Text.ElideRight
         }
     }
 
@@ -214,13 +214,13 @@ Item {
         property string name: ""
         property var chips: []
 
-        Text {
+        Marquee {
             Layout.fillWidth: true
             Layout.topMargin: Math.round(2 * nt.k)
+            running: root.expanded
             text: nt.name
             font.pixelSize: Math.round(13 * nt.k)
             color: ActiveTheme.colors["FG"]
-            elide: Text.ElideRight
         }
 
         Item { Layout.fillHeight: true }
@@ -482,20 +482,20 @@ Item {
                                 font.pixelSize: root.se(9)
                                 color: ActiveTheme.colors["ACCENT"]
                             }
-                            Text {
+                            Marquee {
                                 Layout.fillWidth: true
+                                running: root.expanded
                                 text: gpu.modelData.v
                                 font.pixelSize: root.se(12)
                                 color: ActiveTheme.colors["FG"]
-                                elide: Text.ElideRight
                             }
-                            Text {
+                            Marquee {
                                 Layout.fillWidth: true
                                 visible: !!gpu.modelData.sub
+                                running: root.expanded
                                 text: gpu.modelData.sub ?? ""
                                 font.pixelSize: root.se(9)
                                 color: ActiveTheme.colors["FG_MUTED"]
-                                elide: Text.ElideRight
                             }
                         }
                     }

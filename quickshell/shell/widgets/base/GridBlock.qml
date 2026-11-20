@@ -18,6 +18,7 @@ Rectangle {
     property bool expanded: false
     property int animationDuration: 220
     property real scrimOpacity: 0.5   // how dark the backdrop gets
+    property real expandInset: grid.spacing
 
     readonly property var grid: parent
 
@@ -53,11 +54,11 @@ Rectangle {
         expanded ? collapse() : expand()
     }
 
-    x: expanded ? grid.blockWidth + grid.spacing : column * (grid.blockWidth + grid.spacing)
-    y: expanded ? grid.blockHeight + grid.spacing : row * (grid.blockHeight + grid.spacing)
-    width: expanded ? grid.width - 2 * (grid.blockWidth) - grid.spacing
+    x: expanded ? expandInset : column * (grid.blockWidth + grid.spacing)
+    y: expanded ? expandInset : row * (grid.blockHeight + grid.spacing)
+    width: expanded ? grid.width - 2 * expandInset
                     : columnSpan * grid.blockWidth + (columnSpan - 1) * grid.spacing
-    height: expanded ? grid.height - 2 * (grid.blockHeight) - grid.spacing
+    height: expanded ? grid.height - 2 * expandInset
                      : rowSpan * grid.blockHeight + (rowSpan - 1) * grid.spacing
 
     z: (expanded || _animating) ? 100 : 0

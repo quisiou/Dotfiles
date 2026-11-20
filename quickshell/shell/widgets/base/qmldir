@@ -8,6 +8,7 @@ FillMeter 1.0 FillMeter.qml
 Glass 1.0 Glass.qml
 Grid 1.0 Grid.qml
 GridBlock 1.0 GridBlock.qml
+Marquee 1.0 Marquee.qml
 MorphingContainer 1.0 MorphingContainer.qml
 NotificationLog 1.0 NotificationLog.qml
 OrbitMenu 1.0 OrbitMenu.qml

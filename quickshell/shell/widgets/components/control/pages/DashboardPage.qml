@@ -11,8 +11,8 @@ Item {
 
     property bool active: false
 
-    readonly property int _gridColumns: 20
-    readonly property int _gridRows: 10
+    readonly property int _gridColumns: 40
+    readonly property int _gridRows: 20
     readonly property real _gridSpacing: 12
     readonly property real _designWidth: 768
 
@@ -52,13 +52,13 @@ Item {
         blockWidth: (root.width - (columns - 1) * spacing) / columns
         blockHeight: blockWidth
 
-        showCells: false   // set to true to see the 20x10 cells
+        showCells: false
 
         // Left top
         GridBlock {
             id: clipboardBlock
             column: 0; row: 0
-            columnSpan: 6; rowSpan: 7
+            columnSpan: 12; rowSpan: 14
 
             ClipboardLog {
                 anchors.fill: parent
@@ -72,8 +72,8 @@ Item {
         // Left bottom
         GridBlock {
             id: meteoBlock
-            column: 0; row: 7
-            columnSpan: 6; rowSpan: 3
+            column: 0; row: 14
+            columnSpan: 12; rowSpan: 6
 
             WeatherMenu {
                 anchors.fill: parent
@@ -86,8 +86,8 @@ Item {
         // Center top
         GridBlock {
             id: systemBlock
-            column: 6; row: 0
-            columnSpan: 8; rowSpan: 3
+            column: 12; row: 0
+            columnSpan: 16; rowSpan: 6
 
             SystemInfoMenu {
                 anchors.fill: parent
@@ -99,8 +99,8 @@ Item {
         // Center bottom
         GridBlock {
             id: calendarBlock
-            column: 6; row: 3
-            columnSpan: 8; rowSpan: 7
+            column: 12; row: 6
+            columnSpan: 16; rowSpan: 14
 
             Calendar {
                 id: calendar
@@ -112,8 +112,8 @@ Item {
         // Right
         GridBlock {
             id: notificationBlock
-            column: 14; row: 0
-            columnSpan: 6; rowSpan: 10
+            column: 28; row: 0
+            columnSpan: 12; rowSpan: 20
 
             NotificationLog {
                 anchors.fill: parent
