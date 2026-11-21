@@ -14,7 +14,7 @@ Item {
     property bool expanded: false
     signal toggleRequested()
 
-    // 1.0 at the collapsed size (300 x 105) and at the expanded size (702 x 312)
+    // 1.0 at the collapsed size (300 x 105) and at the expanded size
     readonly property real c: Math.max(0.2, Math.min(width / 300, height / 105))
     readonly property real e: Math.max(0.2, Math.min(width / 660, height / 312))
     function s(v)  { return Math.round(v * c) }
@@ -31,6 +31,22 @@ Item {
 
     function cap(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : "" }
 
+    function healthColor(h) {
+        const green  = Qt.color(ActiveTheme.colors["SUCCESS"])
+        const yellow = Qt.color(ActiveTheme.colors["WARNING"])
+        const red    = Qt.color(ActiveTheme.colors["ERROR_LOW"])
+        const hi = 90, mid = 65, lo = 40   // fully green at or above hi, yellow at mid, red at or below lo
+
+        const mix = (a, b, t) => Qt.rgba(a.r + (b.r - a.r) * t,
+                                         a.g + (b.g - a.g) * t,
+                                         a.b + (b.b - a.b) * t, 1)
+
+        if (h >= hi)  return green
+        if (h >= mid) return mix(green, yellow, (hi - h) / (hi - mid))
+        if (h >= lo)  return mix(yellow, red, (mid - h) / (mid - lo))
+        return red
+    }
+
     // 0 = collapsed, 1 = expanded. Drives the avatar morph and the crossfade.
     property real t: expanded ? 1 : 0
     Behavior on t { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
@@ -42,7 +58,10 @@ Item {
         interval: 60000
         repeat: true
         triggeredOnStart: true
-        onTriggered: SystemInfoService.refreshUptime()
+        onTriggered: {
+            SystemInfoService.refreshUptime()
+            SystemInfoService.refreshTerminal()
+        }
     }
 
     // ── Base card: icon + caption, children go below ──
@@ -52,13 +71,13 @@ Item {
         property real k: 1
         property string icon: ""
         property string label: ""
-        property string tag: ""
         property int gridRow: 0
         property int gridCol: 1
         property int span: 1
         property real w: 0
         property real h: 0
         property real bar: -1          // 0..1 draws a thin progress line on the bottom edge
+        property color barColor: ActiveTheme.colors["ACCENT_LOW"]
         default property alias content: body.data
 
         Layout.row: gridRow
@@ -70,7 +89,10 @@ Item {
         Layout.preferredHeight: h
 
         radius: Math.round(10 * k)
-        color: "#73111823"
+
+        color: Qt.alpha(ActiveTheme.colors["BG"], 0.5)
+        border.width: 1
+        border.color: Qt.alpha(ActiveTheme.colors["FG"], 0.05)
 
         ColumnLayout {
             anchors.fill: parent
@@ -87,22 +109,13 @@ Item {
                 Text {
                     text: card.icon
                     font.pixelSize: Math.round(10 * card.k)
-                    color: ActiveTheme.colors["ACCENT"]
+                    color: Qt.alpha(ActiveTheme.colors["ACCENT_LOW"], 0.75)
                 }
                 Text {
                     text: card.label.toUpperCase()
                     font.pixelSize: Math.round(9 * card.k)
                     font.letterSpacing: 0.8 * card.k
                     color: ActiveTheme.colors["FG_MUTED"]
-                }
-                Item { Layout.fillWidth: true }
-                Text {
-                    visible: card.tag !== ""
-                    text: card.tag
-                    Layout.maximumWidth: card.width * 0.55
-                    font.pixelSize: Math.round(9 * card.k)
-                    color: ActiveTheme.colors["FG_MUTED"]
-                    elide: Text.ElideRight
                 }
             }
 
@@ -111,27 +124,6 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 spacing: 0
-            }
-        }
-
-        // Progress line (battery health)
-        Rectangle {
-            visible: card.bar >= 0
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.leftMargin: Math.round(10 * card.k)
-            anchors.rightMargin: Math.round(10 * card.k)
-            anchors.bottomMargin: Math.round(3 * card.k)
-            height: Math.max(2, Math.round(3 * card.k))
-            radius: height / 2
-            color: "#33ffffff"
-
-            Rectangle {
-                width: parent.width * Math.max(0, Math.min(1, card.bar))
-                height: parent.height
-                radius: parent.radius
-                color: ActiveTheme.colors["ACCENT"]
             }
         }
     }
@@ -148,11 +140,14 @@ Item {
         property bool strong: false    // sub1 in the main text colour
 
         RowLayout {
+            Layout.fillWidth: true
             Layout.topMargin: Math.round(2 * tile.k)
             spacing: Math.round(3 * tile.k)
 
             Text {
+                Layout.minimumWidth: 0
                 text: tile.value
+                elide: Text.ElideRight
                 font.pixelSize: Math.round(tile.valueSize * tile.k)
                 font.weight: Font.Light
                 color: ActiveTheme.colors["FG"]
@@ -161,8 +156,26 @@ Item {
                 visible: tile.unit !== ""
                 text: tile.unit
                 Layout.alignment: Qt.AlignBaseline
+                Layout.minimumWidth: implicitWidth
                 font.pixelSize: Math.round(9 * tile.k)
                 color: ActiveTheme.colors["FG_MUTED"]
+            }
+            Rectangle {
+                visible: tile.bar >= 0
+                Layout.fillWidth: true
+                Layout.minimumWidth: 0
+                Layout.leftMargin: Math.round(8 * tile.k)
+                Layout.alignment: Qt.AlignVCenter
+                Layout.preferredHeight: Math.max(2, Math.round(3 * tile.k))
+                radius: height / 2
+                color: Qt.alpha(ActiveTheme.colors["FG"], 0.2)
+
+                Rectangle {
+                    width: parent.width * Math.max(0, Math.min(1, tile.bar))
+                    height: parent.height
+                    radius: parent.radius
+                    color: tile.barColor
+                }
             }
         }
 
@@ -183,62 +196,6 @@ Item {
             text: tile.sub2
             font.pixelSize: Math.round(9 * tile.k)
             color: ActiveTheme.colors["FG_MUTED"]
-        }
-    }
-
-    // ── Small pill ──
-    component Chip: Rectangle {
-        id: chip
-
-        property real k: 1
-        property string text: ""
-
-        implicitWidth: chipLabel.implicitWidth + Math.round(14 * k)
-        implicitHeight: chipLabel.implicitHeight + Math.round(4 * k)
-        radius: Math.round(6 * k)
-        color: Qt.alpha(ActiveTheme.colors["FG"], 0.07)
-
-        Text {
-            id: chipLabel
-            anchors.centerIn: parent
-            text: chip.text
-            font.pixelSize: Math.round(9 * chip.k)
-            color: ActiveTheme.colors["FG"]
-        }
-    }
-
-    // ── Name tile: the name leads, facts become chips at the bottom ──
-    component NameTile: Card {
-        id: nt
-
-        property string name: ""
-        property var chips: []
-
-        Marquee {
-            Layout.fillWidth: true
-            Layout.topMargin: Math.round(2 * nt.k)
-            running: root.expanded
-            text: nt.name
-            font.pixelSize: Math.round(13 * nt.k)
-            color: ActiveTheme.colors["FG"]
-        }
-
-        Item { Layout.fillHeight: true }
-
-        RowLayout {
-            Layout.fillWidth: true
-            clip: true
-            spacing: Math.round(5 * nt.k)
-
-            Repeater {
-                model: nt.chips.filter(c => !!c)
-
-                Chip {
-                    required property var modelData
-                    k: nt.k
-                    text: modelData
-                }
-            }
         }
     }
 
@@ -377,7 +334,7 @@ Item {
                     Text {
                         text: "\uf017"
                         font.pixelSize: root.se(12)
-                        color: ActiveTheme.colors["ACCENT"]
+                        color: ActiveTheme.colors["ACCENT_LOW"]
                     }
                     Text {
                         text: "up " + SystemInfoService.uptime
@@ -401,28 +358,33 @@ Item {
             Rail { label: "Hardware"; gridRow: 1; rows: 2 }
 
             // ── Row 0: software ──
-            NameTile {
+            Tile {
                 k: root.e; gridRow: 0; gridCol: 1; w: root.spanW(1); h: root.cellH
                 icon: "\uf17c"; label: "System"
-                name: SystemInfoService.osLabel
-                      || (SystemInfoService.osName || "").split(" ")[0]
-                chips: [SystemInfoService.osVersion,
-                        SystemInfoService.kernel !== "" ? "Linux " + SystemInfoService.kernel : ""]
+                value: SystemInfoService.osLabel
+                       || (SystemInfoService.osName || "").split(" ")[0]
+                unit: SystemInfoService.osVersion
+                sub1: SystemInfoService.kernel !== "" ? "Linux " + SystemInfoService.kernel : ""
             }
-            NameTile {
+            Tile {
                 k: root.e; gridRow: 0; gridCol: 2; w: root.spanW(1); h: root.cellH
                 icon: "\uf2d0"; label: "Graphic env"
-                name: SystemInfoService.wm
-                chips: [SystemInfoService.wmVersion !== "" ? "v" + SystemInfoService.wmVersion : "",
-                        root.cap(SystemInfoService.session)]
+                value: SystemInfoService.wm
+                unit: SystemInfoService.wmVersion !== "" ? "v" + SystemInfoService.wmVersion : ""
+                sub1: root.cap(SystemInfoService.session)
             }
-            NameTile {
+            Tile {
                 k: root.e; gridRow: 0; gridCol: 3; w: root.spanW(1); h: root.cellH
                 icon: "\uf120"; label: "Shell"
-                name: SystemInfoService.loginShell
-                chips: [SystemInfoService.terminal,
-                        SystemInfoService.terminalVersion !== ""
-                        ? "v" + SystemInfoService.terminalVersion : ""]
+                value: SystemInfoService.loginShell
+                unit: SystemInfoService.loginShellVersion !== ""
+                      ? "v" + SystemInfoService.loginShellVersion : ""
+                sub1: SystemInfoService.terminal !== ""
+                      ? SystemInfoService.terminal
+                        + (SystemInfoService.terminalVersion !== ""
+                           ? " v" + SystemInfoService.terminalVersion : "")
+                      : ""
+                strong: true
             }
             Tile {
                 k: root.e; gridRow: 0; gridCol: 4; w: root.spanW(1); h: root.cellH
@@ -480,7 +442,7 @@ Item {
                             Text {
                                 text: gpu.modelData.k
                                 font.pixelSize: root.se(9)
-                                color: ActiveTheme.colors["ACCENT"]
+                                color: ActiveTheme.colors["ACCENT_LOW"]
                             }
                             Marquee {
                                 Layout.fillWidth: true
@@ -530,14 +492,11 @@ Item {
                 visible: BatteryService.hasBattery
                 k: root.e; gridRow: 2; gridCol: 4; w: root.spanW(1); h: root.cellH
                 icon: "\uf240"; label: "Battery"
-                tag: BatteryService.healthKnown
-                     ? BatteryService.chargePercent + "%"
-                       + (BatteryService.shortState !== "" ? " · " + BatteryService.shortState : "")
-                     : BatteryService.shortState
                 value: BatteryService.healthKnown
                        ? String(BatteryService.healthPercent) : String(BatteryService.chargePercent)
                 unit: BatteryService.healthKnown ? "% health" : "% charge"
                 bar: BatteryService.healthKnown ? BatteryService.healthPercent / 100 : -1
+                barColor: root.healthColor(BatteryService.healthPercent)
                 sub1: BatteryService.name
                 strong: true
                 sub2: BatteryService.detail
@@ -576,7 +535,7 @@ Item {
                 visible: avatar.status !== Image.Ready
                 text: "\uf007"
                 font.pixelSize: avatarBox.size * 0.48
-                color: ActiveTheme.colors["ACCENT"]
+                color: ActiveTheme.colors["ACCENT_LOW"]
             }
         }
 
@@ -596,7 +555,7 @@ Item {
                 anchors.centerIn: parent
                 text: SystemInfoService.distroGlyph
                 font.pixelSize: parent.width * 0.58
-                color: ActiveTheme.colors["ACCENT"]
+                color: ActiveTheme.colors["ACCENT_LOW"]
             }
         }
     }

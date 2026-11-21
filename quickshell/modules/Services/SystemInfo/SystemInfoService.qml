@@ -73,8 +73,13 @@ Singleton {
 
     property string wmVersion: ""
     property string loginShell: ""
-    property string terminal: ""
-    property string terminalVersion: ""
+    property string loginShellVersion: ""
+    property string _fbTerm: ""
+    property string _fbTermVer: ""
+    readonly property string terminal: _fbTerm
+    readonly property string terminalVersion: _fbTermVer
+
+    function refreshTerminal() { termProc.running = true }
 
     // ── Display (expanded view) ──────────────────────
     property string panelRes: ""
@@ -226,6 +231,7 @@ Singleton {
             echo "storspeed=$(cat /sys/block/$d/device/device/max_link_speed 2>/dev/null)"
             echo "storwidth=$(cat /sys/block/$d/device/device/max_link_width 2>/dev/null)"
             echo "login=$(basename "$SHELL")"
+            echo "loginver=$(timeout 2 "$SHELL" --version 2>/dev/null | head -1 | grep -oE '[0-9]+([.][0-9]+)+' | head -1)"
             echo "edid=$(od -An -tu1 -j66 -N3 $(ls /sys/class/drm/card*-eDP-*/edid 2>/dev/null | head -1) 2>/dev/null)"
             echo "swap=$(awk '/SwapTotal/{print $2}' /proc/meminfo)"
         `]
@@ -252,6 +258,7 @@ Singleton {
                 root.storageInfo = root._storInfo(
                     v.stortran ?? "", v.storrota ?? "", v.storspeed ?? "", v.storwidth ?? "")
                 root.loginShell = v.login ?? ""
+                root.loginShellVersion = v.loginver ?? ""
                 root.edidRaw = v.edid ?? ""
                 root.swapGbRaw = (parseInt(v.swap) || 0) / 1048576
             }
@@ -259,7 +266,7 @@ Singleton {
     }
 
     Process {
-        command: ["fastfetch", "-s", "terminal:gpu", "--format", "json"]
+        command: ["fastfetch", "-s", "gpu", "--format", "json"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -270,15 +277,37 @@ Singleton {
                         driver: g.driver ?? "",
                         type: g.type ?? ""
                     }))
-
-                    const res_term = JSON.parse(text).find(m => m.type === "Terminal")?.result
-                    const name = res_term?.prettyName || res_term?.processName || ""
-                    // Not a terminal: fastfetch found the session or compositor instead
-                    if (/^(hyprland|systemd|login|init|qs|\.?quickshell.*|sh|bash|zsh|fish)$/i.test(name))
-                        return
-                    root.terminal = name
-                    root.terminalVersion = (res_term?.version ?? "").match(/\d+(\.\d+)+/)?.[0] ?? ""
                 } catch (e) {}
+            }
+        }
+    }
+
+    Process {
+        id: termProc
+        command: ["sh", "-c", `
+            t=$(basename "$(echo "$TERMINAL" | awk '{print $1}')" 2>/dev/null)
+            if [ -z "$t" ] || ! command -v "$t" >/dev/null 2>&1; then
+                t=""
+                for c in kitty alacritty foot wezterm-gui ghostty konsole xterm; do
+                    if pgrep -x "$c" >/dev/null 2>&1 || pgrep -x ".$c-wrapped" >/dev/null 2>&1; then
+                        t=$c; break
+                    fi
+                done
+            fi
+            [ "$t" = "wezterm-gui" ] && t=wezterm
+            echo "term=$t"
+            echo "termver=$([ -n "$t" ] && timeout 2 "$t" --version 2>/dev/null | head -1 | grep -oE '[0-9]+([.][0-9]+)+' | head -1)"
+        `]
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const v = {}
+                for (const line of text.split("\n")) {
+                    const i = line.indexOf("=")
+                    if (i > 0) v[line.slice(0, i)] = line.slice(i + 1).trim()
+                }
+                root._fbTerm = v.term ?? ""
+                root._fbTermVer = v.termver ?? ""
             }
         }
     }

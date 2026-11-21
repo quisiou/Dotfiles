@@ -24,15 +24,20 @@ Item {
     property real smoothValue: value
     Behavior on smoothValue { NumberAnimation { duration: 400; easing.type: Easing.InOutCubic } }
 
-    property color minColor: ActiveTheme.colors["ANSI_BLUE"]
-    property color maxColor: ActiveTheme.colors["ANSI_RED"]
+    property color minColor: ActiveTheme.colors["SUCCESS"]
+    property color midColor: ActiveTheme.colors["WARNING"]
+    property color maxColor: ActiveTheme.colors["ERROR_LOW"]
+
+    property real midPoint: 0.6
 
     property color ringColor: {
-        var t = Math.max(0, Math.min(1, level));
-        var h = minColor.hslHue + (maxColor.hslHue - minColor.hslHue) * t;
-        var s = minColor.hslSaturation + (maxColor.hslSaturation - minColor.hslSaturation) * t;
-        var l = minColor.hslLightness + (maxColor.hslLightness - minColor.hslLightness) * t;
-        return Qt.hsla(h, s, l, 1.0);
+        const t = Math.max(0, Math.min(1, level))
+        const mix = (a, b, f) => Qt.rgba(a.r + (b.r - a.r) * f,
+                                         a.g + (b.g - a.g) * f,
+                                         a.b + (b.b - a.b) * f, 1)
+        return t < midPoint
+            ? mix(minColor, midColor, t / midPoint)
+            : mix(midColor, maxColor, (t - midPoint) / (1 - midPoint))
     }
 
     Behavior on ringColor { ColorAnimation { duration: 400 } }

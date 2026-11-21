@@ -19,6 +19,8 @@ Item {
     // When the text fits, centre it instead of left-aligning it
     property bool centerWhenFits: false
 
+    readonly property real textWidth: label.implicitWidth
+
     // Timing (defaults match MediaModule)
     property int startDelay: 2000     // pause before sliding
     property int endDelay: 1200       // pause at the far end
