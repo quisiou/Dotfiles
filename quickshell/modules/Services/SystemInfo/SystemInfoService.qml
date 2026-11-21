@@ -224,7 +224,9 @@ Singleton {
             echo "board=$(cat /sys/devices/virtual/dmi/id/product_name 2>/dev/null)"
             echo "gpudrv=$(lspci -k 2>/dev/null | awk '/VGA|3D|Display/{f=1;next} f&&/driver in use/{print $NF;exit} f&&/^[0-9a-f]/{f=0}')"
             echo "gl=$( (glxinfo -B 2>/dev/null || eglinfo -B 2>/dev/null) | grep -m1 'version string' | sed 's/.*: //')"
-            d=$(lsblk -dno NAME -e7 2>/dev/null | head -1)
+            src=$(findmnt -no SOURCE / 2>/dev/null | cut -d'[' -f1)
+            d=$(lsblk -slno NAME,TYPE "$src" 2>/dev/null | awk '$2=="disk"{print $1; exit}')
+            [ -n "$d" ] || d=$(lsblk -dno NAME,TYPE 2>/dev/null | awk '$2=="disk" && $1 !~ /^(zram|loop|ram)/{print $1; exit}')
             echo "storage=$(lsblk -dno MODEL,SIZE /dev/$d 2>/dev/null)"
             echo "stortran=$(lsblk -dno TRAN /dev/$d 2>/dev/null)"
             echo "storrota=$(cat /sys/block/$d/queue/rotational 2>/dev/null)"
