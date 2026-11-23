@@ -21,6 +21,11 @@ Item {
     implicitWidth: _designWidth
     implicitHeight: _gridRows * _designBlock + (_gridRows - 1) * _gridSpacing
 
+    readonly property var _expandables: [
+        notificationBlock, clipboardBlock, meteoBlock, systemBlock
+    ]
+    readonly property var _current: _expandables.find(b => b.expanded) || null
+
     // Called when opening a page
     function refresh() {
         active = true
@@ -31,20 +36,29 @@ Item {
     // Called after completely switching to another page (animation finished)
     function leave() {
         active = false
-        notificationBlock.collapseImmediately()
-        clipboardBlock.collapseImmediately()
-        meteoBlock.collapseImmediately()
-        systemBlock.collapseImmediately()
+        if (_current)
+            _current.collapseImmediately()
+    }
+
+    function toggleExclusive(block) {
+        if (_current && _current !== block)
+            _current.collapse()
+        block.toggle()
     }
 
     Component.onCompleted: WeatherService.refresh()
 
     Keys.onPressed: event => {
         if (!active) return
-        if (event.key === Qt.Key_I) systemBlock.toggle()
-        else if (event.key === Qt.Key_C) clipboardBlock.toggle()
-        else if (event.key === Qt.Key_N) notificationBlock.toggle()
-        else if (event.key === Qt.Key_W) meteoBlock.toggle()
+        if (event.key === Qt.Key_Escape) {
+            event.accepted = _current !== null
+            if (_current)
+                _current.collapse()
+        }
+        else if (event.key === Qt.Key_I) toggleExclusive(systemBlock)
+        else if (event.key === Qt.Key_C) toggleExclusive(clipboardBlock)
+        else if (event.key === Qt.Key_N) toggleExclusive(notificationBlock)
+        else if (event.key === Qt.Key_W) toggleExclusive(meteoBlock)
     }
 
     Grid {

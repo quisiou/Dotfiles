@@ -31,11 +31,13 @@ Rectangle {
     property bool _animate: false
 
     function expand() {
+        if (root.expanded) return
         _animate = true
         expanded = true
     }
 
     function collapse() {
+        if (!root.expanded) return
         _animate = true
         expanded = false
     }
@@ -61,7 +63,7 @@ Rectangle {
     height: expanded ? grid.height - 2 * expandInset
                      : rowSpan * grid.blockHeight + (rowSpan - 1) * grid.spacing
 
-    z: (expanded || _animating) ? 100 : 0
+    z: expanded ? 101 : (_animating ? 100 : 0)
 
     clip: true
     radius: 12
