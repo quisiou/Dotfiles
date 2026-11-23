@@ -39,6 +39,14 @@ Item {
 
     Component.onCompleted: WeatherService.refresh()
 
+    Keys.onPressed: event => {
+        if (!active) return
+        if (event.key === Qt.Key_I) systemBlock.toggle()
+        else if (event.key === Qt.Key_C) clipboardBlock.toggle()
+        else if (event.key === Qt.Key_N) notificationBlock.toggle()
+        else if (event.key === Qt.Key_W) meteoBlock.toggle()
+    }
+
     Grid {
         id: grid
         anchors.fill: parent
