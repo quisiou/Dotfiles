@@ -35,14 +35,14 @@ BIND(
 
 -- Useful app shortcuts
 BIND(
-    Config.mainMod .. " + F1",
-    hl.dsp.exec_cmd(Config.systemMonitor),
-    { description = "[Apps] Open system monitor" }
-)
-BIND(
     Config.mainMod .. " + F2",
     hl.dsp.exec_cmd(Config.editor .. " " .. os.getenv("HOME")),
     { description = "[Apps] Open editor in home directory" }
+)
+BIND(
+    Config.mainMod .. " + F3",
+    hl.dsp.exec_cmd(Config.systemMonitor),
+    { description = "[Apps] Open system monitor" }
 )
 
 -- Window management
