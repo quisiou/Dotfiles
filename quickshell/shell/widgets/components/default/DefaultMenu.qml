@@ -9,50 +9,34 @@ import "modules"
 Item {
     id: root
 
-    property real horizontalPadding: 10
-    property real verticalPadding: 8
+    // ── Inputs ───────────────────────────────────────────────────────────────
+    property bool isPill: false
     property bool expanded: false
-    property int clockPixelSize: 16
     property bool mouseEnabled: false
+    property real barHeight: 32                  // collapsed height, set by the panel
+    property int  clockPixelSize: 16
+    property real expandedClockScale: 1.5
 
-    // ---- STABLE target size for the clock, decoupled from the animating text ----
-    readonly property real _targetClockPixelSize: root.expanded ? root.clockPixelSize * 1.6 : root.clockPixelSize
-
-    FontMetrics {
-        id: clockMetrics
-        font.bold: true
-        font.pixelSize: root._targetClockPixelSize
-    }
-    FontMetrics {
-        id: dateMetrics
-        font.pixelSize: 11
-    }
-
-    // Single source of truth for the gap between the clock and the cava bars.
-    // Bump this to widen the spacing — implicitWidth and both anchors follow automatically.
-    property real centerGap: 10
+    // ── Spacing ──────────────────────────────────────────────────────────────
+    property real horizontalPadding: 10
+    property real expandedPadding: 16            // top/bottom when expanded
+    property real expandedExtraWidth: 160        // air between media | clock | system
+    property real centerGap: 10                  // clock <-> cava
+    readonly property real pillInset: isPill ? 8 : 0   // extra side room for round ends
 
     readonly property real _cavaWidth: cavaRow.visible
         ? (cavaRow.numBars * 3 + (cavaRow.numBars - 1) * 2 + root.centerGap)
         : 0
 
-    // Fixed-width sample since the clock format is "hh:mm" -> consistent digit count
-    readonly property real _targetClockWidth:  clockMetrics.boundingRect("00:00").width
-    readonly property real _targetClockHeight: clockMetrics.boundingRect("00:00").height
-    readonly property real _dateHeight: dateMetrics.height
+    // ── Size: read from live items, nothing in here animates ─────────────────
+    implicitWidth: expanded
+        ? mediaRect.implicitWidth + clockColumn.targetWidth + systemRect.implicitWidth
+          + expandedExtraWidth + pillInset * 2
+        : clockColumn.targetWidth + _cavaWidth + horizontalPadding * 2.5 + pillInset * 2
 
-    readonly property real _clockWrapperTargetHeight:
-        _targetClockHeight + (root.expanded ? (2 + _dateHeight) : 0)   // 2 = Column spacing
-
-    implicitWidth: root.expanded
-        ? mediaRect.implicitWidth + _targetClockWidth + systemRect.implicitWidth + root.horizontalPadding * 16
-        : _targetClockWidth + _cavaWidth + root.horizontalPadding * 2.5
-
-    implicitHeight: root.expanded
-        ? _clockWrapperTargetHeight + root.verticalPadding * 4
-        : _targetClockHeight + root.verticalPadding * 1.5
-
-    readonly property real basePillHeight: _targetClockHeight + verticalPadding * 2
+    implicitHeight: expanded
+        ? Math.max(barHeight, clockColumn.targetHeight + expandedPadding * 2)
+        : barHeight
 
     signal dashboardTabRequested()
     signal mediaTabRequested()
@@ -66,7 +50,7 @@ Item {
         opacity: root.expanded ? 1 : 0
         anchors {
             left: parent.left
-            leftMargin: root.horizontalPadding
+            leftMargin: root.horizontalPadding + root.pillInset
             verticalCenter: parent.verticalCenter
         }
         implicitWidth: mediaModule.implicitWidth + 12
@@ -170,8 +154,8 @@ Item {
         ClockModule {
             id: clockColumn
             expanded: root.expanded
-            dateMetricsHeight: dateMetrics.height
-            clockPixelSize: root._targetClockPixelSize
+            clockPixelSize: root.clockPixelSize
+            expandedScale: root.expandedClockScale
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.horizontalCenterOffset: root.expanded ? 0 : root._cavaWidth / 2
             anchors.verticalCenter: parent.verticalCenter
@@ -200,7 +184,7 @@ Item {
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right
-            rightMargin: root.horizontalPadding * 3
+            rightMargin: root.horizontalPadding * 3 + root.pillInset
         }
         implicitWidth: systemModule.implicitWidth + 12
         implicitHeight: systemModule.implicitHeight + 12

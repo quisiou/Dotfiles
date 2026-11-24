@@ -26,10 +26,15 @@ PanelWindow {
     id: panwin
     readonly property int topbarHeight: 40
 
+    property bool isPill: false                      // the lip/pill switch
+    readonly property real barHeight: isPill ? 36 : 32
+    readonly property real pillGap: 6                // above and below the pill
+    readonly property real lipOverlap: 6
+
     implicitWidth: screen.width
     implicitHeight: screen.height
     exclusionMode: ExclusionMode.Normal
-    exclusiveZone: topbarHeight - 15
+    exclusiveZone: isPill ? barHeight + pillGap * 2 : barHeight - lipOverlap
 
     WlrLayershell.layer: root.pillWidget !== "default" ? WlrLayer.Overlay : WlrLayer.Top
     WlrLayershell.keyboardFocus: root.pillWidget === "default"
@@ -50,14 +55,15 @@ PanelWindow {
     // ── Content ───────────────────────────────────────────────────────────────
     MorphingContainer {
         id: root
-        isPill: false
-
+        isPill: panwin.isPill
+        readonly property real _pillMargin: isPill ? panwin.pillGap : 0
         readonly property int _defaultClockPixelSize: 16
-        readonly property real _pillMargin: isPill ? 4 : 0
 
         DefaultMenu {
             id: defaultMenu
             anchors.fill: parent
+            isPill: root.isPill
+            barHeight: panwin.barHeight
             clockPixelSize: root._defaultClockPixelSize
             mouseEnabled: root.pillWidget === "default"
 
@@ -77,14 +83,10 @@ PanelWindow {
                 root.pillWidget = "control"
             }
         }
-        LockScreen { id: lockScreen }
 
         defaultItem: defaultMenu
 
         readonly property int _menuHideTimer: 1000
-        readonly property real _fullHeight: panwin.screen ? panwin.screen.height : 1
-        readonly property real _lockProgress: Math.min(Math.max(
-            (root.height - defaultMenu.basePillHeight) / (_fullHeight - defaultMenu.basePillHeight), 0), 1)
 
         property string pillWidget: "default"
         property var _entries: []
@@ -115,7 +117,7 @@ PanelWindow {
 
         anchors {
             top: parent.top
-            topMargin: root._pillMargin * (1 - root._lockProgress)
+            topMargin: root._pillMargin
             horizontalCenter: parent.horizontalCenter
         }
         color: ActiveTheme.colors["BG"]
@@ -131,8 +133,9 @@ PanelWindow {
             pillWidget = pillWidget === "session" ? "default" : "session"
         }
         function lockSession(): void {
-            if (pillWidget === "auth") return
-            pillWidget = "lock"
+            if (pillWidget === "auth" || lockScreen.isLocked) return
+            pillWidget = "default"
+            lockScreen.lock()
         }
         function reset(): void {
             if (pillWidget === "auth") return
@@ -176,7 +179,7 @@ PanelWindow {
             id: polkitAgent
             onIsActiveChanged: {
                 if (isActive) {
-                    if (root.pillWidget !== "lock") root.requestAuth({ type: "polkit" })
+                    if (!lockScreen.isLocked) root.requestAuth({ type: "polkit" })
                 } else {
                     // flow disappeared (cancelled/timed out) — drop it if still queued,
                     // or clear the screen if it was the one showing
@@ -446,15 +449,6 @@ PanelWindow {
                 onCloseRequested: root.pillWidget = "default"
             }
         }
-        Component {     // Lock visual
-            id: lockComponent
-            LockVisual {
-                implicitWidth:  panwin.screen ? panwin.screen.width  : 0
-                implicitHeight: panwin.screen ? panwin.screen.height : 0
-                wallpaper: LockService.currentWallpaper
-                clockPixelSize: root._defaultClockPixelSize + root._lockProgress * (64 - 16)
-            }
-        }
 
         onPillWidgetChanged: {
             if (pillWidget === "default") root.content = null
@@ -464,7 +458,6 @@ PanelWindow {
                     case "brightness":      root.content = brightnessOsdComponent;  break
                     case "launcher":        root.content = launcherComponent;       break
                     case "workspace":       root.content = workspaceOsdComponent;   break
-                    case "lock":            root.content = lockComponent;           break
                     case "session":         root.content = sessionComponent;        break
                     case "auth":            root.content = authComponent;           break
                     case "auth-askpass":    root.content = authAskpassComponent;    break
@@ -496,27 +489,9 @@ PanelWindow {
                 }
             }
         }
-
-        // ── Morph handoff ────────────────────────────────────────────────────
-        Connections {
-            target: root
-            function onMorphFinished() {
-                if (root.pillWidget === "lock" && !lockScreen.isLocked) {
-                    root.square = true
-                    lockScreen.lock()   // decoy is fully fullscreen now — safe to hand off
-                }
-            }
-        }
-
-        Connections {
-            target: lockScreen
-            function onReadyToUnlock() {
-                root.square = false
-                lockScreen.unlock()      // decoy still fullscreen underneath — no flash
-                root.pillWidget = "default"    // now shrink back down
-            }
-        }
     }
+
+    LockScreen { id: lockScreen }
 
     function toggleLauncher(): void { root.toggleLauncher() }
     function toggleSessionMenu(): void { root.toggleSessionMenu() }

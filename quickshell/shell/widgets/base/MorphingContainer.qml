@@ -26,21 +26,17 @@ Item {
         }
     }
 
-    signal morphFinished()
-
     // Non-animated shape toggle: false = rounded, true = flat rectangle
     property real cornerRadius: 20
-    property bool square: false
     property bool isPill: false
     property var color: "#000000"
-    readonly property real radius: square ? 0 : cornerRadius
 
     // Pill: all four corners convex, radius capped at half the smaller side
     readonly property real _pillR: Math.min(cornerRadius, width / 2, height / 2)
 
     // Clamp so radii can never exceed half the box, and top+bottom can't exceed full height
-    readonly property real _br: square ? 0 : (isPill ? _pillR : Math.min(cornerRadius, width / 2, 3 * height / 5))
-    readonly property real _tr: square ? 0 : (isPill ? _pillR : Math.min(cornerRadius, width / 2, Math.max(height - _br, 0)))
+    readonly property real _br: isPill ? _pillR : Math.min(cornerRadius, width / 2, 3 * height / 5)
+    readonly property real _tr: isPill ? _pillR : Math.min(cornerRadius, width / 2, Math.max(height - _br, 0))
 
     property bool _morphing: false
 
@@ -79,10 +75,8 @@ Item {
     }}
 
     function _checkFinished() {
-        if (_morphing && !widthAnim.running && !heightAnim.running) {
+        if (_morphing && !widthAnim.running && !heightAnim.running)
             _morphing = false
-            morphFinished()
-        }
     }
 
     Connections { target: widthAnim;  function onRunningChanged() { root._checkFinished() } }

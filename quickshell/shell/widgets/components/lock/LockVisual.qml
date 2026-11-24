@@ -17,7 +17,7 @@ Item {
         fillMode: Image.PreserveAspectCrop
         opacity: 0   // never shown directly — only feeds MultiEffect below
         cache: true
-        asynchronous: true
+        asynchronous: false
     }
 
     MultiEffect {

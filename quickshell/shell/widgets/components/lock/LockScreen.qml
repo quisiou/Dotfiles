@@ -19,8 +19,6 @@ Item {
     property bool isLocked: false
     readonly property int _fadeDuration: 200
 
-    signal readyToUnlock()
-
     function lock() {
         errorVisible = false
         errorMessage = ""
@@ -41,7 +39,7 @@ Item {
         onCompleted: (result) => {
             root.passwordText = ""
             if (result === PamResult.Success) {
-                root.readyToUnlock()          // signal TopBar; don't unlock directly
+                root.unlock()          // signal TopBar; don't unlock directly
             } else {
                 root.errorMessage = "Incorrect password"
                 root.errorVisible = true
