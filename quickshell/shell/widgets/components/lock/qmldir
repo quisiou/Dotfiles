@@ -1,5 +1,5 @@
 # quickshell/shell/widgets/components/lock/qmldir
 
 
+LockPill 1.0 LockPill.qml
 LockScreen 1.0 LockScreen.qml
-LockVisual 1.0 LockVisual.qml

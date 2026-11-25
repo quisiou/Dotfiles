@@ -132,7 +132,22 @@ hl.config({
         disable_splash_rendering = true,
         force_default_wallpaper = 0,    -- Set to 0 or 1 to disable the anime mascot wallpapers
         disable_hyprland_logo   = true, -- If true disables the random hyprland logo / anime girl background. :(
+        session_lock_xray = true,
+        allow_session_lock_restore = true,
     },
+})
+
+hl.layer_rule({
+    match = { namespace = "elysian-top-bar" },
+    above_lock = 2,
+})
+
+hl.layer_rule({
+    match = { namespace = "elysian-lock-blur" },
+    blur = true,
+    ignore_alpha = 0.0,
+    xray = false,          -- false so windows are blurred too, not just the wallpaper
+    animation = "fade",    -- this fade is the lock transition (see notes)
 })
 
 

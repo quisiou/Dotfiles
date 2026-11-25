@@ -26,17 +26,29 @@ Item {
         }
     }
 
-    // Non-animated shape toggle: false = rounded, true = flat rectangle
     property real cornerRadius: 20
-    property bool isPill: false
-    property var color: "#000000"
+    property bool isPill: false                 // TARGET shape: false = lip, true = pill
+    property int  pillMorphDuration: 300
+    property real earPhase: 0.25
 
-    // Pill: all four corners convex, radius capped at half the smaller side
+    property var  color: "#000000"
+
+    // 0 = lip, 1 = pill. Animated, so the shape morphs instead of snapping.
+    property real _p: isPill ? 1 : 0
+    Behavior on _p { NumberAnimation { duration: root.pillMorphDuration; easing.type: Easing.OutCubic } }
+
+    readonly property real _earK: Math.max(0, 1 - _p / earPhase)                  // 1 -> 0 over p in [0, earPhase]
+    readonly property real detach: Math.max(0, (_p - earPhase) / (1 - earPhase))
+
     readonly property real _pillR: Math.min(cornerRadius, width / 2, height / 2)
+    readonly property real _brLip: Math.min(cornerRadius, width / 2, 3 * height / 5)
+    readonly property real _trLip: Math.min(cornerRadius, width / 2, Math.max(height - _brLip, 0))
 
     // Clamp so radii can never exceed half the box, and top+bottom can't exceed full height
-    readonly property real _br: isPill ? _pillR : Math.min(cornerRadius, width / 2, 3 * height / 5)
-    readonly property real _tr: isPill ? _pillR : Math.min(cornerRadius, width / 2, Math.max(height - _br, 0))
+    readonly property real _br:    _brLip + (_pillR - _brLip) * _p   // bottom corners
+    readonly property real _ear:   _trLip * _earK                    // concave top radius
+    readonly property real _round: _pillR * detach                   // convex top radius
+    readonly property real _tr:    _ear + _round                     // only one is non-zero at a time
 
     property bool _morphing: false
 
@@ -92,18 +104,17 @@ Item {
             fillColor: root.color
             strokeWidth: 0
 
-            // Current shape starts outside the box (concave corners); pill starts inside it
-            startX: root.isPill ? root._tr : -root._tr
+            startX: root._round - root._ear
             startY: 0
 
             // top edge
-            PathLine { x: root.isPill ? root.width - root._tr : root.width + root._tr; y: 0 }
+            PathLine { x: root.width - root._round + root._ear; y: 0 }
 
-            // top-right: concave (current) or convex (pill)
+            // top-right: concave while p < 0.5, convex after
             PathArc {
                 x: root.width; y: root._tr
                 radiusX: root._tr; radiusY: root._tr
-                direction: root.isPill ? PathArc.Clockwise : PathArc.Counterclockwise
+                direction: root._round > 0 ? PathArc.Clockwise : PathArc.Counterclockwise
             }
 
             // right edge
@@ -129,11 +140,11 @@ Item {
             // left edge
             PathLine { x: 0; y: root._tr }
 
-            // top-left: concave (current) or convex (pill)
+            // top-left: concave while p < 0.5, convex after
             PathArc {
-                x: root.isPill ? root._tr : -root._tr; y: 0
+                x: root._round - root._ear; y: 0
                 radiusX: root._tr; radiusY: root._tr
-                direction: root.isPill ? PathArc.Clockwise : PathArc.Counterclockwise
+                direction: root._round > 0 ? PathArc.Clockwise : PathArc.Counterclockwise
             }
         }
 

@@ -4,11 +4,12 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Pam
 import ElysianShell.Themes
-import ElysianShell.Services
+import "../../base"          // ClockText
 
 Item {
     id: root
@@ -17,11 +18,20 @@ Item {
     property bool errorVisible: false
     property real secondsTillBlackOut: 30
     property bool isLocked: false
-    readonly property int _fadeDuration: 200
+    property bool unlocking: false                  // correct password, waiting for the pill to reshape
+    readonly property bool busy: pam.active
+
+    property real tintAlpha: 0.35
+    property int  blurFadeMs: 400                   // keep equal to Hyprland's layer fade
+    property int  pillMorphMs: 300
+    property bool _blurOn: false
 
     function lock() {
         errorVisible = false
         errorMessage = ""
+        passwordText = ""
+        unlocking = false
+        _blurOn = true
         sessionLock.locked = true
         sessionLock.blackedOut = false
         isLocked = true
@@ -29,18 +39,24 @@ Item {
     }
     function unlock() {
         idleTimer.stop()
+        unlockTimer.stop()
+        _blurOn = false
         sessionLock.locked = false
         isLocked = false
+        unlocking = false
+        passwordText = ""
     }
 
     PamContext {
         id: pam
         onPamMessage: if (responseRequired) respond(root.passwordText)
         onCompleted: (result) => {
-            root.passwordText = ""
             if (result === PamResult.Success) {
-                root.unlock()          // signal TopBar; don't unlock directly
+                root.unlocking = true          // panel reshapes the pill back to a lip
+                root._blurOn = false           // blur fades out meanwhile
+                unlockTimer.restart()
             } else {
+                root.passwordText = ""
                 root.errorMessage = "Incorrect password"
                 root.errorVisible = true
             }
@@ -48,8 +64,10 @@ Item {
         onError: (error) => console.log("PAM error:", error)
     }
 
+    Timer { id: unlockTimer; interval: Math.max(root.pillMorphMs, root.blurFadeMs) + 20; onTriggered: root.unlock() }
+
     function tryUnlock() {
-        if (passwordText.length === 0) return
+        if (passwordText.length === 0 || unlocking) return
         errorVisible = false
         if (!pam.start()) {
             errorMessage = "Couldn't start authentication"
@@ -79,69 +97,77 @@ Item {
         idleTimer.restart()
     }
 
+    // Empty fullscreen layer. Hyprland blurs whatever is behind it (layer rule).
+    Variants {
+        model: Quickshell.screens
+
+        PanelWindow {
+            required property var modelData
+            screen: modelData
+            visible: root._blurOn
+
+            anchors { top: true; bottom: true; left: true; right: true }
+            exclusionMode: ExclusionMode.Ignore
+            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.namespace: "elysian-lock-blur"
+            color: Qt.rgba(0, 0, 0, root.tintAlpha)
+            mask: Region {}
+        }
+    }
+
     WlSessionLock {
         id: sessionLock
         property bool blackedOut: false
         onLockedChanged: if (!locked) root.isLocked = false
 
+        // Transparent shell: satisfies the protocol and carries the clock. The pill lives in the panel.
         WlSessionLockSurface {
-            color: "#000000"
-            // color: ActiveTheme.colors["BG"]
+            color: "transparent"
 
             Item {
                 id: sessionItem
                 anchors.fill: parent
                 focus: true
 
+                property bool shown: false
+                Timer { running: true; interval: 30; onTriggered: sessionItem.shown = true }
+
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
                     propagateComposedEvents: true
                     onPositionChanged: root.resetIdle("mouse-move")
-                    onPressed: (mouse) => { root.resetIdle("mouse-press"); mouse.accepted = false }
+                    onPressed: (mouse) => {
+                        root.resetIdle("mouse-press")
+                        passwordInput.forceActiveFocus()
+                        mouse.accepted = false
+                    }
                 }
 
-                Keys.onPressed: (event) => { root.resetIdle("key"); event.accepted = false }
-
-                Loader {
-                    anchors.fill: parent
-                    active: !sessionLock.blackedOut
-                    sourceComponent: Component { LockVisual { wallpaper: LockService.currentWallpaper } }
+                // Hidden input: the lock surface is what Hyprland gives keyboard focus to.
+                // The pill in the panel just displays what is typed here.
+                TextInput {
+                    id: passwordInput
+                    width: 1; height: 1; opacity: 0
+                    focus: true
+                    echoMode: TextInput.Password
+                    readOnly: root.busy || root.unlocking
+                    text: root.passwordText
+                    onTextChanged: {
+                        root.passwordText = text
+                        if (text.length > 0) root.errorVisible = false
+                        root.resetIdle("typing")
+                    }
+                    onAccepted: root.tryUnlock()
+                    Keys.onEscapePressed: root.passwordText = ""
+                    Component.onCompleted: forceActiveFocus()
                 }
 
-                Column {
-                    anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 40 }
-                    spacing: 8
-                    opacity: sessionLock.blackedOut ? 0 : 1
-
-                    Behavior on opacity { NumberAnimation { duration: root._fadeDuration; easing.type: Easing.InOutQuad } }
-
-                    Text {
-                        color: ActiveTheme.colors["ERROR"]
-                        font.pixelSize: 14
-                        text: root.errorMessage
-                        visible: root.errorVisible
-                    }
-
-                    Rectangle {
-                        anchors.left: parent.left; anchors.right: parent.right
-                        height: 50; radius: 12
-                        color: ActiveTheme.colors["BG_STRIPE"]
-
-                        TextInput {
-                            anchors.fill: parent
-                            anchors.margins: 16
-                            color: ActiveTheme.colors["FG"]
-                            font.pixelSize: 16
-                            echoMode: TextInput.Password
-                            enabled: !pam.active
-                            text: root.passwordText
-                            onTextChanged: { root.passwordText = text; root.resetIdle("text-changed") }
-                            onAccepted: root.tryUnlock()
-                            Keys.onEscapePressed: sessionItem.forceActiveFocus()
-                            HoverHandler { cursorShape: Qt.IBeamCursor }
-                        }
-                    }
+                ClockText {
+                    anchors.centerIn: parent
+                    pixelSize: 64
+                    opacity: sessionItem.shown && !root.unlocking && !sessionLock.blackedOut ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: root.blurFadeMs; easing.type: Easing.InOutQuad } }
                 }
             }
         }

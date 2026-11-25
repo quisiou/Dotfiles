@@ -26,24 +26,29 @@ PanelWindow {
     id: panwin
     readonly property int topbarHeight: 40
 
-    property bool isPill: false                      // the lip/pill switch
-    readonly property real barHeight: isPill ? 36 : 32
-    readonly property real pillGap: 6                // above and below the pill
+    readonly property real lipHeight: 32
+    readonly property real pillHeight: 36
+    readonly property real pillGap: 6
     readonly property real lipOverlap: 6
+
+    // The container is a pill only while it is the lock UI
+    readonly property bool isPill: root.pillWidget === "lock"
+
+    exclusiveZone: lipHeight - lipOverlap
+    exclusionMode: ExclusionMode.Normal
 
     implicitWidth: screen.width
     implicitHeight: screen.height
-    exclusionMode: ExclusionMode.Normal
-    exclusiveZone: isPill ? barHeight + pillGap * 2 : barHeight - lipOverlap
 
     WlrLayershell.layer: root.pillWidget !== "default" ? WlrLayer.Overlay : WlrLayer.Top
     WlrLayershell.keyboardFocus: root.pillWidget === "default"
         || root.pillWidget === "volume"
         || root.pillWidget === "brightness"
         || root.pillWidget === "workspace"
+        || root.pillWidget === "lock"
             ? WlrKeyboardFocus.None
             : WlrKeyboardFocus.Exclusive
-    WlrLayershell.namespace: "top-bar"
+    WlrLayershell.namespace: "elysian-top-bar"
 
     mask: Region { item: root }
 
@@ -56,14 +61,14 @@ PanelWindow {
     MorphingContainer {
         id: root
         isPill: panwin.isPill
-        readonly property real _pillMargin: isPill ? panwin.pillGap : 0
+        pillMorphDuration: lockScreen.pillMorphMs
+        transform: Translate { id: shakeShift }
         readonly property int _defaultClockPixelSize: 16
 
         DefaultMenu {
             id: defaultMenu
             anchors.fill: parent
-            isPill: root.isPill
-            barHeight: panwin.barHeight
+            barHeight: panwin.lipHeight
             clockPixelSize: root._defaultClockPixelSize
             mouseEnabled: root.pillWidget === "default"
 
@@ -102,7 +107,7 @@ PanelWindow {
         }
 
         function _processAuthQueue() {
-            if (authBusy || authQueue.length === 0) return
+            if (authBusy || authQueue.length === 0 || lockScreen.isLocked) return
             var next = authQueue.shift()
             if (next.type === "polkit") {
                 pillWidget = "auth"
@@ -117,7 +122,7 @@ PanelWindow {
 
         anchors {
             top: parent.top
-            topMargin: root._pillMargin
+            topMargin: panwin.pillGap * root.detach
             horizontalCenter: parent.horizontalCenter
         }
         color: ActiveTheme.colors["BG"]
@@ -125,20 +130,20 @@ PanelWindow {
 
         // ── Public API ────────────────────────────────────────────────────────────
         function toggleLauncher(): void {
-            if (pillWidget === "auth") return
+            if (pillWidget === "auth" || lockScreen.isLocked) return
             pillWidget = pillWidget === "launcher" ? "default" : "launcher"
         }
         function toggleSessionMenu(): void {
-            if (pillWidget === "auth") return
+            if (pillWidget === "auth" || lockScreen.isLocked) return
             pillWidget = pillWidget === "session" ? "default" : "session"
         }
         function lockSession(): void {
             if (pillWidget === "auth" || lockScreen.isLocked) return
-            pillWidget = "default"
+            pillWidget = "lock"
             lockScreen.lock()
         }
         function reset(): void {
-            if (pillWidget === "auth") return
+            if (pillWidget === "auth" || lockScreen.isLocked) return
             pillWidget = "default"
         }
         function askPass(prompt: string, pipe: string): void {
@@ -449,8 +454,23 @@ PanelWindow {
                 onCloseRequested: root.pillWidget = "default"
             }
         }
+        Component {     // Lock (password pill, display only)
+            id: lockComponent
+            LockPill {
+                password: lockScreen.passwordText
+                busy: lockScreen.busy || lockScreen.unlocking
+                message: lockScreen.errorVisible ? lockScreen.errorMessage : ""
+                barHeight: panwin.pillHeight
+                animDuration: root._animDuration
+                easingType: root._easingType
+            }
+        }
 
         onPillWidgetChanged: {
+            if (lockScreen.isLocked && !lockScreen.unlocking && pillWidget !== "lock") {
+                pillWidget = "lock"
+                return
+            }
             if (pillWidget === "default") root.content = null
             else {
                 switch (pillWidget) {
@@ -462,6 +482,7 @@ PanelWindow {
                     case "auth":            root.content = authComponent;           break
                     case "auth-askpass":    root.content = authAskpassComponent;    break
                     case "control":         root.content = controlComponent;        break
+                    case "lock":            root.content = lockComponent;           break
                 }
             }
         }
@@ -491,7 +512,29 @@ PanelWindow {
         }
     }
 
+    SequentialAnimation {
+        id: shake
+        NumberAnimation { target: shakeShift; property: "x"; to: -10; duration: 50 }
+        NumberAnimation { target: shakeShift; property: "x"; to:  10; duration: 80 }
+        NumberAnimation { target: shakeShift; property: "x"; to:  -6; duration: 70 }
+        NumberAnimation { target: shakeShift; property: "x"; to:   0; duration: 50 }
+    }
+
     LockScreen { id: lockScreen }
+
+    Connections {
+        target: lockScreen
+        function onUnlockingChanged() {
+            if (lockScreen.unlocking) root.pillWidget = "default"     // pill reshapes back to the lip
+        }
+        function onIsLockedChanged() {
+            if (!lockScreen.isLocked) {
+                if (root.pillWidget === "lock") root.pillWidget = "default"   // unlocked by another path
+                root._processAuthQueue()
+            }
+        }
+        function onErrorVisibleChanged() { if (lockScreen.errorVisible) shake.restart() }
+    }
 
     function toggleLauncher(): void { root.toggleLauncher() }
     function toggleSessionMenu(): void { root.toggleSessionMenu() }
