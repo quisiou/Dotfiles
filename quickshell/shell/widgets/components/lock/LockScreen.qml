@@ -26,6 +26,8 @@ Item {
     property int  pillMorphMs: 300
     property bool _blurOn: false
 
+    signal authFailed()
+
     function lock() {
         errorVisible = false
         errorMessage = ""
@@ -57,8 +59,7 @@ Item {
                 unlockTimer.restart()
             } else {
                 root.passwordText = ""
-                root.errorMessage = "Incorrect password"
-                root.errorVisible = true
+                root.authFailed()
             }
         }
         onError: (error) => console.log("PAM error:", error)

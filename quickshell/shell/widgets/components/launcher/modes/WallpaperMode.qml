@@ -4,7 +4,6 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import ElysianShell.Services
 
 Item {
     id: root
@@ -28,8 +27,12 @@ Item {
     // ── Internal state ───────────────────────────────────────────────────────
     property var _files: []
 
+    property string _currentWallpaper: Quickshell.env("ELYSIAN_DOTS_HOME") + "/wallpapers/Leshy.jpg"
+
+    on_CurrentWallpaperChanged: _rebuild()
+
     function _rebuild() {
-        const current = LockService.currentWallpaper.replace(/^file:\/\//, "")
+        const current = root._currentWallpaper
         const idx = root._files.indexOf(current)
         const files = idx > 0
             ? [...root._files.slice(idx), ...root._files.slice(0, idx)]
@@ -70,23 +73,30 @@ Item {
         // qmllint disable signal-handler-parameters
         onExited: {
             root._files = [...root._files]
-            LockService.refreshWallpaper()
+            currentQuery.running = true
             root._rebuild()
         }
         // qmllint enable signal-handler-parameters
     }
 
     Process {
-        id: applyProcess
+        id: currentQuery
         running: false
+        command: [
+            "bash", "-c",
+            "awww query | awk -F'image: ' '{print $2}' | awk '{print $1}' | xargs realpath"
+        ]
+        stdout: SplitParser {
+            onRead: function(line) {
+                if (line.trim() !== "") root._currentWallpaper = line.trim()
+            }
+        }
     }
 
     // ── Reactivity ────────────────────────────────────────────────────────────
-    // Reorders the carousel whenever the active wallpaper changes elsewhere
-    // (e.g. set from outside the launcher), keeping the current one first.
-    Connections {
-        target: LockService
-        function onCurrentWallpaperChanged() { root._rebuild() }
+    Process {
+        id: applyProcess
+        running: false
     }
 
     Component.onCompleted: rescan()

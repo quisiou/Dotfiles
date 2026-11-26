@@ -62,7 +62,6 @@ PanelWindow {
         id: root
         isPill: panwin.isPill
         pillMorphDuration: lockScreen.pillMorphMs
-        transform: Translate { id: shakeShift }
         readonly property int _defaultClockPixelSize: 16
 
         DefaultMenu {
@@ -457,12 +456,18 @@ PanelWindow {
         Component {     // Lock (password pill, display only)
             id: lockComponent
             LockPill {
+                id: lockPill
                 password: lockScreen.passwordText
                 busy: lockScreen.busy || lockScreen.unlocking
                 message: lockScreen.errorVisible ? lockScreen.errorMessage : ""
                 barHeight: panwin.pillHeight
                 animDuration: root._animDuration
                 easingType: root._easingType
+
+                Connections {
+                    target: lockScreen
+                    function onAuthFailed() { lockPill.flashError() }
+                }
             }
         }
 
@@ -512,14 +517,6 @@ PanelWindow {
         }
     }
 
-    SequentialAnimation {
-        id: shake
-        NumberAnimation { target: shakeShift; property: "x"; to: -10; duration: 50 }
-        NumberAnimation { target: shakeShift; property: "x"; to:  10; duration: 80 }
-        NumberAnimation { target: shakeShift; property: "x"; to:  -6; duration: 70 }
-        NumberAnimation { target: shakeShift; property: "x"; to:   0; duration: 50 }
-    }
-
     LockScreen { id: lockScreen }
 
     Connections {
@@ -533,7 +530,6 @@ PanelWindow {
                 root._processAuthQueue()
             }
         }
-        function onErrorVisibleChanged() { if (lockScreen.errorVisible) shake.restart() }
     }
 
     function toggleLauncher(): void { root.toggleLauncher() }
